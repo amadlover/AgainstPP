@@ -308,14 +308,14 @@ void Graphics::_CreateSwapChain ()
 	uint32_t SurfaceFormatCount = 0;
 	vkGetPhysicalDeviceSurfaceFormatsKHR (PhysicalDevice, Surface, &SurfaceFormatCount, NULL);
 
-	VkSurfaceFormatKHR* SurfaceFormats = (VkSurfaceFormatKHR*)malloc (sizeof (VkSurfaceFormatKHR) * SurfaceFormatCount);
-	vkGetPhysicalDeviceSurfaceFormatsKHR (PhysicalDevice, Surface, &SurfaceFormatCount, SurfaceFormats);
+	std::vector<VkSurfaceFormatKHR> SurfaceFormats (SurfaceFormatCount);
+	vkGetPhysicalDeviceSurfaceFormatsKHR (PhysicalDevice, Surface, &SurfaceFormatCount, SurfaceFormats.data ());
 
-	for (uint32_t s = 0; s < SurfaceFormatCount; s++)
+	for (auto SurfaceFormat : SurfaceFormats)
 	{
-		if (SurfaceFormats[s].format == VK_FORMAT_B8G8R8A8_UNORM)
+		if (SurfaceFormat.format == VK_FORMAT_B8G8R8A8_UNORM)
 		{
-			ChosenSurfaceFormat = SurfaceFormats[s];
+			ChosenSurfaceFormat = SurfaceFormat;
 			break;
 		}
 	}
@@ -323,14 +323,14 @@ void Graphics::_CreateSwapChain ()
 	uint32_t PresentModeCount = 0;
 	vkGetPhysicalDeviceSurfacePresentModesKHR (PhysicalDevice, Surface, &PresentModeCount, NULL);
 
-	VkPresentModeKHR* PresentModes = (VkPresentModeKHR*)malloc (sizeof (VkPresentModeKHR) * PresentModeCount);
-	vkGetPhysicalDeviceSurfacePresentModesKHR (PhysicalDevice, Surface, &PresentModeCount, PresentModes);
+	std::vector<VkPresentModeKHR> PresentModes (PresentModeCount);
+	vkGetPhysicalDeviceSurfacePresentModesKHR (PhysicalDevice, Surface, &PresentModeCount, PresentModes.data ());
 
-	for (uint32_t p = 0; p < PresentModeCount; p++)
+	for (auto PresentMode : PresentModes)
 	{
-		if (PresentModes[p] == VK_PRESENT_MODE_MAILBOX_KHR)
+		if (PresentMode == VK_PRESENT_MODE_MAILBOX_KHR)
 		{
-			ChosenPresentMode = PresentModes[p];
+			ChosenPresentMode = PresentMode;
 			break;
 		}
 	}
@@ -358,16 +358,13 @@ void Graphics::_CreateSwapChain ()
 
 	if (vkCreateSwapchainKHR (GraphicsDevice, &CreateInfo, NULL, &Swapchain) != VK_SUCCESS)
 	{
-		free (SurfaceFormats);
-		free (PresentModes);
-
 		throw GraphicsError::eCREATE_SWAPCHAIN;
 	}
 
 	vkGetSwapchainImagesKHR (GraphicsDevice, Swapchain, &SwapchainImageCount, NULL);
 	SwapchainImages.resize (SwapchainImageCount);
-
 	vkGetSwapchainImagesKHR (GraphicsDevice, Swapchain, &SwapchainImageCount, SwapchainImages.data ());
+
 	SwapchainImageViews.resize (SwapchainImageCount);
 }
 
@@ -375,7 +372,9 @@ void Graphics::_CreateSwapchainImageViews ()
 {
 	OutputDebugString (L"Graphics::_CreateSwapchainImageViews\n");
 
-	for (uint32_t i = 0; i < SwapchainImageCount; i++)
+	int i = 0;
+
+	for (auto SwapchainImageView : SwapchainImageViews)
 	{
 		VkImageViewCreateInfo CreateInfo;
 		memset (&CreateInfo, 0, sizeof (VkImageViewCreateInfo));
@@ -403,10 +402,12 @@ void Graphics::_CreateSwapchainImageViews ()
 		CreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
 		CreateInfo.subresourceRange = SubresourceRange;
 
-		if (vkCreateImageView (GraphicsDevice, &CreateInfo, NULL, &SwapchainImageViews[i]) != VK_SUCCESS)
+		if (vkCreateImageView (GraphicsDevice, &CreateInfo, NULL, &SwapchainImageView) != VK_SUCCESS)
 		{
 			throw GraphicsError::eCREATE_IMAGE_VIEW;
 		}
+
+		++i;
 	}
 }
 
