@@ -69,6 +69,8 @@ Graphics::Graphics (HINSTANCE HInstance, HWND HWnd)
 
 	_GetPhysicalDevice ();
 	_CreateSurface (HInstance, HWnd);
+	_PopulateGraphicsDeviceExtensions ();
+	_CreateGraphicsDevice ();
 }
 
 void Graphics::_PopulateInstanceLayersAndExtensions ()
@@ -79,52 +81,48 @@ void Graphics::_PopulateInstanceLayersAndExtensions ()
 	{
 		uint32_t LayerCount = 0;
 		vkEnumerateInstanceLayerProperties (&LayerCount, NULL);
-		VkLayerProperties* LayerProperties = (VkLayerProperties*)malloc (sizeof (VkLayerProperties) * LayerCount);
-		vkEnumerateInstanceLayerProperties (&LayerCount, LayerProperties);
+		std::vector<VkLayerProperties> LayerProperties (LayerCount);
+		vkEnumerateInstanceLayerProperties (&LayerCount, LayerProperties.data ());
 
-		for (uint32_t l = 0; l < LayerCount; l++)
+		for (auto LayerProperty : LayerProperties)
 		{
-			if (strcmp (LayerProperties[l].layerName, "VK_LAYER_LUNARG_standard_validation") == 0)
+			if (strcmp (LayerProperty.layerName, "VK_LAYER_LUNARG_standard_validation") == 0)
 			{
 				RequestedInstanceLayers[RequestedInstanceLayerCount++] = ("VK_LAYER_LUNARG_standard_validation");
 				break;
 			}
 		}
-
-		free (LayerProperties);
 	}
 
 	uint32_t ExtensionCount = 0;
 	vkEnumerateInstanceExtensionProperties (NULL, &ExtensionCount, NULL);
 
-	VkExtensionProperties* ExtensionProperties = (VkExtensionProperties*)malloc (sizeof (VkExtensionProperties) * ExtensionCount);
-	vkEnumerateInstanceExtensionProperties (NULL, &ExtensionCount, ExtensionProperties);
+	std::vector<VkExtensionProperties> ExtensionProperties (ExtensionCount);
+	vkEnumerateInstanceExtensionProperties (NULL, &ExtensionCount, ExtensionProperties.data ());
 
-	for (uint32_t e = 0; e < ExtensionCount; e++)
+	for (auto ExtensionProperty : ExtensionProperties)
 	{
-		if (strcmp (ExtensionProperties[e].extensionName, VK_KHR_SURFACE_EXTENSION_NAME) == 0)
+		if (strcmp (ExtensionProperty.extensionName, VK_KHR_SURFACE_EXTENSION_NAME) == 0)
 		{
 			RequestedInstanceExtensions[RequestedInstanceExtensionCount++] = VK_KHR_SURFACE_EXTENSION_NAME;
 		}
-		else if (strcmp (ExtensionProperties[e].extensionName, "VK_KHR_win32_surface") == 0)
+		else if (strcmp (ExtensionProperty.extensionName, "VK_KHR_win32_surface") == 0)
 		{
 			RequestedInstanceExtensions[RequestedInstanceExtensionCount++] = "VK_KHR_win32_surface";
 		}
-		else if (strcmp (ExtensionProperties[e].extensionName, VK_KHR_SWAPCHAIN_EXTENSION_NAME) == 0)
+		else if (strcmp (ExtensionProperty.extensionName, VK_KHR_SWAPCHAIN_EXTENSION_NAME) == 0)
 		{
 			RequestedInstanceExtensions[RequestedInstanceExtensionCount++] = VK_KHR_SWAPCHAIN_EXTENSION_NAME;
 		}
 
 		if (_IsValidationNeeded)
 		{
-			if (strcmp (ExtensionProperties[e].extensionName, VK_EXT_DEBUG_UTILS_EXTENSION_NAME) == 0)
+			if (strcmp (ExtensionProperty.extensionName, VK_EXT_DEBUG_UTILS_EXTENSION_NAME) == 0)
 			{
 				RequestedInstanceExtensions[RequestedInstanceExtensionCount++] = VK_EXT_DEBUG_UTILS_EXTENSION_NAME;
 			}
 		}
 	}
-
-	free (ExtensionProperties);
 }
 
 void Graphics::_CreateInstance ()
@@ -184,8 +182,8 @@ void Graphics::_GetPhysicalDevice ()
 	uint32_t PhysicalDeviceCount = 0;
 	vkEnumeratePhysicalDevices (Instance, &PhysicalDeviceCount, NULL);
 
-	VkPhysicalDevice* PhysicalDevices = (VkPhysicalDevice*)malloc (sizeof (VkPhysicalDevice) * PhysicalDeviceCount);
-	vkEnumeratePhysicalDevices (Instance, &PhysicalDeviceCount, PhysicalDevices);
+	std::vector<VkPhysicalDevice> PhysicalDevices (PhysicalDeviceCount);
+	vkEnumeratePhysicalDevices (Instance, &PhysicalDeviceCount, PhysicalDevices.data ());
 
 	if (PhysicalDeviceCount == 0)
 	{
@@ -199,8 +197,8 @@ void Graphics::_GetPhysicalDevice ()
 
 	uint32_t QueueFamilyCount = 0;
 	vkGetPhysicalDeviceQueueFamilyProperties (PhysicalDevice, &QueueFamilyCount, NULL);
-	VkQueueFamilyProperties* QueueFamilyProperties = (VkQueueFamilyProperties*)malloc (sizeof (VkQueueFamilyProperties) * QueueFamilyCount);
-	vkGetPhysicalDeviceQueueFamilyProperties (PhysicalDevice, &QueueFamilyCount, QueueFamilyProperties);
+	std::vector<VkQueueFamilyProperties> QueueFamilyProperties (QueueFamilyCount);
+	vkGetPhysicalDeviceQueueFamilyProperties (PhysicalDevice, &QueueFamilyCount, QueueFamilyProperties.data ());
 
 	for (uint32_t i = 0; i < QueueFamilyCount; i++)
 	{
@@ -216,9 +214,6 @@ void Graphics::_GetPhysicalDevice ()
 	VkPhysicalDeviceProperties DeviceProperties;
 	vkGetPhysicalDeviceProperties (PhysicalDevice, &DeviceProperties);
 	PhysicalDeviceLimits = DeviceProperties.limits;
-
-	free (PhysicalDevices);
-	free (QueueFamilyProperties);
 }
 
 void Graphics::_CreateSurface (HINSTANCE HInstance, HWND HWnd)
@@ -238,7 +233,220 @@ void Graphics::_CreateSurface (HINSTANCE HInstance, HWND HWnd)
 	}
 }
 
+void Graphics::_PopulateGraphicsDeviceExtensions ()
+{
+	OutputDebugString (L"Graphics::_PopulateGraphicsDeviceExtensions\n");
+
+	uint32_t ExtensionCount = 0;
+	vkEnumerateDeviceExtensionProperties (PhysicalDevice, NULL, &ExtensionCount, NULL);
+
+	std::vector<VkExtensionProperties> ExtensionProperties (ExtensionCount);
+	vkEnumerateDeviceExtensionProperties (PhysicalDevice, NULL, &ExtensionCount, ExtensionProperties.data ());
+
+	for (auto ExtensionProperty : ExtensionProperties)
+	{
+		if (strcmp (ExtensionProperty.extensionName, VK_KHR_SWAPCHAIN_EXTENSION_NAME) == 0)
+		{
+			RequestedDeviceExtensions[RequestedDeviceExtensionCount++] = VK_KHR_SWAPCHAIN_EXTENSION_NAME;
+			break;
+		}
+	}
+}
+
+void Graphics::_CreateGraphicsDevice ()
+{
+	OutputDebugString (L"Graphics::_CreateGraphicsDevice\n");
+
+	float Priorities = 1.f;
+
+	VkDeviceQueueCreateInfo QueueCreateInfo;
+	memset (&QueueCreateInfo, 0, sizeof (VkDeviceQueueCreateInfo));
+
+	QueueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+	QueueCreateInfo.pNext = NULL;
+	QueueCreateInfo.pQueuePriorities = &Priorities;
+	QueueCreateInfo.queueCount = 1;
+	QueueCreateInfo.queueFamilyIndex = GraphicsQueueFamilyIndex;
+	QueueCreateInfo.flags = 0;
+
+	VkDeviceCreateInfo CreateInfo;
+	memset (&CreateInfo, 0, sizeof (VkDeviceCreateInfo));
+
+	CreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+	CreateInfo.pNext = NULL;
+	CreateInfo.enabledExtensionCount = RequestedDeviceExtensionCount;
+	CreateInfo.ppEnabledExtensionNames = RequestedDeviceExtensions;
+	CreateInfo.enabledLayerCount = 0;
+	CreateInfo.ppEnabledLayerNames = NULL;
+	CreateInfo.queueCreateInfoCount = 1;
+	CreateInfo.pQueueCreateInfos = &QueueCreateInfo;
+	CreateInfo.flags = 0;
+
+	if (vkCreateDevice (PhysicalDevice, &CreateInfo, NULL, &GraphicsDevice) != VK_SUCCESS)
+	{
+		throw GraphicsError::eCREATE_GRAPHICS_DEVICE;
+	}
+
+	vkGetDeviceQueue (GraphicsDevice, GraphicsQueueFamilyIndex, 0, &GraphicsQueue);
+}
+
+void Graphics::_CreateSwapChain ()
+{
+	OutputDebugString (L"CreateSwapChain\n");
+
+	VkBool32 IsSurfaceSupported = false;
+	vkGetPhysicalDeviceSurfaceSupportKHR (PhysicalDevice, GraphicsQueueFamilyIndex, Surface, &IsSurfaceSupported);
+
+	if (!IsSurfaceSupported)
+	{
+		throw GraphicsError::eSURFACE_SUPPORT;
+	}
+
+	VkSurfaceCapabilitiesKHR SurfaceCapabilites;
+	vkGetPhysicalDeviceSurfaceCapabilitiesKHR (PhysicalDevice, Surface, &SurfaceCapabilites);
+
+	uint32_t SurfaceFormatCount = 0;
+	vkGetPhysicalDeviceSurfaceFormatsKHR (PhysicalDevice, Surface, &SurfaceFormatCount, NULL);
+
+	VkSurfaceFormatKHR* SurfaceFormats = (VkSurfaceFormatKHR*)malloc (sizeof (VkSurfaceFormatKHR) * SurfaceFormatCount);
+	vkGetPhysicalDeviceSurfaceFormatsKHR (PhysicalDevice, Surface, &SurfaceFormatCount, SurfaceFormats);
+
+	for (uint32_t s = 0; s < SurfaceFormatCount; s++)
+	{
+		if (SurfaceFormats[s].format == VK_FORMAT_B8G8R8A8_UNORM)
+		{
+			ChosenSurfaceFormat = SurfaceFormats[s];
+			break;
+		}
+	}
+
+	uint32_t PresentModeCount = 0;
+	vkGetPhysicalDeviceSurfacePresentModesKHR (PhysicalDevice, Surface, &PresentModeCount, NULL);
+
+	VkPresentModeKHR* PresentModes = (VkPresentModeKHR*)malloc (sizeof (VkPresentModeKHR) * PresentModeCount);
+	vkGetPhysicalDeviceSurfacePresentModesKHR (PhysicalDevice, Surface, &PresentModeCount, PresentModes);
+
+	for (uint32_t p = 0; p < PresentModeCount; p++)
+	{
+		if (PresentModes[p] == VK_PRESENT_MODE_MAILBOX_KHR)
+		{
+			ChosenPresentMode = PresentModes[p];
+			break;
+		}
+	}
+
+	SurfaceExtent = SurfaceCapabilites.currentExtent;
+
+	VkSwapchainCreateInfoKHR CreateInfo;
+	memset (&CreateInfo, 0, sizeof (VkSwapchainCreateInfoKHR));
+
+	CreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+	CreateInfo.surface = Surface;
+
+	CreateInfo.clipped = VK_TRUE;
+	CreateInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+	CreateInfo.imageArrayLayers = 1;
+	CreateInfo.imageColorSpace = ChosenSurfaceFormat.colorSpace;
+	CreateInfo.imageExtent = SurfaceCapabilites.currentExtent;
+	CreateInfo.imageFormat = ChosenSurfaceFormat.format;
+	CreateInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+	CreateInfo.imageUsage = SurfaceCapabilites.supportedUsageFlags;
+	CreateInfo.minImageCount = SurfaceCapabilites.minImageCount + 1;
+	CreateInfo.oldSwapchain = VK_NULL_HANDLE;
+	CreateInfo.presentMode = ChosenPresentMode;
+	CreateInfo.preTransform = SurfaceCapabilites.currentTransform;
+
+	if (vkCreateSwapchainKHR (GraphicsDevice, &CreateInfo, NULL, &Swapchain) != VK_SUCCESS)
+	{
+		free (SurfaceFormats);
+		free (PresentModes);
+
+		throw GraphicsError::eCREATE_SWAPCHAIN;
+	}
+
+	vkGetSwapchainImagesKHR (GraphicsDevice, Swapchain, &SwapchainImageCount, NULL);
+	SwapchainImages.resize (SwapchainImageCount);
+
+	vkGetSwapchainImagesKHR (GraphicsDevice, Swapchain, &SwapchainImageCount, SwapchainImages.data ());
+	SwapchainImageViews.resize (SwapchainImageCount);
+}
+
+void Graphics::_CreateSwapchainImageViews ()
+{
+	OutputDebugString (L"Graphics::_CreateSwapchainImageViews\n");
+
+	for (uint32_t i = 0; i < SwapchainImageCount; i++)
+	{
+		VkImageViewCreateInfo CreateInfo;
+		memset (&CreateInfo, 0, sizeof (VkImageViewCreateInfo));
+
+		VkComponentMapping Components;
+
+		Components.a = VK_COMPONENT_SWIZZLE_A;
+		Components.b = VK_COMPONENT_SWIZZLE_B;
+		Components.g = VK_COMPONENT_SWIZZLE_G;
+		Components.r = VK_COMPONENT_SWIZZLE_R;
+
+		VkImageSubresourceRange SubresourceRange;
+
+		SubresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		SubresourceRange.baseMipLevel = 0;
+		SubresourceRange.levelCount = 1;
+
+		SubresourceRange.baseArrayLayer = 0;
+		SubresourceRange.layerCount = 1;
+
+		CreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+		CreateInfo.image = SwapchainImages[i];
+		CreateInfo.format = ChosenSurfaceFormat.format;
+		CreateInfo.components = Components;
+		CreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+		CreateInfo.subresourceRange = SubresourceRange;
+
+		if (vkCreateImageView (GraphicsDevice, &CreateInfo, NULL, &SwapchainImageViews[i]) != VK_SUCCESS)
+		{
+			throw GraphicsError::eCREATE_IMAGE_VIEW;
+		}
+	}
+}
+
 Graphics::~Graphics ()
 {
 	OutputDebugString (L"Graphics::~Graphics\n");
+
+	if (Swapchain != VK_NULL_HANDLE)
+	{
+		vkDestroySwapchainKHR (GraphicsDevice, Swapchain, NULL);
+	}
+
+	for (auto SwapchainImageView : SwapchainImageViews)
+	{
+		if (SwapchainImageView != VK_NULL_HANDLE)
+		{
+			vkDestroyImageView (GraphicsDevice, SwapchainImageView, NULL);
+		}
+	}
+
+	if (GraphicsDevice != VK_NULL_HANDLE)
+	{
+		vkDestroyDevice (GraphicsDevice, NULL);
+	}
+
+	if (Surface != VK_NULL_HANDLE)
+	{
+		vkDestroySurfaceKHR (Instance, Surface, NULL);
+	}
+
+	if (_IsValidationNeeded)
+	{
+		if (DebugUtilsMessenger != VK_NULL_HANDLE)
+		{
+			DestroyDebugUtilsMessenger (Instance, DebugUtilsMessenger, NULL);
+		}
+	}
+
+	if (Instance != VK_NULL_HANDLE)
+	{
+		vkDestroyInstance (Instance, NULL);
+	}
 }

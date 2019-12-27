@@ -15,11 +15,12 @@ public:
 	VkSurfaceFormatKHR ChosenSurfaceFormat;
 	VkExtent2D SurfaceExtent;
 	VkSwapchainKHR Swapchain;
-	VkImage* SwapchainImages;
+	std::vector<VkImage> SwapchainImages;
 	std::vector<VkImageView> SwapchainImageViews;
 	VkQueue GraphicsQueue;
 
 	uint32_t GraphicsQueueFamilyIndex;
+	uint32_t SwapchainImageCount;
 
 private:
 
@@ -28,15 +29,20 @@ private:
 	void _SetupDebugUtilsMessenger ();
 	void _GetPhysicalDevice ();
 	void _CreateSurface (HINSTANCE HInstance, HWND HWnd);
+	void _PopulateGraphicsDeviceExtensions ();
+	void _CreateGraphicsDevice ();
+	void _CreateSwapChain ();
+	void _CreateSwapchainImageViews ();
 
 	bool _IsValidationNeeded;
 
 	uint32_t RequestedInstanceLayerCount;
-	uint32_t RequestedInstanceExtensionCount;
-
 	const char* RequestedInstanceLayers[32];
+	
+	uint32_t RequestedInstanceExtensionCount;
 	const char* RequestedInstanceExtensions[32];
 
+	uint32_t RequestedDeviceExtensionCount;
 	const char* RequestedDeviceExtensions[32];
 
 	VkInstance Instance;

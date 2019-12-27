@@ -7,7 +7,7 @@
 #include "SplashScreenScene.hpp"
 #include "MainMenuScene.hpp"
 
-enum SceneType
+enum class SceneType
 {
 	SplashScreen,
 	MainMenu,
