@@ -17,7 +17,7 @@ enum SceneType
 class Game
 {
 public:
-	Game ();
+	Game (HINSTANCE HInstance, HWND HWnd);
 	~Game ();
 
 	void Run ();
@@ -27,6 +27,7 @@ public:
 	void ProcessMiddleMouseClick ();
 	void ProcessRightMouseClick ();
 	void ProcessMouseMovement (WPARAM wParam, LPARAM lParam);
+	void ProcessWindowDestroy ();
 
 private:
 	std::unique_ptr<Graphics> _G;

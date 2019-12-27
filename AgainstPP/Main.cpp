@@ -2,6 +2,7 @@
 #include <string>
 
 #include "Game.hpp"
+#include "Error.hpp"
 
 std::unique_ptr<Game> G;
 
@@ -10,6 +11,7 @@ LRESULT CALLBACK WindowProc (HWND WindowHandle, UINT Msg, WPARAM wParam, LPARAM 
 	switch (Msg)
 	{
 	case WM_DESTROY:
+		G->ProcessWindowDestroy ();
 		PostQuitMessage (0);
 		break;
 
@@ -55,18 +57,29 @@ int WINAPI wWinMain (_In_ HINSTANCE HInstance, _In_opt_ HINSTANCE PreviousHInsta
 
 	MSG Msg;
 	ZeroMemory (&Msg, sizeof (Msg));
-	
-	G = std::make_unique<Game> ();
 
-	while (Msg.message != WM_QUIT)
+	try
 	{
-		if (PeekMessage (&Msg, NULL, 0, 0, PM_REMOVE))
-		{
-			TranslateMessage (&Msg);
-			DispatchMessage (&Msg);
-		}
+		G = std::make_unique<Game> (HInstance, WindowHandle);
 
-		G->Run ();
+		while (Msg.message != WM_QUIT)
+		{
+			if (PeekMessage (&Msg, NULL, 0, 0, PM_REMOVE))
+			{
+				TranslateMessage (&Msg);
+				DispatchMessage (&Msg);
+			}
+
+			G->Run ();
+		}
+	}
+	catch (GraphicsError Err)
+	{
+		LogError (Err);
+	}
+	catch (GLTFError Err)
+	{
+		LogError (Err);
 	}
 
 	return 0;

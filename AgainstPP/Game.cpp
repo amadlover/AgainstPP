@@ -7,19 +7,24 @@
 #include "SplashScreenScene.hpp"
 #include "MainMenuScene.hpp"
 
-Game::Game ()
+Game::Game (HINSTANCE HInstance, HWND HWnd)
 {
 	OutputDebugString (L"Game::Game\n");
 
-	_G = std::make_unique<Graphics> ();
+	_G = std::make_unique<Graphics> (HInstance, HWnd);
 
-	_SplashScreen = std::make_shared<SplashScreenScene> ();
-	_MainMenu = std::make_shared<MainMenuScene> ();
+	//_SplashScreen = std::make_shared<SplashScreenScene> ();
+	//_MainMenu = std::make_shared<MainMenuScene> ();
 
-	_CurrentScene = _SplashScreen;
-	_CurrentScene->Init ();
+	_CurrentScene = std::make_shared<SplashScreenScene> ();
+	//_CurrentScene->Init ();
 
 	_CurrentSceneType = SceneType::SplashScreen;
+}
+
+Game::~Game ()
+{
+	OutputDebugString (L"Game::~Game\n");
 }
 
 void Game::ProcessKeyboardInput (WPARAM wParam, LPARAM lParam)
@@ -30,10 +35,11 @@ void Game::ProcessKeyboardInput (WPARAM wParam, LPARAM lParam)
 		switch (wParam)
 		{
 		case VK_ESCAPE:
-			_CurrentScene->Exit ();
+			//_CurrentScene->Exit ();
 			
-			_CurrentScene = _MainMenu;
-			_CurrentScene->Init ();
+			_CurrentScene = std::make_shared<MainMenuScene> ();
+			//_CurrentScene->Init ();
+			
 			_CurrentSceneType = SceneType::MainMenu;
 
 			break;
@@ -48,10 +54,10 @@ void Game::ProcessKeyboardInput (WPARAM wParam, LPARAM lParam)
 		switch (wParam)
 		{
 		case VK_ESCAPE:
-			_CurrentScene->Exit ();
+			//_CurrentScene->Exit ();
 
-			_CurrentScene = _SplashScreen;
-			_CurrentScene->Init ();
+			_CurrentScene = std::make_shared<SplashScreenScene> ();
+			//_CurrentScene->Init ();
 
 			_CurrentSceneType = SceneType::SplashScreen;
 
@@ -84,15 +90,14 @@ void Game::ProcessMouseMovement (WPARAM wParam, LPARAM lParam)
 {
 }
 
+void Game::ProcessWindowDestroy ()
+{
+}
+
 void Game::Run ()
 {
 	if (_CurrentScene)
 	{
 		_CurrentScene->Draw ();
 	}
-}
-
-Game::~Game ()
-{
-	OutputDebugString (L"Game::~Game\n");
 }
