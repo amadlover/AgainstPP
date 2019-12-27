@@ -1,0 +1,12 @@
+# Build
+Debug
+Release
+
+# CMake
+build
+
+# Visual Studio
+.vs
+
+# Automation
+*.bat
