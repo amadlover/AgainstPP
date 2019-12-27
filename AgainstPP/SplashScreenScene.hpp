@@ -2,6 +2,7 @@
 
 #include "Graphics.hpp"
 #include "Scene.hpp"
+#include "Assets.hpp"
 
 #include <memory>
 
@@ -14,4 +15,9 @@ public:
 	void Init () override { OutputDebugString (L"SplashScreenScene::Init\n"); }
 	void Draw () override {}
 	void Exit () override { OutputDebugString (L"SplashScreenScene::Exit\n"); }
+
+private:
+	void _CreateMesh ();
+
+	Mesh Mesh;
 };
