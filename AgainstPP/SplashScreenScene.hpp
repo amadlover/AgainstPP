@@ -1,12 +1,15 @@
 #pragma once
 
+#include "Graphics.hpp"
 #include "Scene.hpp"
+
+#include <memory>
 
 class SplashScreenScene : public Scene
 {
 public:
-	SplashScreenScene () { OutputDebugString (L"SplashScreenScene::SplashScreenScene\n"); Init (); }
-	~SplashScreenScene () { OutputDebugString (L"SplashScreenScene::~SplashScreenScene\n"); Exit (); }
+	SplashScreenScene (const std::unique_ptr<Graphics>& G);
+	~SplashScreenScene ();
 
 	void Init () override { OutputDebugString (L"SplashScreenScene::Init\n"); }
 	void Draw () override {}

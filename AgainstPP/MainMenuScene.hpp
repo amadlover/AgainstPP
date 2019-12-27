@@ -5,8 +5,8 @@
 class MainMenuScene : public Scene
 {
 public:
-	MainMenuScene () { OutputDebugString (L"MainMenu::MainMenu\n"); Init (); }
-	~MainMenuScene () { OutputDebugString (L"MainMenu::~MainMenu\n"); Exit (); }
+	MainMenuScene () { OutputDebugString (L"MainMenu::MainMenu\n"); }
+	~MainMenuScene () { OutputDebugString (L"MainMenu::~MainMenu\n"); }
 
 	void Init () override { OutputDebugString (L"MainMenuScene::Init\n"); }
 	void Draw () override { }

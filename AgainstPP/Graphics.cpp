@@ -71,6 +71,8 @@ Graphics::Graphics (HINSTANCE HInstance, HWND HWnd)
 	_CreateSurface (HInstance, HWnd);
 	_PopulateGraphicsDeviceExtensions ();
 	_CreateGraphicsDevice ();
+	_CreateSwapChain ();
+	_CreateSwapchainImageViews ();
 }
 
 void Graphics::_PopulateInstanceLayersAndExtensions ()
@@ -374,7 +376,7 @@ void Graphics::_CreateSwapchainImageViews ()
 
 	int i = 0;
 
-	for (auto SwapchainImageView : SwapchainImageViews)
+	for (auto& SwapchainImageView : SwapchainImageViews)
 	{
 		VkImageViewCreateInfo CreateInfo;
 		memset (&CreateInfo, 0, sizeof (VkImageViewCreateInfo));
@@ -420,7 +422,7 @@ Graphics::~Graphics ()
 		vkDestroySwapchainKHR (GraphicsDevice, Swapchain, NULL);
 	}
 
-	for (auto SwapchainImageView : SwapchainImageViews)
+	for (auto& SwapchainImageView : SwapchainImageViews)
 	{
 		if (SwapchainImageView != VK_NULL_HANDLE)
 		{

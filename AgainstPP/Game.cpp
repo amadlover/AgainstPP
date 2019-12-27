@@ -13,7 +13,7 @@ Game::Game (HINSTANCE HInstance, HWND HWnd)
 
 	_G = std::make_unique<Graphics> (HInstance, HWnd);
 
-	_CurrentScene = std::make_shared<SplashScreenScene> ();
+	_CurrentScene = std::make_shared<SplashScreenScene> (_G);
 
 	_CurrentSceneType = SceneType::SplashScreen;
 }
@@ -47,7 +47,7 @@ void Game::ProcessKeyboardInput (WPARAM wParam, LPARAM lParam)
 		switch (wParam)
 		{
 		case VK_ESCAPE:
-			_CurrentScene = std::make_shared<SplashScreenScene> ();
+			_CurrentScene = std::make_shared<SplashScreenScene> (_G);
 
 			_CurrentSceneType = SceneType::SplashScreen;
 
