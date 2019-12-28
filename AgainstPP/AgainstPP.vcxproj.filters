@@ -36,12 +36,6 @@
     <ClCompile Include="Error.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Assets.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="EntityComponent.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="SplashScreenScene.cpp">
       <Filter>Scenes</Filter>
     </ClCompile>
@@ -51,14 +45,23 @@
     <ClCompile Include="Scene.cpp">
       <Filter>Scenes</Filter>
     </ClCompile>
-    <ClCompile Include="StaticMeshEntity.cpp">
-      <Filter>Entity</Filter>
-    </ClCompile>
     <ClCompile Include="Entity.cpp">
       <Filter>Entity</Filter>
     </ClCompile>
-    <ClCompile Include="StaticMeshComponent.cpp">
+    <ClCompile Include="EntityComponent.cpp">
       <Filter>EntityComponent</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshEntity.cpp">
+      <Filter>Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshComponent.cpp">
+      <Filter>EntityComponent</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Primitive.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -69,12 +72,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Error.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Assets.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="EntityComponent.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Scene.hpp">
@@ -89,11 +86,20 @@
     <ClInclude Include="Entity.hpp">
       <Filter>Entity</Filter>
     </ClInclude>
-    <ClInclude Include="StaticMeshEntity.hpp">
+    <ClInclude Include="EntityComponent.hpp">
+      <Filter>EntityComponent</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshEntity.hpp">
       <Filter>Entity</Filter>
     </ClInclude>
-    <ClInclude Include="StaticMeshComponent.hpp">
+    <ClInclude Include="MeshComponent.hpp">
       <Filter>EntityComponent</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Primitive.hpp">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

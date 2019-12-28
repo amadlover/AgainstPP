@@ -150,7 +150,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Assets.cpp" />
+    <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="EntityComponent.cpp" />
     <ClCompile Include="Error.cpp" />
@@ -158,23 +158,25 @@
     <ClCompile Include="Graphics.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MainMenuScene.cpp" />
+    <ClCompile Include="Primitive.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SplashScreenScene.cpp" />
-    <ClCompile Include="StaticMeshComponent.cpp" />
-    <ClCompile Include="StaticMeshEntity.cpp" />
+    <ClCompile Include="MeshComponent.cpp" />
+    <ClCompile Include="MeshEntity.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Assets.hpp" />
+    <ClInclude Include="Mesh.hpp" />
     <ClInclude Include="Entity.hpp" />
     <ClInclude Include="EntityComponent.hpp" />
     <ClInclude Include="Error.hpp" />
     <ClInclude Include="Game.hpp" />
     <ClInclude Include="Graphics.hpp" />
     <ClInclude Include="MainMenuScene.hpp" />
+    <ClInclude Include="Primitive.hpp" />
     <ClInclude Include="Scene.hpp" />
     <ClInclude Include="SplashScreenScene.hpp" />
-    <ClInclude Include="StaticMeshComponent.hpp" />
-    <ClInclude Include="StaticMeshEntity.hpp" />
+    <ClInclude Include="MeshComponent.hpp" />
+    <ClInclude Include="MeshEntity.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

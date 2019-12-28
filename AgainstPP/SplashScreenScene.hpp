@@ -2,7 +2,7 @@
 
 #include "Graphics.hpp"
 #include "Scene.hpp"
-#include "StaticMeshEntity.hpp"
+#include "MeshEntity.hpp"
 
 #include <memory>
 
@@ -15,7 +15,7 @@ public:
 	void Draw () override {}
 
 private:
-	void _CreateEntity ();
+	void _CreateBackground ();
 
-	std::unique_ptr<StaticMeshEntity> Background;
+	std::unique_ptr<MeshEntity> Background;
 };

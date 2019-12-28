@@ -1,6 +1,8 @@
 #pragma once
 
 #include <vulkan/vulkan.h>
+#include <string>
+#include <vector>
 
 struct VkImageHandles
 {
@@ -9,7 +11,7 @@ struct VkImageHandles
 
 struct Image
 {
-	char Name[256];
+	std::string Name;
 	unsigned int Width;
 	unsigned int Height;
 	unsigned int BPP;
@@ -31,14 +33,14 @@ struct Sampler
 
 struct Texture
 {
-	char Name[256];
+	std::string Name;
 	Image* Image;
 	Sampler* Sampler;
 };
 
 struct Material
 {
-	char Name[256];
+	std::string Name;
 	Texture* BaseColorTexture;
 };
 
@@ -53,11 +55,33 @@ struct VkPrimitiveHandles
 	VkMemoryRequirements MemoryRequirements;
 };
 
-struct Primitive
+struct Float4
 {
-	float* Positions;
-	float* UV0s;
-	float* Normals;
+	float x, y, z, w;
+};
+
+struct Float3
+{
+	float x, y, z;
+};
+
+struct Float2
+{
+	float x, y;
+};
+
+class Primitive
+{
+public:
+	Primitive () {}
+	~Primitive () {}
+
+	void Update () {}
+	void Draw () {}
+
+	std::vector<Float3> Positions;
+	std::vector<Float2> UV0s;
+	std::vector<Float3> Normals;
 
 	uint32_t PositionSize;
 	uint32_t UV0Size;
@@ -65,31 +89,9 @@ struct Primitive
 	uint32_t IndexSize;
 
 	uint32_t IndexCount;
-	uint32_t* Indices;
+	std::vector<uint32_t> Indices;
 
 	Material* Material;
 
 	VkPrimitiveHandles VkHandles;
-};
-
-struct Mesh
-{
-	char Name[256];
-	uint32_t ID;
-
-	Primitive* Primitives;
-	uint32_t PrimitiveCount;
-};
-
-struct Node
-{
-	float TransformationMatrix[16];
-
-	float Translation[3];
-	float Rotation[4];
-	float Scale[3];
-
-	char Name[256];
-
-	Mesh* Mesh;
 };

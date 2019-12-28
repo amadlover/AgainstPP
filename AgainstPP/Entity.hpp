@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Assets.hpp"
-
 #include <string>
 
 class Entity
