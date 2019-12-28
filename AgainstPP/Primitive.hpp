@@ -70,14 +70,16 @@ struct Float2
 	float x, y;
 };
 
-class Primitive
+#include <Windows.h>
+
+class _Primitive
 {
 public:
-	Primitive () {}
-	~Primitive () {}
+	_Primitive () {}
+	~_Primitive () {}
 
 	void Update () {}
-	void Draw () {}
+	void Draw () { OutputDebugString (L"_Primitive::Draw\n"); }
 
 	std::vector<Float3> Positions;
 	std::vector<Float2> UV0s;

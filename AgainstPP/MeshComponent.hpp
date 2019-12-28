@@ -4,18 +4,15 @@
 
 #include <memory>
 
-class MeshComponent
+class _MeshComponent
 {
 public:
-	MeshComponent ();
-	~MeshComponent ();
-
-	void Init ();
+	_MeshComponent ();
+	~_MeshComponent ();
 
 	void Update ();
 	void Draw ();
 
-private:
-	std::unique_ptr<Mesh> Mesh;
+	std::unique_ptr<_Mesh> Mesh;
 };
 

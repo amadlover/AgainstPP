@@ -5,13 +5,11 @@
 
 #include "Primitive.hpp"
 
-class Mesh
+class _Mesh
 {
 public:
-	Mesh ();
-	~Mesh ();
-
-	void Init ();
+	_Mesh ();
+	~_Mesh ();
 
 	void Update ();
 	void Draw ();
@@ -19,5 +17,5 @@ public:
 	std::string Name;
 	uint32_t ID;
 
-	std::vector<Primitive> Primitives;
+	std::vector<_Primitive> Primitives;
 };

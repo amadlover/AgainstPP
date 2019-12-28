@@ -1,26 +1,21 @@
 #include "MeshComponent.hpp"
 
-MeshComponent::MeshComponent ()
+_MeshComponent::_MeshComponent ()
+{
+	Mesh = std::make_unique<_Mesh> ();
+}
+
+_MeshComponent::~_MeshComponent ()
 {
 
 }
 
-MeshComponent::~MeshComponent ()
+void _MeshComponent::Update ()
 {
 
 }
 
-void MeshComponent::Update ()
-{
-
-}
-
-void MeshComponent::Init ()
-{
-
-}
-
-void MeshComponent::Draw ()
+void _MeshComponent::Draw ()
 {
 	Mesh->Draw ();
 }

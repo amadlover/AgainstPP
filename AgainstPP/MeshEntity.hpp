@@ -12,6 +12,6 @@ public:
 	void Update () override;
 	void Draw () override;
 	
-	std::unique_ptr<MeshComponent> MeshComponent;
+	std::unique_ptr<_MeshComponent> MeshComponent;
 };
 

@@ -1,27 +1,25 @@
 #include "Mesh.hpp"
 
 
-Mesh::Mesh ()
+_Mesh::_Mesh ()
 {
 
 }
 
-Mesh::~Mesh ()
+_Mesh::~_Mesh ()
 {
 
 }
 
-void Mesh::Init ()
+void _Mesh::Update ()
 {
 
 }
 
-void Mesh::Update ()
+void _Mesh::Draw ()
 {
-
-}
-
-void Mesh::Draw ()
-{
-
+	for (auto Primitive : Primitives)
+	{
+		Primitive.Draw ();
+	}
 }
