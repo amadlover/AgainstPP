@@ -2,7 +2,7 @@
 
 #include "Graphics.hpp"
 #include "Scene.hpp"
-#include "Assets.hpp"
+#include "StaticMeshEntity.hpp"
 
 #include <memory>
 
@@ -12,12 +12,10 @@ public:
 	SplashScreenScene (const std::unique_ptr<Graphics>& G);
 	~SplashScreenScene ();
 
-	void Init () override { OutputDebugString (L"SplashScreenScene::Init\n"); }
 	void Draw () override {}
-	void Exit () override { OutputDebugString (L"SplashScreenScene::Exit\n"); }
 
 private:
-	void _CreateMesh ();
+	void _CreateEntity ();
 
-	Mesh Mesh;
+	std::unique_ptr<StaticMeshEntity> Background;
 };

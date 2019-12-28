@@ -151,6 +151,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Assets.cpp" />
+    <ClCompile Include="Entity.cpp" />
+    <ClCompile Include="EntityComponent.cpp" />
     <ClCompile Include="Error.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Graphics.cpp" />
@@ -158,15 +160,21 @@
     <ClCompile Include="MainMenuScene.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SplashScreenScene.cpp" />
+    <ClCompile Include="StaticMeshComponent.cpp" />
+    <ClCompile Include="StaticMeshEntity.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Assets.hpp" />
+    <ClInclude Include="Entity.hpp" />
+    <ClInclude Include="EntityComponent.hpp" />
     <ClInclude Include="Error.hpp" />
     <ClInclude Include="Game.hpp" />
     <ClInclude Include="Graphics.hpp" />
     <ClInclude Include="MainMenuScene.hpp" />
     <ClInclude Include="Scene.hpp" />
     <ClInclude Include="SplashScreenScene.hpp" />
+    <ClInclude Include="StaticMeshComponent.hpp" />
+    <ClInclude Include="StaticMeshEntity.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -13,6 +13,15 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Scenes">
+      <UniqueIdentifier>{155d8b90-eee4-4529-b657-f34701a6d0b7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Entity">
+      <UniqueIdentifier>{c7c0b09c-de91-46ba-ba0b-c54fbf7a7c98}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="EntityComponent">
+      <UniqueIdentifier>{36a9efb5-f378-4fea-be58-a4888a27f9cc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -24,20 +33,32 @@
     <ClCompile Include="Graphics.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Scene.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SplashScreenScene.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MainMenuScene.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Error.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Assets.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EntityComponent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SplashScreenScene.cpp">
+      <Filter>Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="MainMenuScene.cpp">
+      <Filter>Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="StaticMeshEntity.cpp">
+      <Filter>Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="Entity.cpp">
+      <Filter>Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="StaticMeshComponent.cpp">
+      <Filter>EntityComponent</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -47,20 +68,32 @@
     <ClInclude Include="Graphics.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Scene.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SplashScreenScene.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MainMenuScene.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Error.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Assets.hpp">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EntityComponent.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.hpp">
+      <Filter>Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="MainMenuScene.hpp">
+      <Filter>Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="SplashScreenScene.hpp">
+      <Filter>Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="Entity.hpp">
+      <Filter>Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="StaticMeshEntity.hpp">
+      <Filter>Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="StaticMeshComponent.hpp">
+      <Filter>EntityComponent</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

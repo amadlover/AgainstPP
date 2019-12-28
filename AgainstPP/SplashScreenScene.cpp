@@ -5,8 +5,9 @@ SplashScreenScene::SplashScreenScene (const std::unique_ptr<Graphics>& G)
 	OutputDebugString (L"SplashScreenScene::SplashScreenScene\n");
 }
 
-void SplashScreenScene::_CreateMesh ()
+void SplashScreenScene::_CreateEntity ()
 {
+	Background = std::make_unique<StaticMeshEntity> ();
 }
 
 SplashScreenScene::~SplashScreenScene ()
