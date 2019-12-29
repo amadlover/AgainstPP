@@ -16,10 +16,14 @@ public:
 private:
 	void _CreateDescriptorPool ();
 	void _CreateDescriptorSetLayout ();
+	void _CreateDescriptorSet ();
 
 	BaseGraphics* _G;
 
 	vk::DescriptorPool _DescriptorPool;
 	vk::DescriptorSetLayout _DescriptorSetLayout;
+	vk::DescriptorSet _DescriptorSet;
+	vk::Sampler _Sampler;
+	vk::ImageView _TextureImageView;
 };
 
