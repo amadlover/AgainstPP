@@ -81,6 +81,12 @@ int WINAPI wWinMain (_In_ HINSTANCE HInstance, _In_opt_ HINSTANCE PreviousHInsta
 	{
 		LogError (Err);
 	}
+	catch (std::runtime_error Err)
+	{
+		wchar_t Buff[64];
+		swprintf (Buff, 64, L"%hs\n", Err.what ());
+		OutputDebugString (Buff);
+	}
 
 	return 0;
 }

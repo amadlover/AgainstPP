@@ -91,7 +91,7 @@ void BaseGraphics::_PopulateInstanceLayersAndExtensions ()
 {
 	OutputDebugString (L"BaseGraphics::_PopulateInstanceLayersAndExtensions\n");
 
-	if (_IsValidationNeeded)
+	/*if (_IsValidationNeeded)
 	{
 		uint32_t LayerCount = 0;
 		vkEnumerateInstanceLayerProperties (&LayerCount, NULL);
@@ -124,10 +124,6 @@ void BaseGraphics::_PopulateInstanceLayersAndExtensions ()
 		{
 			RequestedInstanceExtensions[RequestedInstanceExtensionCount++] = "VK_KHR_win32_surface";
 		}
-		else if (strcmp (ExtensionProperty.extensionName, VK_KHR_SWAPCHAIN_EXTENSION_NAME) == 0)
-		{
-			RequestedInstanceExtensions[RequestedInstanceExtensionCount++] = VK_KHR_SWAPCHAIN_EXTENSION_NAME;
-		}
 
 		if (_IsValidationNeeded)
 		{
@@ -136,6 +132,27 @@ void BaseGraphics::_PopulateInstanceLayersAndExtensions ()
 				RequestedInstanceExtensions[RequestedInstanceExtensionCount++] = VK_EXT_DEBUG_UTILS_EXTENSION_NAME;
 			}
 		}
+	}*/
+
+	if (_IsValidationNeeded)
+	{
+		std::vector<vk::LayerProperties> LayerProperties = vk::enumerateInstanceLayerProperties ();
+		std::vector<vk::LayerProperties>::iterator It = std::find_if (LayerProperties.begin (), LayerProperties.end (), [](const vk::LayerProperties& LayerProperty) { return strcmp (LayerProperty.layerName, "VK_LAYER_LUNARG_standard_validation") == 0; });
+
+		RequestedInstanceLayers.push_back ((*It).layerName);
+	}
+
+	std::vector<vk::ExtensionProperties> ExtensionProperties = vk::enumerateInstanceExtensionProperties ();
+	std::vector<vk::ExtensionProperties>::iterator It = std::find_if (ExtensionProperties.begin (), ExtensionProperties.end (), [](const vk::ExtensionProperties& ExtensionProperty) { return strcmp (ExtensionProperty.extensionName, VK_KHR_SURFACE_EXTENSION_NAME) == 0; });
+	RequestedInstanceExtensions.push_back ((*It).extensionName);
+
+	It = std::find_if (ExtensionProperties.begin (), ExtensionProperties.end (), [](const vk::ExtensionProperties& ExtensionProperty) { return strcmp (ExtensionProperty.extensionName, "VK_KHR_win32_surface") == 0; });
+	RequestedInstanceExtensions.push_back ((*It).extensionName);
+
+	if (_IsValidationNeeded)
+	{
+		It = std::find_if (ExtensionProperties.begin (), ExtensionProperties.end (), [](const vk::ExtensionProperties& ExtensionProperty) { return strcmp (ExtensionProperty.extensionName, VK_EXT_DEBUG_UTILS_EXTENSION_NAME) == 0; });
+		RequestedInstanceExtensions.push_back ((*It).extensionName);
 	}
 }
 
@@ -168,7 +185,7 @@ void BaseGraphics::_CreateInstance ()
 	}*/
 
 	vk::ApplicationInfo AI{ "Against", 1, "Against", 1, VK_API_VERSION_1_1 };
-	vk::InstanceCreateInfo InstanceCreateInfo = { {}, &AI, RequestedInstanceLayerCount, RequestedInstanceLayers, RequestedInstanceExtensionCount, RequestedInstanceExtensions };
+	vk::InstanceCreateInfo InstanceCreateInfo = { {}, &AI, RequestedInstanceLayers.size (), RequestedInstanceLayers.data (), RequestedInstanceExtensions.size (), RequestedInstanceExtensions.data () };
 
 	Instance = vk::createInstanceUnique (InstanceCreateInfo);
 }
@@ -193,7 +210,7 @@ void BaseGraphics::_SetupDebugUtilsMessenger ()
 	pfnVkCreateDebugUtilsMessengerEXT = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(Instance->getProcAddr ("vkCreateDebugUtilsMessengerEXT"));
 	pfnVkDestroyDebugUtilsMessengerEXT = reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(Instance->getProcAddr ("vkDestroyDebugUtilsMessengerEXT"));
 
-	vk::DebugUtilsMessageSeverityFlagsEXT severityFlags (vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning | vk::DebugUtilsMessageSeverityFlagBitsEXT::eError | vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo | vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose);
+	vk::DebugUtilsMessageSeverityFlagsEXT severityFlags (vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning | vk::DebugUtilsMessageSeverityFlagBitsEXT::eError);// | vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo | vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose);
 	vk::DebugUtilsMessageTypeFlagsEXT messageTypeFlags (vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral | vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance | vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation);
 	DebugUtilsMessenger = Instance->createDebugUtilsMessengerEXTUnique (vk::DebugUtilsMessengerCreateInfoEXT ({}, severityFlags, messageTypeFlags, &DebugMessengerCallback));
 }
@@ -203,6 +220,7 @@ void BaseGraphics::_GetPhysicalDevice ()
 	OutputDebugString (L"BaseGraphics::_GetPhysicalDevice\n");
 
 	PhysicalDevice = Instance->enumeratePhysicalDevices ().front ();
+
 	uint32_t i = 0;
 	for (auto QueueFamilyProperty : PhysicalDevice.getQueueFamilyProperties ())
 	{
@@ -286,7 +304,7 @@ void BaseGraphics::_PopulateGraphicsDeviceExtensions ()
 			RequestedDeviceExtensions[RequestedDeviceExtensionCount++] = VK_KHR_SWAPCHAIN_EXTENSION_NAME;
 			break;
 		}
-	}*/
+	}
 
 	for (auto ExtensionProperty : PhysicalDevice.enumerateDeviceExtensionProperties ())
 	{
@@ -295,7 +313,12 @@ void BaseGraphics::_PopulateGraphicsDeviceExtensions ()
 			RequestedDeviceExtensions[RequestedDeviceExtensionCount++] = ExtensionProperty.extensionName;
 			break;
 		}
-	}
+	}*/
+
+	std::vector<vk::ExtensionProperties> ExtensionProperties = PhysicalDevice.enumerateDeviceExtensionProperties ();
+	std::vector< vk::ExtensionProperties>::iterator It = std::find_if (ExtensionProperties.begin (), ExtensionProperties.end (), [](const vk::ExtensionProperties& ExtensionProperty) { return strcmp (ExtensionProperty.extensionName, VK_KHR_SWAPCHAIN_EXTENSION_NAME) == 0; });
+
+	RequestedDeviceExtensions.push_back ((*It).extensionName);
 }
 
 void BaseGraphics::_CreateGraphicsDevice ()
@@ -332,9 +355,10 @@ void BaseGraphics::_CreateGraphicsDevice ()
 
 	vkGetDeviceQueue (GraphicsDevice, GraphicsQueueFamilyIndex, 0, &GraphicsQueue);*/
 
-	vk::DeviceQueueCreateInfo QueueCreateInfo{ {}, GraphicsQueueFamilyIndex, 1, &Priorities };
+	vk::DeviceQueueCreateInfo QueueCreateInfo ({}, GraphicsQueueFamilyIndex, 1, &Priorities);
+	vk::DeviceCreateInfo DeviceCreateInfo ({}, 1, &QueueCreateInfo, 0, NULL, RequestedDeviceExtensions.size (), RequestedDeviceExtensions.data ());
 
-	PhysicalDevice.createDeviceUnique (vk::DeviceCreateInfo ({}, 1, &QueueCreateInfo, 0, NULL, RequestedDeviceExtensionCount, RequestedDeviceExtensions));
+	GraphicsDevice = PhysicalDevice.createDeviceUnique (DeviceCreateInfo);
 }
 
 void BaseGraphics::_CreateSwapChain ()
@@ -439,9 +463,9 @@ void BaseGraphics::_CreateSwapChain ()
 	SurfaceExtent = SurfaceCapabilities.currentExtent;
 
 	vk::SwapchainCreateInfoKHR SwapchainCreateInfo{ {}, Surface.get (), SurfaceCapabilities.minImageCount + 1, ChosenSurfaceFormat.format, ChosenSurfaceFormat.colorSpace, SurfaceExtent, 1, SurfaceCapabilities.supportedUsageFlags, vk::SharingMode::eExclusive, 1, &GraphicsQueueFamilyIndex, SurfaceCapabilities.currentTransform, vk::CompositeAlphaFlagBitsKHR::eOpaque, ChosenPresentMode, VK_TRUE, VK_NULL_HANDLE };
-	Swapchain = GraphicsDevice.createSwapchainKHRUnique (SwapchainCreateInfo);
+	Swapchain = GraphicsDevice->createSwapchainKHRUnique (SwapchainCreateInfo);
 
-	SwapchainImages = GraphicsDevice.getSwapchainImagesKHR (Swapchain.get ());
+	SwapchainImages = GraphicsDevice->getSwapchainImagesKHR (Swapchain.get ());
 
 	vk::ComponentMapping Components (vk::ComponentSwizzle::eR, vk::ComponentSwizzle::eG, vk::ComponentSwizzle::eB, vk::ComponentSwizzle::eA);
 	vk::ImageSubresourceRange SubresourceRange (vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1);
@@ -453,7 +477,7 @@ void BaseGraphics::_CreateSwapChain ()
 	{
 		SwapchainImageViewCreateInfo.image = SwapchainImages[i];
 
-		SwapchainImageViews.push_back (GraphicsDevice.createImageView (SwapchainImageViewCreateInfo));
+		SwapchainImageViews.push_back (GraphicsDevice->createImageView (SwapchainImageViewCreateInfo));
 
 		++i;
 	}
