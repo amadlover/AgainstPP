@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vulkan/vulkan.h>
+#include <vulkan.hpp>
 #include <vector>
 #include <Windows.h>
 
@@ -10,14 +10,14 @@ public:
 	BaseGraphics (HINSTANCE HInstance, HWND HWnd);
 	~BaseGraphics ();
 
-	VkDevice GraphicsDevice;
+	vk::Device GraphicsDevice;
 	VkPhysicalDeviceMemoryProperties PhysicalDeviceMemoryProperties;
 	VkPhysicalDeviceLimits PhysicalDeviceLimits;
-	VkSurfaceFormatKHR ChosenSurfaceFormat;
-	VkExtent2D SurfaceExtent;
-	VkSwapchainKHR Swapchain;
-	std::vector<VkImage> SwapchainImages;
-	std::vector<VkImageView> SwapchainImageViews;
+	vk::SurfaceFormatKHR ChosenSurfaceFormat;
+	vk::Extent2D SurfaceExtent;
+	vk::UniqueSwapchainKHR Swapchain;
+	std::vector<vk::Image> SwapchainImages;
+	std::vector<vk::ImageView> SwapchainImageViews;
 	VkQueue GraphicsQueue;
 
 	uint32_t GraphicsQueueFamilyIndex;
@@ -33,7 +33,6 @@ private:
 	void _PopulateGraphicsDeviceExtensions ();
 	void _CreateGraphicsDevice ();
 	void _CreateSwapChain ();
-	void _CreateSwapchainImageViews ();
 
 	bool _IsValidationNeeded;
 
@@ -46,9 +45,10 @@ private:
 	uint32_t RequestedDeviceExtensionCount;
 	const char* RequestedDeviceExtensions[32];
 
-	VkInstance Instance;
-	VkDebugUtilsMessengerEXT DebugUtilsMessenger;
-	VkPhysicalDevice PhysicalDevice;
-	VkSurfaceKHR Surface;
-	VkPresentModeKHR ChosenPresentMode;
+	vk::UniqueInstance Instance;
+	vk::UniqueDebugUtilsMessengerEXT DebugUtilsMessenger;
+
+	vk::PhysicalDevice PhysicalDevice;
+	vk::UniqueSurfaceKHR Surface;
+	vk::PresentModeKHR ChosenPresentMode;
 };

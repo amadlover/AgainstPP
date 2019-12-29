@@ -5,6 +5,19 @@
 
 #include <vulkan/vulkan_win32.h>
 
+PFN_vkCreateDebugUtilsMessengerEXT pfnVkCreateDebugUtilsMessengerEXT;
+PFN_vkDestroyDebugUtilsMessengerEXT pfnVkDestroyDebugUtilsMessengerEXT;
+
+VKAPI_ATTR VkResult VKAPI_CALL vkCreateDebugUtilsMessengerEXT (VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pMessenger)
+{
+	return pfnVkCreateDebugUtilsMessengerEXT (instance, pCreateInfo, pAllocator, pMessenger);
+}
+
+VKAPI_ATTR void VKAPI_CALL vkDestroyDebugUtilsMessengerEXT (VkInstance instance, VkDebugUtilsMessengerEXT messenger, VkAllocationCallbacks const* pAllocator)
+{
+	return pfnVkDestroyDebugUtilsMessengerEXT (instance, messenger, pAllocator);
+}
+
 VkResult CreateDebugUtilsMessenger (VkInstance Instance, const VkDebugUtilsMessengerCreateInfoEXT* DebugUtilsMessengerCreateInfo, const VkAllocationCallbacks* AllocationCallbacks, VkDebugUtilsMessengerEXT* DebugUtilsMessenger)
 {
 	OutputDebugString (L"CreateDebugUtilsMessenger\n");
@@ -72,7 +85,6 @@ BaseGraphics::BaseGraphics (HINSTANCE HInstance, HWND HWnd)
 	_PopulateGraphicsDeviceExtensions ();
 	_CreateGraphicsDevice ();
 	_CreateSwapChain ();
-	_CreateSwapchainImageViews ();
 }
 
 void BaseGraphics::_PopulateInstanceLayersAndExtensions ()
@@ -131,7 +143,7 @@ void BaseGraphics::_CreateInstance ()
 {
 	OutputDebugString (L"BaseGraphics::_CreateInstance\n");
 
-	VkApplicationInfo ApplicationInfo = {};
+	/*VkApplicationInfo ApplicationInfo = {};
 
 	ApplicationInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
 	ApplicationInfo.pEngineName = "AGE";
@@ -153,17 +165,22 @@ void BaseGraphics::_CreateInstance ()
 	if (vkCreateInstance (&CreateInfo, NULL, &Instance) != VK_SUCCESS)
 	{
 		throw GraphicsError::eCREATE_INSTANCE;
-	}
+	}*/
+
+	vk::ApplicationInfo AI{ "Against", 1, "Against", 1, VK_API_VERSION_1_1 };
+	vk::InstanceCreateInfo InstanceCreateInfo = { {}, &AI, RequestedInstanceLayerCount, RequestedInstanceLayers, RequestedInstanceExtensionCount, RequestedInstanceExtensions };
+
+	Instance = vk::createInstanceUnique (InstanceCreateInfo);
 }
 
 void BaseGraphics::_SetupDebugUtilsMessenger ()
 {
 	OutputDebugString (L"BaseGraphics::_SetupDebugUtilsMessenger\n");
 
-	VkDebugUtilsMessengerCreateInfoEXT CreateInfo = {};
+	/*VkDebugUtilsMessengerCreateInfoEXT CreateInfo = {};
 
 	CreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-	CreateInfo.messageSeverity = /*VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT |*/ VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+	CreateInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
 	CreateInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
 	CreateInfo.pfnUserCallback = DebugMessengerCallback;
 	CreateInfo.flags = 0;
@@ -171,14 +188,36 @@ void BaseGraphics::_SetupDebugUtilsMessenger ()
 	if (CreateDebugUtilsMessenger (Instance, &CreateInfo, NULL, &DebugUtilsMessenger) != VK_SUCCESS)
 	{
 		throw GraphicsError::eCREATE_DEBUG_UTILS_MESSENGER;
-	}
+	}*/
+
+	pfnVkCreateDebugUtilsMessengerEXT = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(Instance->getProcAddr ("vkCreateDebugUtilsMessengerEXT"));
+	pfnVkDestroyDebugUtilsMessengerEXT = reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(Instance->getProcAddr ("vkDestroyDebugUtilsMessengerEXT"));
+
+	vk::DebugUtilsMessageSeverityFlagsEXT severityFlags (vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning | vk::DebugUtilsMessageSeverityFlagBitsEXT::eError | vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo | vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose);
+	vk::DebugUtilsMessageTypeFlagsEXT messageTypeFlags (vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral | vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance | vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation);
+	DebugUtilsMessenger = Instance->createDebugUtilsMessengerEXTUnique (vk::DebugUtilsMessengerCreateInfoEXT ({}, severityFlags, messageTypeFlags, &DebugMessengerCallback));
 }
 
 void BaseGraphics::_GetPhysicalDevice ()
 {
 	OutputDebugString (L"BaseGraphics::_GetPhysicalDevice\n");
 
-	uint32_t PhysicalDeviceCount = 0;
+	PhysicalDevice = Instance->enumeratePhysicalDevices ().front ();
+	uint32_t i = 0;
+	for (auto QueueFamilyProperty : PhysicalDevice.getQueueFamilyProperties ())
+	{
+		if ((QueueFamilyProperty.queueFlags & vk::QueueFlagBits::eGraphics) && QueueFamilyProperty.queueCount > 1)
+		{
+			GraphicsQueueFamilyIndex = i;
+
+			break;
+		}
+		++i;
+	}
+
+	PhysicalDeviceLimits = PhysicalDevice.getProperties ().limits;
+
+	/*uint32_t PhysicalDeviceCount = 0;
 	vkEnumeratePhysicalDevices (Instance, &PhysicalDeviceCount, NULL);
 
 	std::vector<VkPhysicalDevice> PhysicalDevices (PhysicalDeviceCount);
@@ -190,9 +229,6 @@ void BaseGraphics::_GetPhysicalDevice ()
 	}
 
 	PhysicalDevice = PhysicalDevices[0];
-
-	VkPhysicalDeviceFeatures DeviceFeatures;
-	vkGetPhysicalDeviceFeatures (PhysicalDevice, &DeviceFeatures);
 
 	uint32_t QueueFamilyCount = 0;
 	vkGetPhysicalDeviceQueueFamilyProperties (PhysicalDevice, &QueueFamilyCount, NULL);
@@ -212,14 +248,14 @@ void BaseGraphics::_GetPhysicalDevice ()
 
 	VkPhysicalDeviceProperties DeviceProperties;
 	vkGetPhysicalDeviceProperties (PhysicalDevice, &DeviceProperties);
-	PhysicalDeviceLimits = DeviceProperties.limits;
+	PhysicalDeviceLimits = DeviceProperties.limits;*/
 }
 
 void BaseGraphics::_CreateSurface (HINSTANCE HInstance, HWND HWnd)
 {
 	OutputDebugString (L"BaseGraphics::_CreateSurface\n");
 
-	VkWin32SurfaceCreateInfoKHR CreateInfo = {};
+	/*VkWin32SurfaceCreateInfoKHR CreateInfo = {};
 
 	CreateInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
 	CreateInfo.hinstance = HInstance;
@@ -228,14 +264,16 @@ void BaseGraphics::_CreateSurface (HINSTANCE HInstance, HWND HWnd)
 	if (vkCreateWin32SurfaceKHR (Instance, &CreateInfo, NULL, &Surface) != VK_SUCCESS)
 	{
 		throw GraphicsError::eCREATE_SURFACE;
-	}
+	}*/
+
+	Surface = Instance->createWin32SurfaceKHRUnique (vk::Win32SurfaceCreateInfoKHR ({}, HInstance, HWnd));
 }
 
 void BaseGraphics::_PopulateGraphicsDeviceExtensions ()
 {
 	OutputDebugString (L"BaseGraphics::_PopulateGraphicsDeviceExtensions\n");
 
-	uint32_t ExtensionCount = 0;
+	/*uint32_t ExtensionCount = 0;
 	vkEnumerateDeviceExtensionProperties (PhysicalDevice, NULL, &ExtensionCount, NULL);
 
 	std::vector<VkExtensionProperties> ExtensionProperties (ExtensionCount);
@@ -248,6 +286,15 @@ void BaseGraphics::_PopulateGraphicsDeviceExtensions ()
 			RequestedDeviceExtensions[RequestedDeviceExtensionCount++] = VK_KHR_SWAPCHAIN_EXTENSION_NAME;
 			break;
 		}
+	}*/
+
+	for (auto ExtensionProperty : PhysicalDevice.enumerateDeviceExtensionProperties ())
+	{
+		if (strcmp (ExtensionProperty.extensionName, VK_KHR_SWAPCHAIN_EXTENSION_NAME) == 0)
+		{
+			RequestedDeviceExtensions[RequestedDeviceExtensionCount++] = ExtensionProperty.extensionName;
+			break;
+		}
 	}
 }
 
@@ -257,7 +304,7 @@ void BaseGraphics::_CreateGraphicsDevice ()
 
 	float Priorities = 1.f;
 
-	VkDeviceQueueCreateInfo QueueCreateInfo = {};
+	/*VkDeviceQueueCreateInfo QueueCreateInfo = {};
 
 	QueueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
 	QueueCreateInfo.pNext = NULL;
@@ -283,14 +330,18 @@ void BaseGraphics::_CreateGraphicsDevice ()
 		throw GraphicsError::eCREATE_GRAPHICS_DEVICE;
 	}
 
-	vkGetDeviceQueue (GraphicsDevice, GraphicsQueueFamilyIndex, 0, &GraphicsQueue);
+	vkGetDeviceQueue (GraphicsDevice, GraphicsQueueFamilyIndex, 0, &GraphicsQueue);*/
+
+	vk::DeviceQueueCreateInfo QueueCreateInfo{ {}, GraphicsQueueFamilyIndex, 1, &Priorities };
+
+	PhysicalDevice.createDeviceUnique (vk::DeviceCreateInfo ({}, 1, &QueueCreateInfo, 0, NULL, RequestedDeviceExtensionCount, RequestedDeviceExtensions));
 }
 
 void BaseGraphics::_CreateSwapChain ()
 {
-	OutputDebugString (L"CreateSwapChain\n");
+	OutputDebugString (L"BaseGraphics::_CreateSwapChain\n");
 
-	VkBool32 IsSurfaceSupported = false;
+	/*VkBool32 IsSurfaceSupported = false;
 	vkGetPhysicalDeviceSurfaceSupportKHR (PhysicalDevice, GraphicsQueueFamilyIndex, Surface, &IsSurfaceSupported);
 
 	if (!IsSurfaceSupported)
@@ -360,46 +411,49 @@ void BaseGraphics::_CreateSwapChain ()
 	SwapchainImages.resize (SwapchainImageCount);
 	vkGetSwapchainImagesKHR (GraphicsDevice, Swapchain, &SwapchainImageCount, SwapchainImages.data ());
 
-	SwapchainImageViews.resize (SwapchainImageCount);
-}
+	SwapchainImageViews.resize (SwapchainImageCount);*/
 
-void BaseGraphics::_CreateSwapchainImageViews ()
-{
-	OutputDebugString (L"BaseGraphics::_CreateSwapchainImageViews\n");
+	if (!PhysicalDevice.getSurfaceSupportKHR (GraphicsQueueFamilyIndex, Surface.get ()))
+	{
+		throw GraphicsError::eSURFACE_SUPPORT;
+	}
+
+	for (auto SurfaceFormat : PhysicalDevice.getSurfaceFormatsKHR (Surface.get ()))
+	{
+		if (SurfaceFormat.format == vk::Format::eR8G8B8A8Unorm)
+		{
+			ChosenSurfaceFormat = SurfaceFormat.format;
+			break;
+		}
+	}
+
+	for (auto PresentMode : PhysicalDevice.getSurfacePresentModesKHR (Surface.get ()))
+	{
+		if (PresentMode == vk::PresentModeKHR::eMailbox)
+		{
+			ChosenPresentMode = PresentMode;
+		}
+	}
+
+	vk::SurfaceCapabilitiesKHR SurfaceCapabilities = PhysicalDevice.getSurfaceCapabilitiesKHR (Surface.get ());
+	SurfaceExtent = SurfaceCapabilities.currentExtent;
+
+	vk::SwapchainCreateInfoKHR SwapchainCreateInfo{ {}, Surface.get (), SurfaceCapabilities.minImageCount + 1, ChosenSurfaceFormat.format, ChosenSurfaceFormat.colorSpace, SurfaceExtent, 1, SurfaceCapabilities.supportedUsageFlags, vk::SharingMode::eExclusive, 1, &GraphicsQueueFamilyIndex, SurfaceCapabilities.currentTransform, vk::CompositeAlphaFlagBitsKHR::eOpaque, ChosenPresentMode, VK_TRUE, VK_NULL_HANDLE };
+	Swapchain = GraphicsDevice.createSwapchainKHRUnique (SwapchainCreateInfo);
+
+	SwapchainImages = GraphicsDevice.getSwapchainImagesKHR (Swapchain.get ());
+
+	vk::ComponentMapping Components (vk::ComponentSwizzle::eR, vk::ComponentSwizzle::eG, vk::ComponentSwizzle::eB, vk::ComponentSwizzle::eA);
+	vk::ImageSubresourceRange SubresourceRange (vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1);
+
+	vk::ImageViewCreateInfo SwapchainImageViewCreateInfo ({}, nullptr, vk::ImageViewType::e2D, ChosenSurfaceFormat.format, Components, SubresourceRange);
 
 	int i = 0;
-
-	for (auto& SwapchainImageView : SwapchainImageViews)
+	for (auto SwapchainImageView : SwapchainImageViews)
 	{
-		VkImageViewCreateInfo CreateInfo = {};
+		SwapchainImageViewCreateInfo.image = SwapchainImages[i];
 
-		VkComponentMapping Components;
-
-		Components.a = VK_COMPONENT_SWIZZLE_A;
-		Components.b = VK_COMPONENT_SWIZZLE_B;
-		Components.g = VK_COMPONENT_SWIZZLE_G;
-		Components.r = VK_COMPONENT_SWIZZLE_R;
-
-		VkImageSubresourceRange SubresourceRange;
-
-		SubresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		SubresourceRange.baseMipLevel = 0;
-		SubresourceRange.levelCount = 1;
-
-		SubresourceRange.baseArrayLayer = 0;
-		SubresourceRange.layerCount = 1;
-
-		CreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-		CreateInfo.image = SwapchainImages[i];
-		CreateInfo.format = ChosenSurfaceFormat.format;
-		CreateInfo.components = Components;
-		CreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-		CreateInfo.subresourceRange = SubresourceRange;
-
-		if (vkCreateImageView (GraphicsDevice, &CreateInfo, NULL, &SwapchainImageView) != VK_SUCCESS)
-		{
-			throw GraphicsError::eCREATE_IMAGE_VIEW;
-		}
+		SwapchainImageViews.push_back (GraphicsDevice.createImageView (SwapchainImageViewCreateInfo));
 
 		++i;
 	}
@@ -409,7 +463,7 @@ BaseGraphics::~BaseGraphics ()
 {
 	OutputDebugString (L"BaseGraphics::~BaseGraphics\n");
 
-	if (Swapchain != VK_NULL_HANDLE)
+	/*if (Swapchain != VK_NULL_HANDLE)
 	{
 		vkDestroySwapchainKHR (GraphicsDevice, Swapchain, NULL);
 	}
@@ -443,5 +497,5 @@ BaseGraphics::~BaseGraphics ()
 	if (Instance != VK_NULL_HANDLE)
 	{
 		vkDestroyInstance (Instance, NULL);
-	}
+	}*/
 }

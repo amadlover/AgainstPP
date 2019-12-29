@@ -13,7 +13,7 @@ void _SplashSceneGraphics::_CreateDescriptorPool ()
 {
 	OutputDebugString (L"_SplashSceneGraphics::_CreateDescriptorPool\n");
 
-	VkDescriptorPoolSize DescriptorPoolSize = {};
+	/*VkDescriptorPoolSize DescriptorPoolSize = {};
 
 	DescriptorPoolSize.descriptorCount = _G->SwapchainImageCount;
 	DescriptorPoolSize.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -29,7 +29,7 @@ void _SplashSceneGraphics::_CreateDescriptorPool ()
 	if (vkCreateDescriptorPool (_G->GraphicsDevice, &DescriptorPoolCreateInfo, NULL, &_DescriptorPool) != VK_SUCCESS)
 	{
 		throw GraphicsError::eCREATE_DESCRIPTOR_POOL;
-	}
+	}*/
 }
 
 void _SplashSceneGraphics::_CreateDescriptorSetLayout ()
