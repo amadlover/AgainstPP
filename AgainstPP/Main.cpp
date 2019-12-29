@@ -88,5 +88,7 @@ int WINAPI wWinMain (_In_ HINSTANCE HInstance, _In_opt_ HINSTANCE PreviousHInsta
 		OutputDebugString (Buff);
 	}
 
+	DestroyWindow (WindowHandle);
+
 	return 0;
 }

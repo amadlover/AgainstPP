@@ -139,20 +139,20 @@ void BaseGraphics::_PopulateInstanceLayersAndExtensions ()
 		std::vector<vk::LayerProperties> LayerProperties = vk::enumerateInstanceLayerProperties ();
 		std::vector<vk::LayerProperties>::iterator It = std::find_if (LayerProperties.begin (), LayerProperties.end (), [](const vk::LayerProperties& LayerProperty) { return strcmp (LayerProperty.layerName, "VK_LAYER_LUNARG_standard_validation") == 0; });
 
-		RequestedInstanceLayers.push_back ((*It).layerName);
+		RequestedInstanceLayers.push_back ("VK_LAYER_LUNARG_standard_validation");
 	}
 
 	std::vector<vk::ExtensionProperties> ExtensionProperties = vk::enumerateInstanceExtensionProperties ();
 	std::vector<vk::ExtensionProperties>::iterator It = std::find_if (ExtensionProperties.begin (), ExtensionProperties.end (), [](const vk::ExtensionProperties& ExtensionProperty) { return strcmp (ExtensionProperty.extensionName, VK_KHR_SURFACE_EXTENSION_NAME) == 0; });
-	RequestedInstanceExtensions.push_back ((*It).extensionName);
+	RequestedInstanceExtensions.push_back (VK_KHR_SURFACE_EXTENSION_NAME);
 
 	It = std::find_if (ExtensionProperties.begin (), ExtensionProperties.end (), [](const vk::ExtensionProperties& ExtensionProperty) { return strcmp (ExtensionProperty.extensionName, "VK_KHR_win32_surface") == 0; });
-	RequestedInstanceExtensions.push_back ((*It).extensionName);
+	RequestedInstanceExtensions.push_back ("VK_KHR_win32_surface");
 
 	if (_IsValidationNeeded)
 	{
 		It = std::find_if (ExtensionProperties.begin (), ExtensionProperties.end (), [](const vk::ExtensionProperties& ExtensionProperty) { return strcmp (ExtensionProperty.extensionName, VK_EXT_DEBUG_UTILS_EXTENSION_NAME) == 0; });
-		RequestedInstanceExtensions.push_back ((*It).extensionName);
+		RequestedInstanceExtensions.push_back (VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 	}
 }
 
@@ -184,8 +184,8 @@ void BaseGraphics::_CreateInstance ()
 		throw GraphicsError::eCREATE_INSTANCE;
 	}*/
 
-	vk::ApplicationInfo AI{ "Against", 1, "Against", 1, VK_API_VERSION_1_1 };
-	vk::InstanceCreateInfo InstanceCreateInfo = { {}, &AI, RequestedInstanceLayers.size (), RequestedInstanceLayers.data (), RequestedInstanceExtensions.size (), RequestedInstanceExtensions.data () };
+	vk::ApplicationInfo AI ("Against", 1, "Against", 1, VK_API_VERSION_1_1);
+	vk::InstanceCreateInfo InstanceCreateInfo ({}, &AI, RequestedInstanceLayers.size (), RequestedInstanceLayers.data (), RequestedInstanceExtensions.size (), RequestedInstanceExtensions.data ());
 
 	Instance = vk::createInstanceUnique (InstanceCreateInfo);
 }
@@ -227,9 +227,9 @@ void BaseGraphics::_GetPhysicalDevice ()
 		if ((QueueFamilyProperty.queueFlags & vk::QueueFlagBits::eGraphics) && QueueFamilyProperty.queueCount > 1)
 		{
 			GraphicsQueueFamilyIndex = i;
-
 			break;
 		}
+
 		++i;
 	}
 
@@ -284,6 +284,7 @@ void BaseGraphics::_CreateSurface (HINSTANCE HInstance, HWND HWnd)
 		throw GraphicsError::eCREATE_SURFACE;
 	}*/
 
+
 	Surface = Instance->createWin32SurfaceKHRUnique (vk::Win32SurfaceCreateInfoKHR ({}, HInstance, HWnd));
 }
 
@@ -318,7 +319,7 @@ void BaseGraphics::_PopulateGraphicsDeviceExtensions ()
 	std::vector<vk::ExtensionProperties> ExtensionProperties = PhysicalDevice.enumerateDeviceExtensionProperties ();
 	std::vector< vk::ExtensionProperties>::iterator It = std::find_if (ExtensionProperties.begin (), ExtensionProperties.end (), [](const vk::ExtensionProperties& ExtensionProperty) { return strcmp (ExtensionProperty.extensionName, VK_KHR_SWAPCHAIN_EXTENSION_NAME) == 0; });
 
-	RequestedDeviceExtensions.push_back ((*It).extensionName);
+	RequestedDeviceExtensions.push_back (VK_KHR_SWAPCHAIN_EXTENSION_NAME);
 }
 
 void BaseGraphics::_CreateGraphicsDevice ()
@@ -444,7 +445,7 @@ void BaseGraphics::_CreateSwapChain ()
 
 	for (auto SurfaceFormat : PhysicalDevice.getSurfaceFormatsKHR (Surface.get ()))
 	{
-		if (SurfaceFormat.format == vk::Format::eR8G8B8A8Unorm)
+		if (SurfaceFormat.format == vk::Format::eB8G8R8A8Unorm)
 		{
 			ChosenSurfaceFormat = SurfaceFormat.format;
 			break;
