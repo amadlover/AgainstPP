@@ -19,7 +19,7 @@ private:
 
 	BaseGraphics* _G;
 
-	VkDescriptorPool _DescriptorPool;
-	VkDescriptorSetLayout _DescriptorSetLayout;
+	vk::DescriptorPool _DescriptorPool;
+	vk::DescriptorSetLayout _DescriptorSetLayout;
 };
 

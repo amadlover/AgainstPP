@@ -10,15 +10,15 @@ public:
 	BaseGraphics (HINSTANCE HInstance, HWND HWnd);
 	~BaseGraphics ();
 
-	vk::UniqueDevice GraphicsDevice;
-	VkPhysicalDeviceMemoryProperties PhysicalDeviceMemoryProperties;
-	VkPhysicalDeviceLimits PhysicalDeviceLimits;
+	vk::Device GraphicsDevice;
+	vk::PhysicalDeviceMemoryProperties PhysicalDeviceMemoryProperties;
+	vk::PhysicalDeviceLimits PhysicalDeviceLimits;
 	vk::SurfaceFormatKHR ChosenSurfaceFormat;
 	vk::Extent2D SurfaceExtent;
-	vk::UniqueSwapchainKHR Swapchain;
+	vk::SwapchainKHR Swapchain;
 	std::vector<vk::Image> SwapchainImages;
 	std::vector<vk::ImageView> SwapchainImageViews;
-	VkQueue GraphicsQueue;
+	vk::Queue GraphicsQueue;
 
 	uint32_t GraphicsQueueFamilyIndex;
 	uint32_t SwapchainImageCount;
@@ -49,10 +49,10 @@ private:
 	/*uint32_t RequestedDeviceExtensionCount;
 	const char* RequestedDeviceExtensions[32];*/
 
-	vk::UniqueInstance Instance;
-	vk::UniqueDebugUtilsMessengerEXT DebugUtilsMessenger;
+	vk::Instance Instance;
+	vk::DebugUtilsMessengerEXT DebugUtilsMessenger;
 
 	vk::PhysicalDevice PhysicalDevice;
-	vk::UniqueSurfaceKHR Surface;
+	vk::SurfaceKHR Surface;
 	vk::PresentModeKHR ChosenPresentMode;
 };
