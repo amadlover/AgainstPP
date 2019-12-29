@@ -11,7 +11,7 @@ Game::Game (HINSTANCE HInstance, HWND HWnd)
 {
 	OutputDebugString (L"Game::Game\n");
 
-	_G = std::make_unique<Graphics> (HInstance, HWnd);
+	_G = std::make_unique<BaseGraphics> (HInstance, HWnd);
 
 	_CurrentScene = std::make_shared<SplashScreenScene> (_G);
 

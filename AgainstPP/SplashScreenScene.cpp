@@ -1,8 +1,10 @@
 #include "SplashScreenScene.hpp"
 
-SplashScreenScene::SplashScreenScene (const std::unique_ptr<Graphics>& G)
+SplashScreenScene::SplashScreenScene (const std::unique_ptr<BaseGraphics>& G)
 { 
 	OutputDebugString (L"SplashScreenScene::SplashScreenScene\n");
+
+	Graphics = std::make_unique<_SplashSceneGraphics> (G);
 
 	_CreateBackground ();
 }
@@ -11,9 +13,9 @@ void SplashScreenScene::_CreateBackground ()
 {
 	OutputDebugString (L"SplashScreenScene::_CreateBackground\n");
 
-	Background = std::make_unique<MeshEntity> ();
-	Background->MeshComponent->Mesh->ID = 0;
-	Background->MeshComponent->Mesh->Name = "Background";
+	_Background = std::make_unique<MeshEntity> ();
+	_Background->MeshComponent->Mesh->ID = 0;
+	_Background->MeshComponent->Mesh->Name = "_Background";
 	
 	_Primitive Prim;
 	Prim.Positions.push_back (Float3{ 1, 1, 1 });
@@ -36,12 +38,12 @@ void SplashScreenScene::_CreateBackground ()
 
 	Prim.UV0Size = Prim.UV0s.size () * sizeof (Float2);
 
-	Background->MeshComponent->Mesh->Primitives.push_back (Prim);
+	_Background->MeshComponent->Mesh->Primitives.push_back (Prim);
 }
 
 void SplashScreenScene::Draw ()
 {
-	Background->Draw ();
+	Graphics->Draw (_Background);
 }
 
 SplashScreenScene::~SplashScreenScene ()

@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Graphics.hpp"
+#include "BaseGraphics.hpp"
+#include "SplashSceneGraphics.hpp"
 #include "Scene.hpp"
 #include "MeshEntity.hpp"
 
@@ -9,13 +10,15 @@
 class SplashScreenScene : public Scene
 {
 public:
-	SplashScreenScene (const std::unique_ptr<Graphics>& G);
+	SplashScreenScene (const std::unique_ptr<BaseGraphics>& G);
 	~SplashScreenScene ();
 
 	void Draw () override;
 
+	std::unique_ptr<_SplashSceneGraphics> Graphics;
+
 private:
 	void _CreateBackground ();
 
-	std::unique_ptr<MeshEntity> Background;
+	std::unique_ptr<MeshEntity> _Background;
 };

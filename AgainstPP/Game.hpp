@@ -3,7 +3,7 @@
 #include <Windows.h>
 #include <memory>
 
-#include "Graphics.hpp"
+#include "BaseGraphics.hpp"
 #include "SplashScreenScene.hpp"
 #include "MainMenuScene.hpp"
 
@@ -30,7 +30,7 @@ public:
 	void ProcessWindowDestroy ();
 
 private:
-	std::unique_ptr<Graphics> _G;
+	std::unique_ptr<BaseGraphics> _G;
 	std::shared_ptr<Scene> _CurrentScene;
 
 	std::shared_ptr<SplashScreenScene> _SplashScreen;
