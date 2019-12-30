@@ -184,6 +184,7 @@ void BaseGraphics::_CreateGraphicsDevice ()
 	vk::DeviceCreateInfo DeviceCreateInfo ({}, 1, &QueueCreateInfo, 0, NULL, RequestedDeviceExtensions.size (), RequestedDeviceExtensions.data ());
 
 	GraphicsDevice = PhysicalDevice.createDevice (DeviceCreateInfo);
+	GraphicsQueue = GraphicsDevice.getQueue (GraphicsQueueFamilies[0], 0);
 }
 
 void BaseGraphics::_CreateSwapChain ()

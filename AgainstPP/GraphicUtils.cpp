@@ -38,6 +38,52 @@ void GraphicUtils::CreateImageAndImageMemory (BaseGraphics* G, vk::ImageType Ima
 	G->GraphicsDevice.bindImageMemory (OutImage, OutImageMemory, 0);
 }
 
+void GraphicUtils::ChangeImageLayout (BaseGraphics* G, vk::CommandPool CommandPool, vk::Image& Image, vk::ImageLayout OldLayout, vk::ImageLayout NewLayout, vk::PipelineStageFlags SrcStageMask, vk::PipelineStageFlags DstStageMask, vk::AccessFlags SrcAccessMask, vk::AccessFlags DstAccessMask)
+{
+	vk::CommandBufferAllocateInfo CommandBufferAllocateInfo (CommandPool, vk::CommandBufferLevel::ePrimary, 1);
+	vk::CommandBuffer CommandBuffer = G->GraphicsDevice.allocateCommandBuffers (CommandBufferAllocateInfo).front ();
+
+	vk::CommandBufferBeginInfo CommandBufferBeginInfo (vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
+	vk::ImageSubresourceRange ImageSubresourceRange (vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1);
+	vk::ImageMemoryBarrier ImageMemoryBarrier (SrcAccessMask, DstAccessMask, OldLayout, NewLayout, G->GraphicsQueueFamilies[0], G->GraphicsQueueFamilies[0], Image, ImageSubresourceRange);
+	vk::ArrayProxy<const vk::ImageMemoryBarrier> ImageMemoryBarriers (1, &ImageMemoryBarrier);
+	
+	CommandBuffer.begin (CommandBufferBeginInfo);
+	CommandBuffer.pipelineBarrier (SrcStageMask, DstStageMask, {}, {}, {}, ImageMemoryBarriers);
+	CommandBuffer.end ();
+
+	SubmitOneTimeCmd (G->GraphicsQueue, CommandBuffer);
+
+	G->GraphicsDevice.freeCommandBuffers (CommandPool, CommandBuffer);
+}
+
+void GraphicUtils::CopyBufferToImage (BaseGraphics* G, vk::CommandPool CommandPool, vk::Buffer Buffer, vk::Image& Image, vk::Extent3D ImageExtent, vk::ImageLayout DstImageLayout)
+{
+	vk::CommandBufferAllocateInfo CommandBufferAllocateInfo (CommandPool, vk::CommandBufferLevel::ePrimary);
+	vk::CommandBuffer CommandBuffer = G->GraphicsDevice.allocateCommandBuffers (CommandBufferAllocateInfo).front ();
+
+	vk::CommandBufferBeginInfo CommandBufferBeginInfo (vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
+	vk::ImageSubresourceLayers ImageSubresourceLayers (vk::ImageAspectFlagBits::eColor, 0, 0, 1);
+	vk::BufferImageCopy BufferImageCopy (0, 0, 0, ImageSubresourceLayers, {}, ImageExtent);
+	vk::ArrayProxy<const vk::BufferImageCopy> BufferImageCopies (1, &BufferImageCopy);
+	
+	CommandBuffer.begin (CommandBufferBeginInfo);
+	CommandBuffer.copyBufferToImage (Buffer, Image, DstImageLayout, BufferImageCopies);
+	CommandBuffer.end ();
+
+	SubmitOneTimeCmd (G->GraphicsQueue, CommandBuffer);
+
+	G->GraphicsDevice.freeCommandBuffers (CommandPool, CommandBuffer);
+}
+
+void GraphicUtils::SubmitOneTimeCmd (vk::Queue GraphicsQueue, vk::CommandBuffer CommandBuffer)
+{
+	vk::SubmitInfo SubmitInfo (0, nullptr, nullptr, 1, &CommandBuffer, 0, nullptr);
+	vk::ArrayProxy<const vk::SubmitInfo> SubmitInfos (1, &SubmitInfo);
+	GraphicsQueue.submit (SubmitInfos, nullptr);
+	GraphicsQueue.waitIdle ();
+}
+
 uint32_t GraphicUtils::GetMemoryTypeIndex (vk::MemoryRequirements MemoryRequirements, vk::PhysicalDeviceMemoryProperties MemoryProperties, vk::MemoryPropertyFlags RequiredMemoryTypes)
 {
 	for (uint32_t i = 0; i < MemoryProperties.memoryTypeCount; i++)

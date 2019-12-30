@@ -19,6 +19,7 @@ private:
 	void _CreateDescriptorSet ();
 	void _CreateRenderPass ();
 	void _CreateShaders ();
+	void _CreateCommandBuffers ();
 	void _CreateDeviceTextureImage ();
 
 	BaseGraphics* _G;
@@ -26,10 +27,13 @@ private:
 	vk::DescriptorPool _DescriptorPool;
 	vk::DescriptorSetLayout _DescriptorSetLayout;
 	vk::DescriptorSet _DescriptorSet;
-	vk::Sampler _Sampler;
+	vk::CommandPool _CommandPool;
+	vk::Sampler _TextureSampler;
 	vk::Image _TextureImage;
 	vk::DeviceMemory _TextureImageMemory;
 	vk::ImageView _TextureImageView;
 	vk::RenderPass _RenderPass;
+
+	std::vector<vk::CommandBuffer> SwapchainCommandBuffers;
 };
 

@@ -10,11 +10,23 @@ _SplashSceneGraphics::_SplashSceneGraphics (const std::unique_ptr<BaseGraphics>&
 {
 	_G = G.get ();
 
+	_CreateCommandBuffers ();
 	_CreateDeviceTextureImage ();
 	_CreateDescriptorPool ();
 	_CreateDescriptorSetLayout ();
 	_CreateDescriptorSet ();
 	_CreateShaders ();
+}
+
+void _SplashSceneGraphics::_CreateCommandBuffers ()
+{
+	OutputDebugString (L"_SplashSceneGraphics::_CreateCommandBuffers\n");
+
+	vk::CommandPoolCreateInfo CommandPoolCreateInfo ({}, _G->GraphicsQueueFamilies[0]);
+	_CommandPool = _G->GraphicsDevice.createCommandPool (CommandPoolCreateInfo);
+
+	const vk::CommandBufferAllocateInfo CommandBufferAllocateInfo (_CommandPool, vk::CommandBufferLevel::ePrimary, _G->SwapchainImages.size ());
+	SwapchainCommandBuffers = _G->GraphicsDevice.allocateCommandBuffers (CommandBufferAllocateInfo);
 }
 
 void _SplashSceneGraphics::_CreateDeviceTextureImage ()
@@ -28,12 +40,23 @@ void _SplashSceneGraphics::_CreateDeviceTextureImage ()
 
 	int Width; int Height; int Components;
 	uint8_t* Pixels = stbi_load (TexturePath.c_str (), &Width, &Height, &Components, 4);
-	
+
 	GraphicUtils::CreateBufferAndBufferMemory (_G, (vk::DeviceSize)(Width * Height * Components), vk::BufferUsageFlagBits::eTransferSrc, vk::SharingMode::eExclusive, _G->GraphicsQueueFamilies, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, StagingBuffer, StagingBufferMemory);
 	GraphicUtils::CreateImageAndImageMemory (_G, vk::ImageType::e2D, vk::Format::eR8G8B8A8Unorm, vk::Extent3D (Width, Height, 1), 1, 1, vk::SampleCountFlagBits::e1, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled, vk::SharingMode::eExclusive, _G->GraphicsQueueFamilies, vk::ImageLayout::eUndefined, vk::MemoryPropertyFlagBits::eDeviceLocal, _TextureImage, _TextureImageMemory);
 
+	GraphicUtils::ChangeImageLayout (_G, _CommandPool, _TextureImage, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, vk::PipelineStageFlagBits::eTopOfPipe, vk::PipelineStageFlagBits::eTransfer, {}, vk::AccessFlagBits::eTransferWrite);
+	GraphicUtils::CopyBufferToImage (_G, _CommandPool, StagingBuffer, _TextureImage, vk::Extent3D (Width, Height, 1), vk::ImageLayout::eTransferDstOptimal);
+	GraphicUtils::ChangeImageLayout (_G, _CommandPool, _TextureImage, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eShaderReadOnlyOptimal, vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eFragmentShader, vk::AccessFlagBits::eTransferWrite, vk::AccessFlagBits::eShaderRead);
+
 	_G->GraphicsDevice.freeMemory (StagingBufferMemory);
 	_G->GraphicsDevice.destroyBuffer (StagingBuffer);
+
+	vk::SamplerCreateInfo SamplerCreateInfo ({}, vk::Filter::eLinear, vk::Filter::eLinear, vk::SamplerMipmapMode::eLinear, vk::SamplerAddressMode::eRepeat, vk::SamplerAddressMode::eRepeat, vk::SamplerAddressMode::eRepeat, 0, VK_FALSE, 0, VK_FALSE, {}, {}, {}, vk::BorderColor::eFloatOpaqueBlack);
+	_TextureSampler = _G->GraphicsDevice.createSampler (SamplerCreateInfo);
+
+	vk::ImageSubresourceRange ImageSubresourceRange (vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1);
+	vk::ImageViewCreateInfo ImageViewCreateInfo ({}, _TextureImage, vk::ImageViewType::e2D, vk::Format::eR8G8B8A8Unorm, vk::ComponentSwizzle::eIdentity, ImageSubresourceRange);
+	_TextureImageView = _G->GraphicsDevice.createImageView (ImageViewCreateInfo);
 }
 
 void _SplashSceneGraphics::_CreateDescriptorPool ()
@@ -61,7 +84,7 @@ void _SplashSceneGraphics::_CreateDescriptorSet ()
 	vk::DescriptorSetAllocateInfo DescriptorSetAllocateInfo (_DescriptorPool, 1, &_DescriptorSetLayout);
 	_DescriptorSet = _G->GraphicsDevice.allocateDescriptorSets (DescriptorSetAllocateInfo).front ();
 
-	vk::DescriptorImageInfo DescriptorImageInfo (_Sampler, _TextureImageView, vk::ImageLayout::eShaderReadOnlyOptimal);
+	vk::DescriptorImageInfo DescriptorImageInfo (_TextureSampler, _TextureImageView, vk::ImageLayout::eShaderReadOnlyOptimal);
 	vk::WriteDescriptorSet WriteDescriptorSet (_DescriptorSet, 0, 0, 1, vk::DescriptorType::eCombinedImageSampler, &DescriptorImageInfo);
 
 	vk::ArrayProxy<const vk::WriteDescriptorSet> WriteDescriptorSets (1, &WriteDescriptorSet);
@@ -87,6 +110,7 @@ void _SplashSceneGraphics::_CreateShaders ()
 	OutputDebugString (L"_SplashSceneGraphics::_CreateShaders\n");
 
 	std::string VertFullFilePath = GraphicUtils::GetFullPath ("\\Shaders\\SplashScreen\\vert.spv");
+	std::string FragFullFilePath = GraphicUtils::GetFullPath ("\\Shaders\\SplashScreen\\frag.spv");
 }
 
 void _SplashSceneGraphics::Draw (const std::unique_ptr<MeshEntity>& Background)
@@ -96,6 +120,13 @@ void _SplashSceneGraphics::Draw (const std::unique_ptr<MeshEntity>& Background)
 
 _SplashSceneGraphics::~_SplashSceneGraphics ()
 {
+	_G->GraphicsDevice.freeCommandBuffers (_CommandPool, SwapchainCommandBuffers);	
+	
+	if (_CommandPool != VK_NULL_HANDLE)
+	{
+		_G->GraphicsDevice.destroyCommandPool (_CommandPool);
+	}
+
 	if (_TextureImageMemory != VK_NULL_HANDLE)
 	{
 		_G->GraphicsDevice.freeMemory (_TextureImageMemory);
