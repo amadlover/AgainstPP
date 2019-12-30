@@ -20,18 +20,33 @@ void GraphicUtils::CreateBufferAndBufferMemory (BaseGraphics* G, vk::DeviceSize 
 	OutBuffer = G->GraphicsDevice.createBuffer (BufferCreateInfo);
 
 	vk::MemoryRequirements BufferMemoryRequirements = G->GraphicsDevice.getBufferMemoryRequirements (OutBuffer);
-	vk::MemoryAllocateInfo BufferMemoryAllocateInfo (BufferMemoryRequirements.size);
+	vk::MemoryAllocateInfo BufferMemoryAllocateInfo (BufferMemoryRequirements.size,	GetMemoryTypeIndex (BufferMemoryRequirements, G->PhysicalDeviceMemoryProperties, RequiredMemoryTypes));
 
-	for (uint32_t i = 0; i < G->PhysicalDeviceMemoryProperties.memoryTypeCount; i++)
+	OutBufferMemory = G->GraphicsDevice.allocateMemory (BufferMemoryAllocateInfo);
+	G->GraphicsDevice.bindBufferMemory (OutBuffer, OutBufferMemory, 0);
+}
+
+void GraphicUtils::CreateImageAndImageMemory (BaseGraphics* G, vk::ImageType ImageType, vk::Format Format, vk::Extent3D Extent, uint32_t MipLevels, uint32_t ArrayLayers, vk::SampleCountFlagBits Samples, vk::ImageTiling Tiling, vk::ImageUsageFlags Usage, vk::SharingMode SharingMode, std::vector<uint32_t> QueueFamilies, vk::ImageLayout InitialLayout, vk::MemoryPropertyFlags RequiredMemoryTypes, vk::Image& OutImage, vk::DeviceMemory& OutImageMemory)
+{
+	vk::ImageCreateInfo ImageCreateInfo ({}, ImageType, Format, Extent, MipLevels, ArrayLayers, Samples, Tiling, Usage, SharingMode, QueueFamilies[0], QueueFamilies.data (), InitialLayout);
+	OutImage = G->GraphicsDevice.createImage (ImageCreateInfo);
+
+	vk::MemoryRequirements ImageMemoryRequirements = G->GraphicsDevice.getImageMemoryRequirements (OutImage);
+	vk::MemoryAllocateInfo ImageMemoryAllocateInfo (ImageMemoryRequirements.size, GetMemoryTypeIndex (ImageMemoryRequirements, G->PhysicalDeviceMemoryProperties, RequiredMemoryTypes));
+
+	OutImageMemory = G->GraphicsDevice.allocateMemory (ImageMemoryAllocateInfo);
+	G->GraphicsDevice.bindImageMemory (OutImage, OutImageMemory, 0);
+}
+
+uint32_t GraphicUtils::GetMemoryTypeIndex (vk::MemoryRequirements MemoryRequirements, vk::PhysicalDeviceMemoryProperties MemoryProperties, vk::MemoryPropertyFlags RequiredMemoryTypes)
+{
+	for (uint32_t i = 0; i < MemoryProperties.memoryTypeCount; i++)
 	{
-		if (BufferMemoryRequirements.memoryTypeBits & (i << 1) && RequiredMemoryTypes & G->PhysicalDeviceMemoryProperties.memoryTypes[i].propertyFlags)
+		if (MemoryRequirements.memoryTypeBits & (1 << i) && RequiredMemoryTypes & MemoryProperties.memoryTypes[i].propertyFlags)
 		{
-			BufferMemoryAllocateInfo.memoryTypeIndex = i;
-			break;
+			return i;
 		}
 	}
 
-	OutBufferMemory = G->GraphicsDevice.allocateMemory (BufferMemoryAllocateInfo);
-
-	G->GraphicsDevice.bindBufferMemory (OutBuffer, OutBufferMemory, 0);
+	return 0;
 }

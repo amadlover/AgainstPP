@@ -39,15 +39,6 @@ private:
 	std::vector<const char*> RequestedInstanceExtensions;
 	std::vector<const char*> RequestedDeviceExtensions;
 
-	//uint32_t RequestedInstanceLayerCount;
-	//const char* RequestedInstanceLayers[32];
-	
-	/*uint32_t RequestedInstanceExtensionCount;
-	const char* RequestedInstanceExtensions[32];*/
-
-	/*uint32_t RequestedDeviceExtensionCount;
-	const char* RequestedDeviceExtensions[32];*/
-
 	vk::Instance Instance;
 	vk::DebugUtilsMessengerEXT DebugUtilsMessenger;
 

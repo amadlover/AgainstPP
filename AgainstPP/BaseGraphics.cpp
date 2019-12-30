@@ -154,6 +154,7 @@ void BaseGraphics::_GetPhysicalDevice ()
 	}
 
 	PhysicalDeviceLimits = PhysicalDevice.getProperties ().limits;
+	PhysicalDeviceMemoryProperties = PhysicalDevice.getMemoryProperties ();
 }
 
 void BaseGraphics::_CreateSurface (HINSTANCE HInstance, HWND HWnd)

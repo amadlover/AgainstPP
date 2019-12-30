@@ -27,6 +27,8 @@ private:
 	vk::DescriptorSetLayout _DescriptorSetLayout;
 	vk::DescriptorSet _DescriptorSet;
 	vk::Sampler _Sampler;
+	vk::Image _TextureImage;
+	vk::DeviceMemory _TextureImageMemory;
 	vk::ImageView _TextureImageView;
 	vk::RenderPass _RenderPass;
 };

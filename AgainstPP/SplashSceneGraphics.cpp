@@ -21,15 +21,16 @@ void _SplashSceneGraphics::_CreateDeviceTextureImage ()
 {
 	OutputDebugString (L"_SplashSceneGraphics::_CreateDeviceTextureImage\n");
 
+	vk::DeviceMemory StagingBufferMemory;
+	vk::Buffer StagingBuffer;
+
 	std::string TexturePath = GraphicUtils::GetFullPath ("\\Images\\SplashScreen\\SplashScreen.tga");
 
 	int Width; int Height; int Components;
 	uint8_t* Pixels = stbi_load (TexturePath.c_str (), &Width, &Height, &Components, 4);
-
-	vk::DeviceMemory StagingBufferMemory;
-	vk::Buffer StagingBuffer;
-
+	
 	GraphicUtils::CreateBufferAndBufferMemory (_G, (vk::DeviceSize)(Width * Height * Components), vk::BufferUsageFlagBits::eTransferSrc, vk::SharingMode::eExclusive, _G->GraphicsQueueFamilies, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, StagingBuffer, StagingBufferMemory);
+	GraphicUtils::CreateImageAndImageMemory (_G, vk::ImageType::e2D, vk::Format::eR8G8B8A8Unorm, vk::Extent3D (Width, Height, 1), 1, 1, vk::SampleCountFlagBits::e1, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled, vk::SharingMode::eExclusive, _G->GraphicsQueueFamilies, vk::ImageLayout::eUndefined, vk::MemoryPropertyFlagBits::eDeviceLocal, _TextureImage, _TextureImageMemory);
 
 	_G->GraphicsDevice.freeMemory (StagingBufferMemory);
 	_G->GraphicsDevice.destroyBuffer (StagingBuffer);
@@ -95,6 +96,21 @@ void _SplashSceneGraphics::Draw (const std::unique_ptr<MeshEntity>& Background)
 
 _SplashSceneGraphics::~_SplashSceneGraphics ()
 {
+	if (_TextureImageMemory != VK_NULL_HANDLE)
+	{
+		_G->GraphicsDevice.freeMemory (_TextureImageMemory);
+	}
+
+	if (_TextureImage != VK_NULL_HANDLE)
+	{
+		_G->GraphicsDevice.destroyImage (_TextureImage);
+	}
+
+	if (_TextureImageView != VK_NULL_HANDLE)
+	{
+		_G->GraphicsDevice.destroyImageView (_TextureImageView);
+	}
+
 	if (_DescriptorSetLayout != VK_NULL_HANDLE)
 	{
 		_G->GraphicsDevice.destroyDescriptorSetLayout (_DescriptorSetLayout);
