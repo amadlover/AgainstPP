@@ -59,7 +59,7 @@ void GraphicUtils::ChangeImageLayout (BaseGraphics* G, vk::CommandPool CommandPo
 
 void GraphicUtils::CopyBufferToImage (BaseGraphics* G, vk::CommandPool CommandPool, vk::Buffer Buffer, vk::Image& Image, vk::Extent3D ImageExtent, vk::ImageLayout DstImageLayout)
 {
-	vk::CommandBufferAllocateInfo CommandBufferAllocateInfo (CommandPool, vk::CommandBufferLevel::ePrimary);
+	vk::CommandBufferAllocateInfo CommandBufferAllocateInfo (CommandPool, vk::CommandBufferLevel::ePrimary, 1);
 	vk::CommandBuffer CommandBuffer = G->GraphicsDevice.allocateCommandBuffers (CommandBufferAllocateInfo).front ();
 
 	vk::CommandBufferBeginInfo CommandBufferBeginInfo (vk::CommandBufferUsageFlagBits::eOneTimeSubmit);

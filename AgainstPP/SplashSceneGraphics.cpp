@@ -16,6 +16,8 @@ _SplashSceneGraphics::_SplashSceneGraphics (const std::unique_ptr<BaseGraphics>&
 	_CreateDescriptorSetLayout ();
 	_CreateDescriptorSet ();
 	_CreateShaders ();
+	_CreateRenderPass ();
+	_CreateFramebuffers ();
 }
 
 void _SplashSceneGraphics::_CreateCommandBuffers ()
@@ -42,6 +44,10 @@ void _SplashSceneGraphics::_CreateDeviceTextureImage ()
 	uint8_t* Pixels = stbi_load (TexturePath.c_str (), &Width, &Height, &Components, 4);
 
 	GraphicUtils::CreateBufferAndBufferMemory (_G, (vk::DeviceSize)(Width * Height * Components), vk::BufferUsageFlagBits::eTransferSrc, vk::SharingMode::eExclusive, _G->GraphicsQueueFamilies, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, StagingBuffer, StagingBufferMemory);
+	HANDLE Data = _G->GraphicsDevice.mapMemory (StagingBufferMemory, 0, (vk::DeviceSize)(Width * Height * Components));
+	memcpy (Data, Pixels, (Width * Height * Components));
+	_G->GraphicsDevice.unmapMemory (StagingBufferMemory);
+
 	GraphicUtils::CreateImageAndImageMemory (_G, vk::ImageType::e2D, vk::Format::eR8G8B8A8Unorm, vk::Extent3D (Width, Height, 1), 1, 1, vk::SampleCountFlagBits::e1, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled, vk::SharingMode::eExclusive, _G->GraphicsQueueFamilies, vk::ImageLayout::eUndefined, vk::MemoryPropertyFlagBits::eDeviceLocal, _TextureImage, _TextureImageMemory);
 
 	GraphicUtils::ChangeImageLayout (_G, _CommandPool, _TextureImage, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, vk::PipelineStageFlagBits::eTopOfPipe, vk::PipelineStageFlagBits::eTransfer, {}, vk::AccessFlagBits::eTransferWrite);
@@ -57,6 +63,20 @@ void _SplashSceneGraphics::_CreateDeviceTextureImage ()
 	vk::ImageSubresourceRange ImageSubresourceRange (vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1);
 	vk::ImageViewCreateInfo ImageViewCreateInfo ({}, _TextureImage, vk::ImageViewType::e2D, vk::Format::eR8G8B8A8Unorm, vk::ComponentSwizzle::eIdentity, ImageSubresourceRange);
 	_TextureImageView = _G->GraphicsDevice.createImageView (ImageViewCreateInfo);
+}
+
+void _SplashSceneGraphics::_CreateFramebuffers ()
+{
+	OutputDebugString (L"_SplashSceneGraphics::_CreateFramebuffers\n");
+
+	vk::FramebufferCreateInfo FramebufferCreateInfo ({}, _RenderPass, 1, {}, _G->SurfaceExtent.width, _G->SurfaceExtent.height, 1);
+
+	for (auto& SwapchainImageView : _G->SwapchainImageViews)
+	{
+		FramebufferCreateInfo.setPAttachments (&SwapchainImageView);
+
+		SwapchainFramebuffers.push_back (_G->GraphicsDevice.createFramebuffer (FramebufferCreateInfo));
+	}
 }
 
 void _SplashSceneGraphics::_CreateDescriptorPool ()
@@ -120,6 +140,24 @@ void _SplashSceneGraphics::Draw (const std::unique_ptr<MeshEntity>& Background)
 
 _SplashSceneGraphics::~_SplashSceneGraphics ()
 {
+	if (_RenderPass != VK_NULL_HANDLE)
+	{
+		_G->GraphicsDevice.destroyRenderPass (_RenderPass);
+	}
+
+	for (auto SwapchainFramebuffer : SwapchainFramebuffers)
+	{
+		if (SwapchainFramebuffer != VK_NULL_HANDLE)
+		{
+			_G->GraphicsDevice.destroyFramebuffer (SwapchainFramebuffer);
+		}
+	}
+
+	if (_TextureSampler != VK_NULL_HANDLE)
+	{
+		_G->GraphicsDevice.destroySampler (_TextureSampler);
+	}
+
 	_G->GraphicsDevice.freeCommandBuffers (_CommandPool, SwapchainCommandBuffers);	
 	
 	if (_CommandPool != VK_NULL_HANDLE)

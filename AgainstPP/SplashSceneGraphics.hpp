@@ -21,6 +21,7 @@ private:
 	void _CreateShaders ();
 	void _CreateCommandBuffers ();
 	void _CreateDeviceTextureImage ();
+	void _CreateFramebuffers ();
 
 	BaseGraphics* _G;
 
@@ -35,5 +36,6 @@ private:
 	vk::RenderPass _RenderPass;
 
 	std::vector<vk::CommandBuffer> SwapchainCommandBuffers;
+	std::vector<vk::Framebuffer> SwapchainFramebuffers;
 };
 
