@@ -20,8 +20,7 @@ public:
 	std::vector<vk::ImageView> SwapchainImageViews;
 	vk::Queue GraphicsQueue;
 
-	uint32_t GraphicsQueueFamilyIndex;
-	uint32_t SwapchainImageCount;
+	std::vector<uint32_t> GraphicsQueueFamilies;
 
 private:
 

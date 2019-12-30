@@ -25,6 +25,9 @@
     <Filter Include="Graphics">
       <UniqueIdentifier>{8c9bc19c-2486-4836-b48b-0f3813d73403}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Utils">
+      <UniqueIdentifier>{ae742e2c-2da7-40ad-b960-caf9b75c362f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -69,8 +72,8 @@
     <ClCompile Include="BaseGraphics.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="VkTest.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="GraphicUtils.cpp">
+      <Filter>Utils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -113,8 +116,8 @@
     <ClInclude Include="BaseGraphics.hpp">
       <Filter>Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="VkTest.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="GraphicUtils.hpp">
+      <Filter>Utils</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

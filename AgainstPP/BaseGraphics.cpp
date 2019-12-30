@@ -146,7 +146,7 @@ void BaseGraphics::_GetPhysicalDevice ()
 	{
 		if ((QueueFamilyProperty.queueFlags & vk::QueueFlagBits::eGraphics) && QueueFamilyProperty.queueCount > 1)
 		{
-			GraphicsQueueFamilyIndex = i;
+			GraphicsQueueFamilies.push_back (i);
 			break;
 		}
 
@@ -179,7 +179,7 @@ void BaseGraphics::_CreateGraphicsDevice ()
 
 	float Priorities = 1.f;
 
-	vk::DeviceQueueCreateInfo QueueCreateInfo ({}, GraphicsQueueFamilyIndex, 1, &Priorities);
+	vk::DeviceQueueCreateInfo QueueCreateInfo ({}, GraphicsQueueFamilies[0], GraphicsQueueFamilies.size (), &Priorities);
 	vk::DeviceCreateInfo DeviceCreateInfo ({}, 1, &QueueCreateInfo, 0, NULL, RequestedDeviceExtensions.size (), RequestedDeviceExtensions.data ());
 
 	GraphicsDevice = PhysicalDevice.createDevice (DeviceCreateInfo);
@@ -189,7 +189,7 @@ void BaseGraphics::_CreateSwapChain ()
 {
 	OutputDebugString (L"BaseGraphics::_CreateSwapChain\n");
 
-	if (!PhysicalDevice.getSurfaceSupportKHR (GraphicsQueueFamilyIndex, Surface))
+	if (!PhysicalDevice.getSurfaceSupportKHR (GraphicsQueueFamilies[0], Surface))
 	{
 		throw GraphicsError::eSURFACE_SUPPORT;
 	}
@@ -214,7 +214,7 @@ void BaseGraphics::_CreateSwapChain ()
 	vk::SurfaceCapabilitiesKHR SurfaceCapabilities = PhysicalDevice.getSurfaceCapabilitiesKHR (Surface);
 	SurfaceExtent = SurfaceCapabilities.currentExtent;
 
-	vk::SwapchainCreateInfoKHR SwapchainCreateInfo{ {}, Surface, SurfaceCapabilities.minImageCount + 1, ChosenSurfaceFormat.format, ChosenSurfaceFormat.colorSpace, SurfaceExtent, 1, SurfaceCapabilities.supportedUsageFlags, vk::SharingMode::eExclusive, 1, &GraphicsQueueFamilyIndex, SurfaceCapabilities.currentTransform, vk::CompositeAlphaFlagBitsKHR::eOpaque, ChosenPresentMode, VK_TRUE, VK_NULL_HANDLE };
+	vk::SwapchainCreateInfoKHR SwapchainCreateInfo{ {}, Surface, SurfaceCapabilities.minImageCount + 1, ChosenSurfaceFormat.format, ChosenSurfaceFormat.colorSpace, SurfaceExtent, 1, SurfaceCapabilities.supportedUsageFlags, vk::SharingMode::eExclusive, 1, &GraphicsQueueFamilies[0], SurfaceCapabilities.currentTransform, vk::CompositeAlphaFlagBitsKHR::eOpaque, ChosenPresentMode, VK_TRUE, VK_NULL_HANDLE };
 	Swapchain = GraphicsDevice.createSwapchainKHR (SwapchainCreateInfo);
 
 	SwapchainImages = GraphicsDevice.getSwapchainImagesKHR (Swapchain);

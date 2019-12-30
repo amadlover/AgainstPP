@@ -17,6 +17,9 @@ private:
 	void _CreateDescriptorPool ();
 	void _CreateDescriptorSetLayout ();
 	void _CreateDescriptorSet ();
+	void _CreateRenderPass ();
+	void _CreateShaders ();
+	void _CreateDeviceTextureImage ();
 
 	BaseGraphics* _G;
 
@@ -25,5 +28,6 @@ private:
 	vk::DescriptorSet _DescriptorSet;
 	vk::Sampler _Sampler;
 	vk::ImageView _TextureImageView;
+	vk::RenderPass _RenderPass;
 };
 
