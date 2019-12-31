@@ -120,4 +120,7 @@
       <Filter>Utils</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\SplashScreen\vert.vert" />
+  </ItemGroup>
 </Project>

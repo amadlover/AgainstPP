@@ -19,9 +19,13 @@ private:
 	void _CreateDescriptorSet ();
 	void _CreateRenderPass ();
 	void _CreateShaders ();
-	void _CreateCommandBuffers ();
+	void _CreateCommandPool ();
 	void _CreateDeviceTextureImage ();
 	void _CreateFramebuffers ();
+	void _CreateGraphicsPipeline ();
+	void _CreateVBIB ();
+	void _CreateCommandBuffers ();
+	void _CreateSyncObjects ();
 
 	BaseGraphics* _G;
 
@@ -34,9 +38,15 @@ private:
 	vk::DeviceMemory _TextureImageMemory;
 	vk::ImageView _TextureImageView;
 	vk::RenderPass _RenderPass;
+	vk::Pipeline _GraphicsPipeline;
+	vk::PipelineLayout _GraphicsPipelineLayout;
+	vk::Semaphore _SignalSemaphore;
+	vk::Semaphore _WaitSemaphore;
 
-	std::vector<vk::CommandBuffer> SwapchainCommandBuffers;
-	std::vector<vk::Framebuffer> SwapchainFramebuffers;
-	std::vector<vk::PipelineShaderStageCreateInfo> PipelineShaderStageCreateInfos;
+	std::vector<vk::CommandBuffer> _SwapchainCommandBuffers;
+	std::vector<vk::Framebuffer> _SwapchainFramebuffers;
+	std::vector<vk::ShaderModule> _ShaderModules;
+	std::vector<vk::PipelineShaderStageCreateInfo> _PipelineShaderStageCreateInfos;
+	std::vector<vk::Fence> _SwapchainFences;
 };
 

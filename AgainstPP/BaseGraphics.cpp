@@ -226,14 +226,10 @@ void BaseGraphics::_CreateSwapChain ()
 
 	vk::ImageViewCreateInfo SwapchainImageViewCreateInfo ({}, nullptr, vk::ImageViewType::e2D, ChosenSurfaceFormat.format, Components, SubresourceRange);
 
-	int i = 0;
-	for (auto SwapchainImageView : SwapchainImageViews)
+	for (auto SwapchainImage : SwapchainImages)
 	{
-		SwapchainImageViewCreateInfo.image = SwapchainImages[i];
-
+		SwapchainImageViewCreateInfo.image = SwapchainImage;
 		SwapchainImageViews.push_back (GraphicsDevice.createImageView (SwapchainImageViewCreateInfo));
-
-		++i;
 	}
 }
 

@@ -218,6 +218,9 @@ xcopy "$(ProjectDir)Weapons" "$(SolutionDir)$(Platform)\$(Configuration)\Weapons
     <ClInclude Include="MeshComponent.hpp" />
     <ClInclude Include="MeshEntity.hpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\SplashScreen\vert.vert" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

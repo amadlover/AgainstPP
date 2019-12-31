@@ -10,7 +10,7 @@ _SplashSceneGraphics::_SplashSceneGraphics (const std::unique_ptr<BaseGraphics>&
 {
 	_G = G.get ();
 
-	_CreateCommandBuffers ();
+	_CreateCommandPool ();
 	_CreateDeviceTextureImage ();
 	_CreateDescriptorPool ();
 	_CreateDescriptorSetLayout ();
@@ -18,17 +18,18 @@ _SplashSceneGraphics::_SplashSceneGraphics (const std::unique_ptr<BaseGraphics>&
 	_CreateShaders ();
 	_CreateRenderPass ();
 	_CreateFramebuffers ();
+	_CreateGraphicsPipeline ();
+	_CreateVBIB ();
+	_CreateCommandBuffers ();
+	_CreateSyncObjects ();
 }
 
-void _SplashSceneGraphics::_CreateCommandBuffers ()
+void _SplashSceneGraphics::_CreateCommandPool ()
 {
-	OutputDebugString (L"_SplashSceneGraphics::_CreateCommandBuffers\n");
+	OutputDebugString (L"_SplashSceneGraphics::_CreateCommandPool\n");
 
 	vk::CommandPoolCreateInfo CommandPoolCreateInfo ({}, _G->GraphicsQueueFamilies[0]);
 	_CommandPool = _G->GraphicsDevice.createCommandPool (CommandPoolCreateInfo);
-
-	const vk::CommandBufferAllocateInfo CommandBufferAllocateInfo (_CommandPool, vk::CommandBufferLevel::ePrimary, _G->SwapchainImages.size ());
-	SwapchainCommandBuffers = _G->GraphicsDevice.allocateCommandBuffers (CommandBufferAllocateInfo);
 }
 
 void _SplashSceneGraphics::_CreateDeviceTextureImage ()
@@ -75,7 +76,83 @@ void _SplashSceneGraphics::_CreateFramebuffers ()
 	{
 		FramebufferCreateInfo.setPAttachments (&SwapchainImageView);
 
-		SwapchainFramebuffers.push_back (_G->GraphicsDevice.createFramebuffer (FramebufferCreateInfo));
+		_SwapchainFramebuffers.push_back (_G->GraphicsDevice.createFramebuffer (FramebufferCreateInfo));
+	}
+}
+
+void _SplashSceneGraphics::_CreateGraphicsPipeline ()
+{
+	OutputDebugString (L"_SplashSceneGraphics::_CreateGraphicsPipeline\n");
+
+	vk::PipelineLayoutCreateInfo PipelineLayoutCreateInfo ({}, 1, &_DescriptorSetLayout);
+	_GraphicsPipelineLayout = _G->GraphicsDevice.createPipelineLayout (PipelineLayoutCreateInfo);
+
+	std::vector<vk::VertexInputBindingDescription> VertexInputBindingDescriptions (2);
+	VertexInputBindingDescriptions[0] = vk::VertexInputBindingDescription (0, sizeof (Float3), vk::VertexInputRate::eVertex);
+	VertexInputBindingDescriptions[1] = vk::VertexInputBindingDescription (1, sizeof (Float2), vk::VertexInputRate::eVertex);
+
+	std::vector<vk::VertexInputAttributeDescription> VertexInputAttributeDescriptions (2);
+	VertexInputAttributeDescriptions[0] = vk::VertexInputAttributeDescription (0, 0, vk::Format::eR32G32B32Sfloat);
+	VertexInputAttributeDescriptions[1] = vk::VertexInputAttributeDescription (1, 1, vk::Format::eR32G32Sfloat);
+
+	vk::PipelineVertexInputStateCreateInfo VertexInputStateCreateInfo ({}, VertexInputBindingDescriptions.size (), VertexInputBindingDescriptions.data (), VertexInputAttributeDescriptions.size (), VertexInputAttributeDescriptions.data ());
+	vk::PipelineInputAssemblyStateCreateInfo InputAssemblyStateCreateInfo ({}, vk::PrimitiveTopology::eTriangleList, VK_FALSE);
+	vk::PipelineRasterizationStateCreateInfo RasterizationStateCreateInfo ({}, 0, 0, vk::PolygonMode::eFill, vk::CullModeFlagBits::eBack, vk::FrontFace::eCounterClockwise, {}, {}, {}, {}, 1);
+	vk::PipelineColorBlendAttachmentState ColorBlendAttachmentState (0, {}, {}, {}, {}, {}, {}, vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA);
+	vk::PipelineColorBlendStateCreateInfo ColorBlendStateCreateInfo ({}, 0, {}, 1, &ColorBlendAttachmentState, std::array<float, 4> {1, 1, 1, 1});
+	vk::PipelineDepthStencilStateCreateInfo DepthStencilStateCreateInfo ({}, 1,1, vk::CompareOp::eLessOrEqual);
+
+	vk::Viewport Viewport{ 0, 0, (float)_G->SurfaceExtent.width, (float)_G->SurfaceExtent.height, 0, 1 };
+	vk::Rect2D Scissor{ vk::Offset2D{0,0}, vk::Extent2D{_G->SurfaceExtent.width, _G->SurfaceExtent.height} };
+	vk::PipelineViewportStateCreateInfo ViewportStateCreateInfo ({}, 1, &Viewport, 1, &Scissor);
+
+	vk::PipelineMultisampleStateCreateInfo MultiSampleStateCreateInfo ({}, vk::SampleCountFlagBits::e1);
+
+	vk::GraphicsPipelineCreateInfo PipelineCreateInfo ({}, _PipelineShaderStageCreateInfos.size (), _PipelineShaderStageCreateInfos.data (), &VertexInputStateCreateInfo, &InputAssemblyStateCreateInfo, {}, &ViewportStateCreateInfo, &RasterizationStateCreateInfo, &MultiSampleStateCreateInfo, &DepthStencilStateCreateInfo, &ColorBlendStateCreateInfo, {}, _GraphicsPipelineLayout, _RenderPass);
+	_GraphicsPipeline = _G->GraphicsDevice.createGraphicsPipeline ({}, PipelineCreateInfo);
+}
+
+void _SplashSceneGraphics::_CreateVBIB ()
+{
+}
+
+void _SplashSceneGraphics::_CreateCommandBuffers ()
+{
+	OutputDebugString (L"_SplashSceneGraphics::_CreateCommandBuffers\n");
+
+	const vk::CommandBufferAllocateInfo CommandBufferAllocateInfo (_CommandPool, vk::CommandBufferLevel::ePrimary, _G->SwapchainImages.size ());
+	_SwapchainCommandBuffers = _G->GraphicsDevice.allocateCommandBuffers (CommandBufferAllocateInfo);
+
+	vk::CommandBufferBeginInfo CommandBufferBeginInfo (vk::CommandBufferUsageFlagBits::eSimultaneousUse);
+	vk::ClearValue ClearValues[2];
+	ClearValues[0].color = vk::ClearColorValue (std::array<float, 4>{1, 0, 0, 1});
+	ClearValues[1].depthStencil = vk::ClearDepthStencilValue (1, 0);
+
+	vk::RenderPassBeginInfo RenderPassBeginInfo (_RenderPass, {}, vk::Rect2D (vk::Offset2D{ 0,0 }, _G->SurfaceExtent), 2, ClearValues);
+
+	for (uint32_t i = 0; i < _SwapchainCommandBuffers.size (); i++)
+	{
+		RenderPassBeginInfo.setFramebuffer (_SwapchainFramebuffers[i]);
+		_SwapchainCommandBuffers[i].begin (CommandBufferBeginInfo);
+		_SwapchainCommandBuffers[i].beginRenderPass (RenderPassBeginInfo, vk::SubpassContents::eInline);
+
+		_SwapchainCommandBuffers[i].endRenderPass ();
+		_SwapchainCommandBuffers[i].end ();
+	}
+}
+
+void _SplashSceneGraphics::_CreateSyncObjects ()
+{
+	_SignalSemaphore = _G->GraphicsDevice.createSemaphore (vk::SemaphoreCreateInfo ());
+	_WaitSemaphore = _G->GraphicsDevice.createSemaphore (vk::SemaphoreCreateInfo ());
+
+	vk::FenceCreateInfo FenceCreateInfo (vk::FenceCreateFlagBits::eSignaled);
+
+	_SwapchainFences = std::vector<vk::Fence> (_SwapchainCommandBuffers.size ());
+
+	for (auto& SwapchainFence : _SwapchainFences)
+	{
+		SwapchainFence = _G->GraphicsDevice.createFence (FenceCreateInfo);
 	}
 }
 
@@ -129,13 +206,14 @@ void _SplashSceneGraphics::_CreateShaders ()
 {
 	OutputDebugString (L"_SplashSceneGraphics::_CreateShaders\n");
 
-	PipelineShaderStageCreateInfos = std::vector<vk::PipelineShaderStageCreateInfo> (2);
+	_PipelineShaderStageCreateInfos = std::vector<vk::PipelineShaderStageCreateInfo> (2);
+	_ShaderModules = std::vector<vk::ShaderModule> (2);
 
 	std::string VertFilePath = GraphicUtils::GetFullPath ("\\Shaders\\SplashScreen\\vert.spv");
 	std::string FragFilePath = GraphicUtils::GetFullPath ("\\Shaders\\SplashScreen\\frag.spv");
 
-	GraphicUtils::CreateShader (_G->GraphicsDevice, VertFilePath, vk::ShaderStageFlagBits::eVertex, PipelineShaderStageCreateInfos);
-	GraphicUtils::CreateShader (_G->GraphicsDevice, FragFilePath, vk::ShaderStageFlagBits::eFragment, PipelineShaderStageCreateInfos);
+	GraphicUtils::CreateShader (_G->GraphicsDevice, VertFilePath, vk::ShaderStageFlagBits::eVertex, _ShaderModules[0], _PipelineShaderStageCreateInfos[0]);
+	GraphicUtils::CreateShader (_G->GraphicsDevice, FragFilePath, vk::ShaderStageFlagBits::eFragment, _ShaderModules[1], _PipelineShaderStageCreateInfos[1]);
 }
 
 void _SplashSceneGraphics::Draw (const std::unique_ptr<MeshEntity>& Background)
@@ -145,12 +223,48 @@ void _SplashSceneGraphics::Draw (const std::unique_ptr<MeshEntity>& Background)
 
 _SplashSceneGraphics::~_SplashSceneGraphics ()
 {
+	if (_SignalSemaphore != VK_NULL_HANDLE)
+	{
+		_G->GraphicsDevice.destroySemaphore (_SignalSemaphore);
+	}
+
+	if (_WaitSemaphore != VK_NULL_HANDLE)
+	{
+		_G->GraphicsDevice.destroySemaphore (_WaitSemaphore);
+	}
+
+	for (auto& SwapchainFence : _SwapchainFences)
+	{
+		if (SwapchainFence != VK_NULL_HANDLE)
+		{
+			_G->GraphicsDevice.destroyFence (SwapchainFence);
+		}
+	}
+
+	for (auto ShaderModule : _ShaderModules)
+	{
+		if (ShaderModule != VK_NULL_HANDLE)
+		{
+			_G->GraphicsDevice.destroyShaderModule (ShaderModule);
+		}
+	}
+
+	if (_GraphicsPipelineLayout != VK_NULL_HANDLE)
+	{
+		_G->GraphicsDevice.destroyPipelineLayout (_GraphicsPipelineLayout);
+	}
+
+	if (_GraphicsPipeline != VK_NULL_HANDLE)
+	{
+		_G->GraphicsDevice.destroyPipeline (_GraphicsPipeline);
+	}
+
 	if (_RenderPass != VK_NULL_HANDLE)
 	{
 		_G->GraphicsDevice.destroyRenderPass (_RenderPass);
 	}
 
-	for (auto SwapchainFramebuffer : SwapchainFramebuffers)
+	for (auto& SwapchainFramebuffer : _SwapchainFramebuffers)
 	{
 		if (SwapchainFramebuffer != VK_NULL_HANDLE)
 		{
@@ -163,7 +277,7 @@ _SplashSceneGraphics::~_SplashSceneGraphics ()
 		_G->GraphicsDevice.destroySampler (_TextureSampler);
 	}
 
-	_G->GraphicsDevice.freeCommandBuffers (_CommandPool, SwapchainCommandBuffers);	
+	_G->GraphicsDevice.freeCommandBuffers (_CommandPool, _SwapchainCommandBuffers);	
 	
 	if (_CommandPool != VK_NULL_HANDLE)
 	{
