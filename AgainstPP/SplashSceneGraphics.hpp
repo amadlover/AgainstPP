@@ -37,5 +37,6 @@ private:
 
 	std::vector<vk::CommandBuffer> SwapchainCommandBuffers;
 	std::vector<vk::Framebuffer> SwapchainFramebuffers;
+	std::vector<vk::PipelineShaderStageCreateInfo> PipelineShaderStageCreateInfos;
 };
 

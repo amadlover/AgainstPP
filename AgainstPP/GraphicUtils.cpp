@@ -76,6 +76,37 @@ void GraphicUtils::CopyBufferToImage (BaseGraphics* G, vk::CommandPool CommandPo
 	G->GraphicsDevice.freeCommandBuffers (CommandPool, CommandBuffer);
 }
 
+void GraphicUtils::CreateShader (vk::Device GraphicsDevice, std::string FilePath, vk::ShaderStageFlagBits ShaderStage, std::vector<vk::PipelineShaderStageCreateInfo>& ShaderStageCreateInfos)
+{
+	std::ifstream File (FilePath, std::ios::in | std::ios::binary | std::ios::ate);
+
+	if (!File.is_open ())
+	{
+		return;
+	}
+
+	uint32_t Size = (uint32_t)(File.tellg ());
+
+	std::unique_ptr<char[]> Buff (new char[Size * sizeof (uint32_t)]);
+
+	File.seekg (0, std::ios::beg);
+	File.read ((char*)Buff.get (), Size);
+	File.close ();
+
+	vk::ShaderModuleCreateInfo ShaderModuleCreateInfo ({}, Size, reinterpret_cast<uint32_t*>(Buff.get ()));
+	vk::ShaderModule ShaderModule = GraphicsDevice.createShaderModule (ShaderModuleCreateInfo);
+	vk::PipelineShaderStageCreateInfo ShaderStageCreateInfo ({}, ShaderStage, ShaderModule, "main");
+
+	if (ShaderStage == vk::ShaderStageFlagBits::eVertex)
+	{
+		ShaderStageCreateInfos[0] = ShaderStageCreateInfo;
+	}
+	else if (ShaderStage == vk::ShaderStageFlagBits::eFragment)
+	{
+		ShaderStageCreateInfos[1] = ShaderStageCreateInfo;
+	}
+}
+
 void GraphicUtils::SubmitOneTimeCmd (vk::Queue GraphicsQueue, vk::CommandBuffer CommandBuffer)
 {
 	vk::SubmitInfo SubmitInfo (0, nullptr, nullptr, 1, &CommandBuffer, 0, nullptr);

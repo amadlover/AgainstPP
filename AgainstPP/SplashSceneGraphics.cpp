@@ -129,8 +129,13 @@ void _SplashSceneGraphics::_CreateShaders ()
 {
 	OutputDebugString (L"_SplashSceneGraphics::_CreateShaders\n");
 
-	std::string VertFullFilePath = GraphicUtils::GetFullPath ("\\Shaders\\SplashScreen\\vert.spv");
-	std::string FragFullFilePath = GraphicUtils::GetFullPath ("\\Shaders\\SplashScreen\\frag.spv");
+	PipelineShaderStageCreateInfos = std::vector<vk::PipelineShaderStageCreateInfo> (2);
+
+	std::string VertFilePath = GraphicUtils::GetFullPath ("\\Shaders\\SplashScreen\\vert.spv");
+	std::string FragFilePath = GraphicUtils::GetFullPath ("\\Shaders\\SplashScreen\\frag.spv");
+
+	GraphicUtils::CreateShader (_G->GraphicsDevice, VertFilePath, vk::ShaderStageFlagBits::eVertex, PipelineShaderStageCreateInfos);
+	GraphicUtils::CreateShader (_G->GraphicsDevice, FragFilePath, vk::ShaderStageFlagBits::eFragment, PipelineShaderStageCreateInfos);
 }
 
 void _SplashSceneGraphics::Draw (const std::unique_ptr<MeshEntity>& Background)
