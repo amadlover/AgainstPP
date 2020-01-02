@@ -42,6 +42,8 @@ private:
 	vk::PipelineLayout _GraphicsPipelineLayout;
 	vk::Semaphore _SignalSemaphore;
 	vk::Semaphore _WaitSemaphore;
+	vk::Buffer _VBIB;
+	vk::Buffer _VBIBMemory;
 
 	std::vector<vk::CommandBuffer> _SwapchainCommandBuffers;
 	std::vector<vk::Framebuffer> _SwapchainFramebuffers;

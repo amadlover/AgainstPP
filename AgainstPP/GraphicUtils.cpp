@@ -76,13 +76,31 @@ void GraphicUtils::CopyBufferToImage (BaseGraphics* G, vk::CommandPool CommandPo
 	G->GraphicsDevice.freeCommandBuffers (CommandPool, CommandBuffer);
 }
 
+void GraphicUtils::CopyBufferToBuffer (BaseGraphics* G, vk::CommandPool CommandPool, vk::Buffer SrcBuffer, vk::Buffer DstBuffer, vk::DeviceSize Size)
+{
+	vk::CommandBufferAllocateInfo CommandBufferAllocateInfo (CommandPool, vk::CommandBufferLevel::ePrimary, 1);
+	vk::CommandBuffer CommandBuffer = G->GraphicsDevice.allocateCommandBuffers (CommandBufferAllocateInfo).front ();
+
+	vk::CommandBufferBeginInfo CommandBufferBeginInfo (vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
+	vk::BufferCopy BufferCopy (0, 0, Size);
+
+	CommandBuffer.begin (CommandBufferBeginInfo);
+	CommandBuffer.copyBuffer (SrcBuffer, DstBuffer, BufferCopy);
+	CommandBuffer.end ();
+
+	SubmitOneTimeCmd (G->GraphicsQueue, CommandBuffer);
+
+	G->GraphicsDevice.freeCommandBuffers (CommandPool, CommandBuffer);
+}
+
 void GraphicUtils::CreateShader (vk::Device GraphicsDevice, std::string FilePath, vk::ShaderStageFlagBits ShaderStage, vk::ShaderModule& ShaderModule, vk::PipelineShaderStageCreateInfo& ShaderStageCreateInfo)
 {
 	std::ifstream File (FilePath, std::ios::in | std::ios::binary | std::ios::ate);
 
 	if (!File.is_open ())
 	{
-		return;
+		char Buff[] = "Could not open file ";
+		throw std::runtime_error (reinterpret_cast<const char*>(strcat_s(Buff, 21, FilePath.c_str ())));
 	}
 
 	uint32_t Size = (uint32_t)(File.tellg ());

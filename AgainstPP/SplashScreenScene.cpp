@@ -19,9 +19,9 @@ void SplashScreenScene::_CreateBackground ()
 	
 	_Primitive Prim;
 	Prim.Positions.push_back (Float3{ 1, 1, 1 });
-	Prim.Positions.push_back (Float3{ -1,1,1 });
-	Prim.Positions.push_back (Float3{ -1,-1,1 });
-	Prim.Positions.push_back (Float3{ 1,-1,1 });
+	Prim.Positions.push_back (Float3{ -1, 1, 1 });
+	Prim.Positions.push_back (Float3{ -1, -1, 1 });
+	Prim.Positions.push_back (Float3{ 1, -1, 1 });
 
 	Prim.PositionSize = Prim.Positions.size () * sizeof (Float3);
 
@@ -31,10 +31,10 @@ void SplashScreenScene::_CreateBackground ()
 	Prim.IndexCount = 6;
 	Prim.IndexSize = Prim.Indices.size () * sizeof (uint32_t);
 
-	Prim.UV0s.push_back (Float2{ 1,1 });
-	Prim.UV0s.push_back (Float2{ 0,1 });
-	Prim.UV0s.push_back (Float2{ 0,0 });
-	Prim.UV0s.push_back (Float2{ 1,0 });
+	Prim.UV0s.push_back (Float2{ 1, 1 });
+	Prim.UV0s.push_back (Float2{ 0, 1 });
+	Prim.UV0s.push_back (Float2{ 0, 0 });
+	Prim.UV0s.push_back (Float2{ 1, 0 });
 
 	Prim.UV0Size = Prim.UV0s.size () * sizeof (Float2);
 
