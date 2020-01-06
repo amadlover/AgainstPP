@@ -28,6 +28,9 @@
     <Filter Include="Utils">
       <UniqueIdentifier>{ae742e2c-2da7-40ad-b960-caf9b75c362f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Assets">
+      <UniqueIdentifier>{549b0b96-d54a-4927-a89f-8b0bdc680d46}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -48,24 +51,6 @@
     <ClCompile Include="Scene.cpp">
       <Filter>Scenes</Filter>
     </ClCompile>
-    <ClCompile Include="Entity.cpp">
-      <Filter>Entity</Filter>
-    </ClCompile>
-    <ClCompile Include="EntityComponent.cpp">
-      <Filter>EntityComponent</Filter>
-    </ClCompile>
-    <ClCompile Include="MeshEntity.cpp">
-      <Filter>Entity</Filter>
-    </ClCompile>
-    <ClCompile Include="MeshComponent.cpp">
-      <Filter>EntityComponent</Filter>
-    </ClCompile>
-    <ClCompile Include="Mesh.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Primitive.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="SplashSceneGraphics.cpp">
       <Filter>Graphics</Filter>
     </ClCompile>
@@ -74,6 +59,9 @@
     </ClCompile>
     <ClCompile Include="GraphicUtils.cpp">
       <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Actor.cpp">
+      <Filter>Entity</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -92,24 +80,6 @@
     <ClInclude Include="SplashScreenScene.hpp">
       <Filter>Scenes</Filter>
     </ClInclude>
-    <ClInclude Include="Entity.hpp">
-      <Filter>Entity</Filter>
-    </ClInclude>
-    <ClInclude Include="EntityComponent.hpp">
-      <Filter>EntityComponent</Filter>
-    </ClInclude>
-    <ClInclude Include="MeshEntity.hpp">
-      <Filter>Entity</Filter>
-    </ClInclude>
-    <ClInclude Include="MeshComponent.hpp">
-      <Filter>EntityComponent</Filter>
-    </ClInclude>
-    <ClInclude Include="Mesh.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Primitive.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="SplashSceneGraphics.hpp">
       <Filter>Graphics</Filter>
     </ClInclude>
@@ -119,8 +89,8 @@
     <ClInclude Include="GraphicUtils.hpp">
       <Filter>Utils</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Shaders\SplashScreen\vert.vert" />
+    <ClInclude Include="Actor.hpp">
+      <Filter>Entity</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

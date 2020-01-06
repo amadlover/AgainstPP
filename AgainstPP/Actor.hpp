@@ -2,14 +2,18 @@
 
 #include <string>
 
-class Entity
+class Actor
 {
 public:
-	Entity ();
-	~Entity ();
+	Actor ();
+	~Actor ();
 
-	virtual void Update () = 0;
-	virtual void Draw () = 0;
+	//GraphicsProxy
+	//PhysicsProxy
+	//NetworkProxy
+
+	virtual void Update () {}
+	virtual void Draw () {}
 
 protected:
 	float TransformationMatrix[16];

@@ -91,7 +91,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions); WIN32_LEAN_AND_MEAN;;VK_USE_PLATFORM_WIN32_KHR</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>E:\Projects\Vulkan-Hpp\vulkan;$(VULKAN_SDK)\Include;..\External\stb</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>E:\Projects\Vulkan-Hpp\vulkan;$(VULKAN_SDK)\Include;..\External\stb;..\External\glm</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -102,10 +102,8 @@
     <PreBuildEvent>
       <Command>xcopy "$(ProjectDir)Images" "$(SolutionDir)$(Platform)\$(Configuration)\Images" /I /Y /D /E /R 
 xcopy "$(ProjectDir)Shaders" "$(SolutionDir)$(Platform)\$(Configuration)\Shaders" /I /Y /D /E /R 
-xcopy "$(ProjectDir)Characters" "$(SolutionDir)$(Platform)\$(Configuration)\Characters" /I /Y /D /E /R 
-xcopy "$(ProjectDir)Maps" "$(SolutionDir)$(Platform)\$(Configuration)\Maps" /I /Y /D /E /R 
 xcopy "$(ProjectDir)UIElements" "$(SolutionDir)$(Platform)\$(Configuration)\UIElements" /I /Y /D /E /R 
-xcopy "$(ProjectDir)Weapons" "$(SolutionDir)$(Platform)\$(Configuration)\Weapons" /I /Y /D /E /R </Command>
+</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -114,7 +112,7 @@ xcopy "$(ProjectDir)Weapons" "$(SolutionDir)$(Platform)\$(Configuration)\Weapons
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions); WIN32_LEAN_AND_MEAN;;VK_USE_PLATFORM_WIN32_KHR</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>E:\Projects\Vulkan-Hpp\vulkan;$(VULKAN_SDK)\Include;..\External\stb</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>E:\Projects\Vulkan-Hpp\vulkan;$(VULKAN_SDK)\Include;..\External\stb;..\External\glm</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -125,10 +123,8 @@ xcopy "$(ProjectDir)Weapons" "$(SolutionDir)$(Platform)\$(Configuration)\Weapons
     <PreBuildEvent>
       <Command>xcopy "$(ProjectDir)Images" "$(SolutionDir)$(Platform)\$(Configuration)\Images" /I /Y /D /E /R 
 xcopy "$(ProjectDir)Shaders" "$(SolutionDir)$(Platform)\$(Configuration)\Shaders" /I /Y /D /E /R 
-xcopy "$(ProjectDir)Characters" "$(SolutionDir)$(Platform)\$(Configuration)\Characters" /I /Y /D /E /R 
-xcopy "$(ProjectDir)Maps" "$(SolutionDir)$(Platform)\$(Configuration)\Maps" /I /Y /D /E /R 
 xcopy "$(ProjectDir)UIElements" "$(SolutionDir)$(Platform)\$(Configuration)\UIElements" /I /Y /D /E /R 
-xcopy "$(ProjectDir)Weapons" "$(SolutionDir)$(Platform)\$(Configuration)\Weapons" /I /Y /D /E /R </Command>
+</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -139,7 +135,7 @@ xcopy "$(ProjectDir)Weapons" "$(SolutionDir)$(Platform)\$(Configuration)\Weapons
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions); WIN32_LEAN_AND_MEAN;;VK_USE_PLATFORM_WIN32_KHR</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>E:\Projects\Vulkan-Hpp\vulkan;$(VULKAN_SDK)\Include;..\External\stb</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>E:\Projects\Vulkan-Hpp\vulkan;$(VULKAN_SDK)\Include;..\External\stb;..\External\glm</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -152,10 +148,8 @@ xcopy "$(ProjectDir)Weapons" "$(SolutionDir)$(Platform)\$(Configuration)\Weapons
     <PreBuildEvent>
       <Command>xcopy "$(ProjectDir)Images" "$(SolutionDir)$(Platform)\$(Configuration)\Images" /I /Y /D /E /R 
 xcopy "$(ProjectDir)Shaders" "$(SolutionDir)$(Platform)\$(Configuration)\Shaders" /I /Y /D /E /R 
-xcopy "$(ProjectDir)Characters" "$(SolutionDir)$(Platform)\$(Configuration)\Characters" /I /Y /D /E /R 
-xcopy "$(ProjectDir)Maps" "$(SolutionDir)$(Platform)\$(Configuration)\Maps" /I /Y /D /E /R 
 xcopy "$(ProjectDir)UIElements" "$(SolutionDir)$(Platform)\$(Configuration)\UIElements" /I /Y /D /E /R 
-xcopy "$(ProjectDir)Weapons" "$(SolutionDir)$(Platform)\$(Configuration)\Weapons" /I /Y /D /E /R </Command>
+</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -166,7 +160,7 @@ xcopy "$(ProjectDir)Weapons" "$(SolutionDir)$(Platform)\$(Configuration)\Weapons
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions); WIN32_LEAN_AND_MEAN;;VK_USE_PLATFORM_WIN32_KHR</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>E:\Projects\Vulkan-Hpp\vulkan;$(VULKAN_SDK)\Include;..\External\stb</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>E:\Projects\Vulkan-Hpp\vulkan;$(VULKAN_SDK)\Include;..\External\stb;..\External\glm</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -179,47 +173,32 @@ xcopy "$(ProjectDir)Weapons" "$(SolutionDir)$(Platform)\$(Configuration)\Weapons
     <PreBuildEvent>
       <Command>xcopy "$(ProjectDir)Images" "$(SolutionDir)$(Platform)\$(Configuration)\Images" /I /Y /D /E /R 
 xcopy "$(ProjectDir)Shaders" "$(SolutionDir)$(Platform)\$(Configuration)\Shaders" /I /Y /D /E /R 
-xcopy "$(ProjectDir)Characters" "$(SolutionDir)$(Platform)\$(Configuration)\Characters" /I /Y /D /E /R 
-xcopy "$(ProjectDir)Maps" "$(SolutionDir)$(Platform)\$(Configuration)\Maps" /I /Y /D /E /R 
 xcopy "$(ProjectDir)UIElements" "$(SolutionDir)$(Platform)\$(Configuration)\UIElements" /I /Y /D /E /R 
-xcopy "$(ProjectDir)Weapons" "$(SolutionDir)$(Platform)\$(Configuration)\Weapons" /I /Y /D /E /R </Command>
+</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="GraphicUtils.cpp" />
-    <ClCompile Include="Mesh.cpp" />
-    <ClCompile Include="Entity.cpp" />
-    <ClCompile Include="EntityComponent.cpp" />
+    <ClCompile Include="Actor.cpp" />
     <ClCompile Include="Error.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="BaseGraphics.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MainMenuScene.cpp" />
-    <ClCompile Include="Primitive.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SplashSceneGraphics.cpp" />
     <ClCompile Include="SplashScreenScene.cpp" />
-    <ClCompile Include="MeshComponent.cpp" />
-    <ClCompile Include="MeshEntity.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GraphicUtils.hpp" />
-    <ClInclude Include="Mesh.hpp" />
-    <ClInclude Include="Entity.hpp" />
-    <ClInclude Include="EntityComponent.hpp" />
+    <ClInclude Include="Actor.hpp" />
     <ClInclude Include="Error.hpp" />
     <ClInclude Include="Game.hpp" />
     <ClInclude Include="BaseGraphics.hpp" />
     <ClInclude Include="MainMenuScene.hpp" />
-    <ClInclude Include="Primitive.hpp" />
     <ClInclude Include="Scene.hpp" />
     <ClInclude Include="SplashSceneGraphics.hpp" />
     <ClInclude Include="SplashScreenScene.hpp" />
-    <ClInclude Include="MeshComponent.hpp" />
-    <ClInclude Include="MeshEntity.hpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Shaders\SplashScreen\vert.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

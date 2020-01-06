@@ -1,6 +1,7 @@
 #include "SplashSceneGraphics.hpp"
 #include "Error.hpp"
 #include "GraphicUtils.hpp"
+#include "glm/vec2.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_ONLY_TGA
@@ -88,8 +89,8 @@ void _SplashSceneGraphics::_CreateGraphicsPipeline ()
 	_GraphicsPipelineLayout = _G->GraphicsDevice.createPipelineLayout (PipelineLayoutCreateInfo);
 
 	std::vector<vk::VertexInputBindingDescription> VertexInputBindingDescriptions (2);
-	VertexInputBindingDescriptions[0] = vk::VertexInputBindingDescription (0, sizeof (Float3), vk::VertexInputRate::eVertex);
-	VertexInputBindingDescriptions[1] = vk::VertexInputBindingDescription (1, sizeof (Float2), vk::VertexInputRate::eVertex);
+	VertexInputBindingDescriptions[0] = vk::VertexInputBindingDescription (0, sizeof (glm::vec2), vk::VertexInputRate::eVertex);
+	VertexInputBindingDescriptions[1] = vk::VertexInputBindingDescription (1, sizeof (glm::vec2), vk::VertexInputRate::eVertex);
 
 	std::vector<vk::VertexInputAttributeDescription> VertexInputAttributeDescriptions (2);
 	VertexInputAttributeDescriptions[0] = vk::VertexInputAttributeDescription (0, 0, vk::Format::eR32G32B32Sfloat);
@@ -114,6 +115,9 @@ void _SplashSceneGraphics::_CreateGraphicsPipeline ()
 
 void _SplashSceneGraphics::_CreateVBIB ()
 {
+	OutputDebugString (L"_SplashSceneGraphics::_CreateVBIB\n");
+
+	
 }
 
 void _SplashSceneGraphics::_CreateCommandBuffers ()
@@ -214,11 +218,6 @@ void _SplashSceneGraphics::_CreateShaders ()
 
 	GraphicUtils::CreateShader (_G->GraphicsDevice, VertFilePath, vk::ShaderStageFlagBits::eVertex, _ShaderModules[0], _PipelineShaderStageCreateInfos[0]);
 	GraphicUtils::CreateShader (_G->GraphicsDevice, FragFilePath, vk::ShaderStageFlagBits::eFragment, _ShaderModules[1], _PipelineShaderStageCreateInfos[1]);
-}
-
-void _SplashSceneGraphics::Draw (const std::unique_ptr<MeshEntity>& Background)
-{
-	Background->Draw ();
 }
 
 _SplashSceneGraphics::~_SplashSceneGraphics ()
