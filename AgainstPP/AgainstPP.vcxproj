@@ -91,7 +91,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions); WIN32_LEAN_AND_MEAN;;VK_USE_PLATFORM_WIN32_KHR</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>E:\Projects\Vulkan-Hpp\vulkan;$(VULKAN_SDK)\Include;..\External\stb;..\External\glm</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>E:\Projects\Vulkan-Hpp\vulkan;$(VULKAN_SDK)\Include;..\External\stb;..\External\glm;..\External\TinyGLTF</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -112,7 +112,7 @@ xcopy "$(ProjectDir)UIElements" "$(SolutionDir)$(Platform)\$(Configuration)\UIEl
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions); WIN32_LEAN_AND_MEAN;;VK_USE_PLATFORM_WIN32_KHR</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>E:\Projects\Vulkan-Hpp\vulkan;$(VULKAN_SDK)\Include;..\External\stb;..\External\glm</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>E:\Projects\Vulkan-Hpp\vulkan;$(VULKAN_SDK)\Include;..\External\stb;..\External\glm;..\External\TinyGLTF</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -135,7 +135,7 @@ xcopy "$(ProjectDir)UIElements" "$(SolutionDir)$(Platform)\$(Configuration)\UIEl
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions); WIN32_LEAN_AND_MEAN;;VK_USE_PLATFORM_WIN32_KHR</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>E:\Projects\Vulkan-Hpp\vulkan;$(VULKAN_SDK)\Include;..\External\stb;..\External\glm</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>E:\Projects\Vulkan-Hpp\vulkan;$(VULKAN_SDK)\Include;..\External\stb;..\External\glm;..\External\TinyGLTF</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -160,7 +160,7 @@ xcopy "$(ProjectDir)UIElements" "$(SolutionDir)$(Platform)\$(Configuration)\UIEl
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions); WIN32_LEAN_AND_MEAN;;VK_USE_PLATFORM_WIN32_KHR</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>E:\Projects\Vulkan-Hpp\vulkan;$(VULKAN_SDK)\Include;..\External\stb;..\External\glm</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>E:\Projects\Vulkan-Hpp\vulkan;$(VULKAN_SDK)\Include;..\External\stb;..\External\glm;..\External\TinyGLTF</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -178,6 +178,7 @@ xcopy "$(ProjectDir)UIElements" "$(SolutionDir)$(Platform)\$(Configuration)\UIEl
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="GLTFData.cpp" />
     <ClCompile Include="GraphicUtils.cpp" />
     <ClCompile Include="Actor.cpp" />
     <ClCompile Include="Error.cpp" />
@@ -190,6 +191,7 @@ xcopy "$(ProjectDir)UIElements" "$(SolutionDir)$(Platform)\$(Configuration)\UIEl
     <ClCompile Include="SplashScreenScene.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="GLTFData.hpp" />
     <ClInclude Include="GraphicUtils.hpp" />
     <ClInclude Include="Actor.hpp" />
     <ClInclude Include="Error.hpp" />

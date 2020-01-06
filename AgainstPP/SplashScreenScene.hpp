@@ -12,11 +12,8 @@ public:
 	SplashScreenScene (const std::unique_ptr<BaseGraphics>& G);
 	~SplashScreenScene ();
 
-	void Update () {}
+	void Update () override {}
 	void Draw () override;
 
 	std::unique_ptr<_SplashSceneGraphics> Graphics;
-
-private:
-	void _CreateBackground ();
 };

@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "Actor.hpp"
+#include "GLTFData.hpp"
 
 class Scene
 {
@@ -17,4 +18,5 @@ public:
 
 protected:
 	std::vector<Actor> SceneActors;
+	std::unique_ptr<_GLTFData> GLTFData;
 };

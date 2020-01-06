@@ -28,7 +28,7 @@
     <Filter Include="Utils">
       <UniqueIdentifier>{ae742e2c-2da7-40ad-b960-caf9b75c362f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Assets">
+    <Filter Include="GLTF">
       <UniqueIdentifier>{549b0b96-d54a-4927-a89f-8b0bdc680d46}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -63,6 +63,9 @@
     <ClCompile Include="Actor.cpp">
       <Filter>Entity</Filter>
     </ClCompile>
+    <ClCompile Include="GLTFData.cpp">
+      <Filter>GLTF</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.hpp">
@@ -91,6 +94,9 @@
     </ClInclude>
     <ClInclude Include="Actor.hpp">
       <Filter>Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="GLTFData.hpp">
+      <Filter>GLTF</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

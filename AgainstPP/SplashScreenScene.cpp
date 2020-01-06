@@ -5,13 +5,7 @@ SplashScreenScene::SplashScreenScene (const std::unique_ptr<BaseGraphics>& G)
 	OutputDebugString (L"SplashScreenScene::SplashScreenScene\n");
 
 	Graphics = std::make_unique<_SplashSceneGraphics> (G);
-
-	_CreateBackground ();
-}
-
-void SplashScreenScene::_CreateBackground ()
-{
-	OutputDebugString (L"SplashScreenScene::_CreateBackground\n");
+	GLTFData = std::make_unique<_GLTFData> ("HH");
 }
 
 void SplashScreenScene::Draw ()
