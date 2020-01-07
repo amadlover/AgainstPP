@@ -165,15 +165,3 @@ void LogError (GraphicsError Err)
 		break;
 	}
 }
-
-void LogError (GLTFError Err)
-{
-	switch (Err)
-	{
-	case GLTFError::eCouldNotImport:
-		OutputDebugString (L"GLTF Error: Could not import\n");
-		break;
-	default:
-		break;
-	}
-}

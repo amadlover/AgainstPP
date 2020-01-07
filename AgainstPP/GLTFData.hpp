@@ -6,7 +6,7 @@
 class _GLTFData
 {
 public:
-	_GLTFData (std::string FilePath) { OutputDebugString (L"_GLTFData::_GLTFData\n"); }
+	_GLTFData (std::string FilePath);
 	~_GLTFData () { OutputDebugString (L"_GLTFData::~_GLTFData\n"); }
 };
 

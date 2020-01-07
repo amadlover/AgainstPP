@@ -77,10 +77,6 @@ int WINAPI wWinMain (_In_ HINSTANCE HInstance, _In_opt_ HINSTANCE PreviousHInsta
 	{
 		LogError (Err);
 	}
-	catch (GLTFError Err)
-	{
-		LogError (Err);
-	}
 	catch (std::runtime_error Err)
 	{
 		wchar_t Buff[64];

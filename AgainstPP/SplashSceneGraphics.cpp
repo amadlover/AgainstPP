@@ -1,10 +1,9 @@
 #include "SplashSceneGraphics.hpp"
 #include "Error.hpp"
+#include "Utils.hpp"
 #include "GraphicUtils.hpp"
 #include "glm/vec2.hpp"
 
-#define STB_IMAGE_IMPLEMENTATION
-#define STB_ONLY_TGA
 #include <stb_image.h>
 
 _SplashSceneGraphics::_SplashSceneGraphics (const std::unique_ptr<BaseGraphics>& G)
@@ -40,7 +39,7 @@ void _SplashSceneGraphics::_CreateDeviceTextureImage ()
 	vk::DeviceMemory StagingBufferMemory;
 	vk::Buffer StagingBuffer;
 
-	std::string TexturePath = GraphicUtils::GetFullPath ("\\Images\\SplashScreen\\SplashScreen.tga");
+	std::string TexturePath = Utils::GetFullPath ("\\Images\\SplashScreen\\SplashScreen.tga");
 
 	int Width; int Height; int Components;
 	uint8_t* Pixels = stbi_load (TexturePath.c_str (), &Width, &Height, &Components, 4);
@@ -213,8 +212,8 @@ void _SplashSceneGraphics::_CreateShaders ()
 	_PipelineShaderStageCreateInfos = std::vector<vk::PipelineShaderStageCreateInfo> (2);
 	_ShaderModules = std::vector<vk::ShaderModule> (2);
 
-	std::string VertFilePath = GraphicUtils::GetFullPath ("\\Shaders\\SplashScreen\\vert.spv");
-	std::string FragFilePath = GraphicUtils::GetFullPath ("\\Shaders\\SplashScreen\\frag.spv");
+	std::string VertFilePath = Utils::GetFullPath ("\\Shaders\\SplashScreen\\vert.spv");
+	std::string FragFilePath = Utils::GetFullPath ("\\Shaders\\SplashScreen\\frag.spv");
 
 	GraphicUtils::CreateShader (_G->GraphicsDevice, VertFilePath, vk::ShaderStageFlagBits::eVertex, _ShaderModules[0], _PipelineShaderStageCreateInfos[0]);
 	GraphicUtils::CreateShader (_G->GraphicsDevice, FragFilePath, vk::ShaderStageFlagBits::eFragment, _ShaderModules[1], _PipelineShaderStageCreateInfos[1]);

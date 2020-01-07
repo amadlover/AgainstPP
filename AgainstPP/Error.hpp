@@ -44,11 +44,5 @@ enum class GraphicsError
 	eCREATE_SAMPLER,
 };
 
-enum class GLTFError
-{
-	eCouldNotImport
-};
-
 void LogError (GraphicsError Err);
-void LogError (GLTFError Err);
 
