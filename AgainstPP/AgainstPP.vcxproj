@@ -178,8 +178,9 @@ xcopy "$(ProjectDir)UIElements" "$(SolutionDir)$(Platform)\$(Configuration)\UIEl
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="GraphicUtils.cpp" />
     <ClCompile Include="Actor.cpp" />
+    <ClCompile Include="GraphicUtils.cpp" />
+    <ClCompile Include="Asset.cpp" />
     <ClCompile Include="Error.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="BaseGraphics.cpp" />
@@ -191,8 +192,9 @@ xcopy "$(ProjectDir)UIElements" "$(SolutionDir)$(Platform)\$(Configuration)\UIEl
     <ClCompile Include="Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="GraphicUtils.hpp" />
     <ClInclude Include="Actor.hpp" />
+    <ClInclude Include="GraphicUtils.hpp" />
+    <ClInclude Include="Asset.hpp" />
     <ClInclude Include="Error.hpp" />
     <ClInclude Include="Game.hpp" />
     <ClInclude Include="BaseGraphics.hpp" />

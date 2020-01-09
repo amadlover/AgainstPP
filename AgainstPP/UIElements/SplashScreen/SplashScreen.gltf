@@ -8,7 +8,8 @@
         {
             "name" : "Scene",
             "nodes" : [
-                0
+                0,
+                1
             ]
         }
     ],
@@ -16,6 +17,15 @@
         {
             "mesh" : 0,
             "name" : "Plane"
+        },
+        {
+            "mesh" : 1,
+            "name" : "CS_Cube",
+            "scale" : [
+                0.25093841552734375,
+                0.25093841552734375,
+                0.25093841552734375
+            ]
         }
     ],
     "materials" : [
@@ -39,11 +49,22 @@
                 {
                     "attributes" : {
                         "POSITION" : 0,
-                        "NORMAL" : 1,
-                        "TEXCOORD_0" : 2
+                        "TEXCOORD_0" : 1
                     },
-                    "indices" : 3,
+                    "indices" : 2,
                     "material" : 0
+                }
+            ]
+        },
+        {
+            "name" : "Cube",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 3,
+                        "TEXCOORD_0" : 4
+                    },
+                    "indices" : 5
                 }
             ]
         }
@@ -81,18 +102,40 @@
             "bufferView" : 1,
             "componentType" : 5126,
             "count" : 4,
-            "type" : "VEC3"
-        },
-        {
-            "bufferView" : 2,
-            "componentType" : 5126,
-            "count" : 4,
             "type" : "VEC2"
         },
         {
-            "bufferView" : 3,
+            "bufferView" : 2,
             "componentType" : 5123,
             "count" : 6,
+            "type" : "SCALAR"
+        },
+        {
+            "bufferView" : 3,
+            "componentType" : 5126,
+            "count" : 24,
+            "max" : [
+                1,
+                1,
+                1
+            ],
+            "min" : [
+                -1,
+                -1,
+                -1
+            ],
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 4,
+            "componentType" : 5126,
+            "count" : 24,
+            "type" : "VEC2"
+        },
+        {
+            "bufferView" : 5,
+            "componentType" : 5123,
+            "count" : 36,
             "type" : "SCALAR"
         }
     ],
@@ -104,23 +147,33 @@
         },
         {
             "buffer" : 0,
-            "byteLength" : 48,
+            "byteLength" : 32,
             "byteOffset" : 48
         },
         {
             "buffer" : 0,
-            "byteLength" : 32,
-            "byteOffset" : 96
+            "byteLength" : 12,
+            "byteOffset" : 80
         },
         {
             "buffer" : 0,
-            "byteLength" : 12,
-            "byteOffset" : 128
+            "byteLength" : 288,
+            "byteOffset" : 92
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 192,
+            "byteOffset" : 380
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 72,
+            "byteOffset" : 572
         }
     ],
     "buffers" : [
         {
-            "byteLength" : 140,
+            "byteLength" : 644,
             "uri" : "SplashScreen.bin"
         }
     ]

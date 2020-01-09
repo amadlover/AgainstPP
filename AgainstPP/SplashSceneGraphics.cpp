@@ -4,11 +4,17 @@
 #include "GraphicUtils.hpp"
 #include "glm/vec2.hpp"
 
-#include <stb_image.h>
+#define TINYGLTF_IMPLEMENTATION
+#define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_WRITE_IMPLEMENTATION
 
-_SplashSceneGraphics::_SplashSceneGraphics (const std::unique_ptr<BaseGraphics>& G)
+#include "tiny_gltf.h"
+
+_SplashSceneGraphics::_SplashSceneGraphics (const std::unique_ptr<BaseGraphics>& G, std::string FilePath, std::vector<Asset>& Assets)
 {
 	_G = G.get ();
+
+	_LoadGLTFData (FilePath, Assets);
 
 	_CreateCommandPool ();
 	_CreateDeviceTextureImage ();
@@ -22,6 +28,58 @@ _SplashSceneGraphics::_SplashSceneGraphics (const std::unique_ptr<BaseGraphics>&
 	_CreateVBIB ();
 	_CreateCommandBuffers ();
 	_CreateSyncObjects ();
+}
+
+void _SplashSceneGraphics::_LoadGLTFData (std::string FilePath, std::vector<Asset>& Assets)
+{
+	OutputDebugString (L"_SplashSceneGraphics::_LoadGLTFData\n");
+
+	tinygltf::Model Model;
+	tinygltf::TinyGLTF Loader;
+
+	std::string Error; std::string Warning;
+
+	if (!Loader.LoadASCIIFromFile (&Model, &Error, &Warning, FilePath))
+	{
+		throw std::runtime_error (Error);
+	}
+
+	vk::DeviceSize ImageMemorySize = 0;
+	vk::DeviceSize VertexIndexMemorySize = 0;
+
+	for (auto Image : Model.images)
+	{
+		ImageMemorySize += (vk::DeviceSize)Image.width * (vk::DeviceSize)Image.height * ((vk::DeviceSize)Image.bits / 8);
+	}
+
+	for (auto Node : Model.nodes)
+	{
+		if (Node.name.find ("CS_") != std::string::npos)
+		{
+			continue;
+		}
+
+		if (Node.mesh > -1)
+		{
+			auto Mesh = Model.meshes[Node.mesh];
+
+			for (auto Primitive : Mesh.primitives)
+			{
+				VertexIndexMemorySize += Model.bufferViews[Model.accessors[Primitive.indices].bufferView].byteLength;
+
+				for (auto Attribute : Primitive.attributes)
+				{
+					VertexIndexMemorySize += Model.bufferViews[Model.accessors[Attribute.second].bufferView].byteLength;
+				}
+			}
+		}
+	}
+
+	vk::Buffer StagingBuffer; vk::DeviceMemory StagingBufferMemory;
+	GraphicUtils::CreateBufferAndBufferMemory (_G, (ImageMemorySize + VertexIndexMemorySize), vk::BufferUsageFlagBits::eTransferSrc, vk::SharingMode::eExclusive, _G->GraphicsQueueFamilies, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, StagingBuffer, StagingBufferMemory);
+
+	_G->GraphicsDevice.destroyBuffer (StagingBuffer);
+	_G->GraphicsDevice.freeMemory (StagingBufferMemory);
 }
 
 void _SplashSceneGraphics::_CreateCommandPool ()
@@ -55,8 +113,8 @@ void _SplashSceneGraphics::_CreateDeviceTextureImage ()
 	GraphicUtils::CopyBufferToImage (_G, _CommandPool, StagingBuffer, _TextureImage, vk::Extent3D (Width, Height, 1), vk::ImageLayout::eTransferDstOptimal);
 	GraphicUtils::ChangeImageLayout (_G, _CommandPool, _TextureImage, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eShaderReadOnlyOptimal, vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eFragmentShader, vk::AccessFlagBits::eTransferWrite, vk::AccessFlagBits::eShaderRead);
 
-	_G->GraphicsDevice.freeMemory (StagingBufferMemory);
 	_G->GraphicsDevice.destroyBuffer (StagingBuffer);
+	_G->GraphicsDevice.freeMemory (StagingBufferMemory);
 
 	vk::SamplerCreateInfo SamplerCreateInfo ({}, vk::Filter::eLinear, vk::Filter::eLinear, vk::SamplerMipmapMode::eLinear, vk::SamplerAddressMode::eRepeat, vk::SamplerAddressMode::eRepeat, vk::SamplerAddressMode::eRepeat, 0, VK_FALSE, 0, VK_FALSE, {}, {}, {}, vk::BorderColor::eFloatOpaqueBlack);
 	_TextureSampler = _G->GraphicsDevice.createSampler (SamplerCreateInfo);
@@ -217,11 +275,8 @@ void _SplashSceneGraphics::_CreateShaders ()
 	GraphicUtils::CreateShader (_G->GraphicsDevice, FragFilePath, vk::ShaderStageFlagBits::eFragment, _ShaderModules[1], _PipelineShaderStageCreateInfos[1]);
 }
 
-void _SplashSceneGraphics::Draw (std::vector<Actor> Actors)
+void _SplashSceneGraphics::Draw ()
 {
-	for (auto Actor : Actors)
-	{ 
-	}
 }
 
 _SplashSceneGraphics::~_SplashSceneGraphics ()

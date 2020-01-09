@@ -1,18 +1,22 @@
 #pragma once
 
 #include "BaseGraphics.hpp"
+#include "Asset.hpp"
 #include "Actor.hpp"
+
 #include <memory>
 
 class _SplashSceneGraphics
 {
 public:
-	_SplashSceneGraphics (const std::unique_ptr<BaseGraphics>& G);
+	_SplashSceneGraphics (const std::unique_ptr<BaseGraphics>& G, std::string FilePath, std::vector<Asset>& Assets);
 	~_SplashSceneGraphics ();
 
-	void Draw (std::vector<Actor> Actors);
+	void Draw ();
 
 private:
+	void _LoadGLTFData (std::string FilePath, std::vector<Asset>& Assets);
+
 	void _CreateDescriptorPool ();
 	void _CreateDescriptorSetLayout ();
 	void _CreateDescriptorSet ();

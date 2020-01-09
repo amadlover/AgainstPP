@@ -16,20 +16,17 @@
     <Filter Include="Scenes">
       <UniqueIdentifier>{155d8b90-eee4-4529-b657-f34701a6d0b7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Entity">
-      <UniqueIdentifier>{c7c0b09c-de91-46ba-ba0b-c54fbf7a7c98}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="EntityComponent">
-      <UniqueIdentifier>{36a9efb5-f378-4fea-be58-a4888a27f9cc}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Graphics">
       <UniqueIdentifier>{8c9bc19c-2486-4836-b48b-0f3813d73403}</UniqueIdentifier>
     </Filter>
     <Filter Include="Utils">
       <UniqueIdentifier>{ae742e2c-2da7-40ad-b960-caf9b75c362f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="GLTF">
-      <UniqueIdentifier>{549b0b96-d54a-4927-a89f-8b0bdc680d46}</UniqueIdentifier>
+    <Filter Include="Asset">
+      <UniqueIdentifier>{c7c0b09c-de91-46ba-ba0b-c54fbf7a7c98}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Actor">
+      <UniqueIdentifier>{20290496-9d12-478a-8914-e3dd24ffb57f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -60,11 +57,14 @@
     <ClCompile Include="GraphicUtils.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
-    <ClCompile Include="Actor.cpp">
-      <Filter>Entity</Filter>
-    </ClCompile>
     <ClCompile Include="Utils.cpp">
       <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Asset.cpp">
+      <Filter>Asset</Filter>
+    </ClCompile>
+    <ClCompile Include="Actor.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -92,11 +92,14 @@
     <ClInclude Include="GraphicUtils.hpp">
       <Filter>Utils</Filter>
     </ClInclude>
-    <ClInclude Include="Actor.hpp">
-      <Filter>Entity</Filter>
-    </ClInclude>
     <ClInclude Include="Utils.hpp">
       <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Asset.hpp">
+      <Filter>Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="Actor.hpp">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
