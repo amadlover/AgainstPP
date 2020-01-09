@@ -17,6 +17,7 @@ public:
 	virtual void Draw () {}
 
 protected:
-	std::vector<Actor> SceneActors;
+	std::vector<Actor> GraphicsActors;
+	std::vector<Actor> PhysicsActors;
 	std::unique_ptr<_GLTFData> GLTFData;
 };

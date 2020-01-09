@@ -9,12 +9,13 @@ SplashScreenScene::SplashScreenScene (const std::unique_ptr<BaseGraphics>& G)
 	GLTFData = std::make_unique<_GLTFData> (Utils::GetFullPath ("\\UIElements\\SplashScreen\\SplashScreen.gltf"));
 }
 
+void SplashScreenScene::Update ()
+{
+	
+}
+
 void SplashScreenScene::Draw ()
 {
-	for (auto SceneActor : SceneActors)
-	{
-		SceneActor.Draw ();
-	}
 }
 
 SplashScreenScene::~SplashScreenScene ()

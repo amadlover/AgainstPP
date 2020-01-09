@@ -115,8 +115,6 @@ void _SplashSceneGraphics::_CreateGraphicsPipeline ()
 void _SplashSceneGraphics::_CreateVBIB ()
 {
 	OutputDebugString (L"_SplashSceneGraphics::_CreateVBIB\n");
-
-	
 }
 
 void _SplashSceneGraphics::_CreateCommandBuffers ()
@@ -217,6 +215,12 @@ void _SplashSceneGraphics::_CreateShaders ()
 
 	GraphicUtils::CreateShader (_G->GraphicsDevice, VertFilePath, vk::ShaderStageFlagBits::eVertex, _ShaderModules[0], _PipelineShaderStageCreateInfos[0]);
 	GraphicUtils::CreateShader (_G->GraphicsDevice, FragFilePath, vk::ShaderStageFlagBits::eFragment, _ShaderModules[1], _PipelineShaderStageCreateInfos[1]);
+}
+
+void _SplashSceneGraphics::Draw (std::vector<Actor> Actors)
+{
+	for (auto Actor : Actors)
+	{ }
 }
 
 _SplashSceneGraphics::~_SplashSceneGraphics ()

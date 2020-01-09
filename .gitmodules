@@ -1,9 +1,12 @@
 [submodule "External/TinyGLTF"]
 	path = External/TinyGLTF
 	url = git@github.com:syoyo/tinygltf.git
+	ignore = all
 [submodule "External/stb"]
 	path = External/stb
 	url = git@github.com:nothings/stb.git
+	ignore = all
 [submodule "External/glm"]
 	path = External/glm
 	url = git@github.com:g-truc/glm.git
+	ignore = all 

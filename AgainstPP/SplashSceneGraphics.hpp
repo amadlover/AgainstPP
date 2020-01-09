@@ -1,7 +1,7 @@
 #pragma once
 
 #include "BaseGraphics.hpp"
-
+#include "Actor.hpp"
 #include <memory>
 
 class _SplashSceneGraphics
@@ -9,6 +9,8 @@ class _SplashSceneGraphics
 public:
 	_SplashSceneGraphics (const std::unique_ptr<BaseGraphics>& G);
 	~_SplashSceneGraphics ();
+
+	void Draw (std::vector<Actor> Actors);
 
 private:
 	void _CreateDescriptorPool ();

@@ -8,14 +8,6 @@ public:
 	Actor ();
 	~Actor ();
 
-	//GraphicsProxy
-	//PhysicsProxy
-	//NetworkProxy
-
-	virtual void Update () {}
-	virtual void Draw () {}
-
-protected:
 	float TransformationMatrix[16];
 
 	float Translation[3];

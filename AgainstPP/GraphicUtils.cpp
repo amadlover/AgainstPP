@@ -86,6 +86,12 @@ void GraphicUtils::CreateShader (vk::Device GraphicsDevice, std::string FilePath
 {
 	std::ifstream File (FilePath, std::ios::in | std::ios::binary | std::ios::ate);
 
+	if (!File.good ())
+	{
+		char Buff[] = "Could not open file ";
+		throw std::runtime_error (reinterpret_cast<const char*>(strcat_s (Buff, 21, FilePath.c_str ())));
+	}
+
 	if (!File.is_open ())
 	{
 		char Buff[] = "Could not open file ";
