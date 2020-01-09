@@ -220,7 +220,8 @@ void _SplashSceneGraphics::_CreateShaders ()
 void _SplashSceneGraphics::Draw (std::vector<Actor> Actors)
 {
 	for (auto Actor : Actors)
-	{ }
+	{ 
+	}
 }
 
 _SplashSceneGraphics::~_SplashSceneGraphics ()

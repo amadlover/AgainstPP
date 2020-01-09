@@ -63,9 +63,6 @@
     <ClCompile Include="Actor.cpp">
       <Filter>Entity</Filter>
     </ClCompile>
-    <ClCompile Include="GLTFData.cpp">
-      <Filter>GLTF</Filter>
-    </ClCompile>
     <ClCompile Include="Utils.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
@@ -97,9 +94,6 @@
     </ClInclude>
     <ClInclude Include="Actor.hpp">
       <Filter>Entity</Filter>
-    </ClInclude>
-    <ClInclude Include="GLTFData.hpp">
-      <Filter>GLTF</Filter>
     </ClInclude>
     <ClInclude Include="Utils.hpp">
       <Filter>Utils</Filter>

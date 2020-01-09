@@ -5,7 +5,6 @@
 #include <vector>
 
 #include "Actor.hpp"
-#include "GLTFData.hpp"
 
 class Scene
 {
@@ -16,8 +15,8 @@ public:
 	virtual void Update () {}
 	virtual void Draw () {}
 
+	void LoadGLTFData (std::string FilePath);
+
 protected:
-	std::vector<Actor> GraphicsActors;
-	std::vector<Actor> PhysicsActors;
-	std::unique_ptr<_GLTFData> GLTFData;
+	std::vector<Actor> Actors;
 };
