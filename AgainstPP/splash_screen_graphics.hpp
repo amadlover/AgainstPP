@@ -1,8 +1,8 @@
 #pragma once
 
-#include "BaseGraphics.hpp"
-#include "Asset.hpp"
-#include "Actor.hpp"
+#include "graphics.hpp"
+#include "asset.hpp"
+#include "actor.hpp"
 
 #include <memory>
 

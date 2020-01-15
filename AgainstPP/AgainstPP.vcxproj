@@ -178,31 +178,29 @@ xcopy "$(ProjectDir)UIElements" "$(SolutionDir)$(Platform)\$(Configuration)\UIEl
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Actor.cpp" />
-    <ClCompile Include="GraphicUtils.cpp" />
-    <ClCompile Include="Asset.cpp" />
-    <ClCompile Include="Error.cpp" />
-    <ClCompile Include="Game.cpp" />
-    <ClCompile Include="BaseGraphics.cpp" />
-    <ClCompile Include="Main.cpp" />
-    <ClCompile Include="MainMenuScene.cpp" />
-    <ClCompile Include="Scene.cpp" />
-    <ClCompile Include="SplashSceneGraphics.cpp" />
-    <ClCompile Include="SplashScreenScene.cpp" />
-    <ClCompile Include="Utils.cpp" />
+    <ClCompile Include="actor.cpp" />
+    <ClCompile Include="asset.cpp" />
+    <ClCompile Include="error.cpp" />
+    <ClCompile Include="game.cpp" />
+    <ClCompile Include="graphics.cpp" />
+    <ClCompile Include="graphics_utils.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="main_menu.cpp" />
+    <ClCompile Include="splash_screen.cpp" />
+    <ClCompile Include="splash_screen_graphics.cpp" />
+    <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Actor.hpp" />
-    <ClInclude Include="GraphicUtils.hpp" />
-    <ClInclude Include="Asset.hpp" />
-    <ClInclude Include="Error.hpp" />
-    <ClInclude Include="Game.hpp" />
-    <ClInclude Include="BaseGraphics.hpp" />
-    <ClInclude Include="MainMenuScene.hpp" />
-    <ClInclude Include="Scene.hpp" />
-    <ClInclude Include="SplashSceneGraphics.hpp" />
-    <ClInclude Include="SplashScreenScene.hpp" />
-    <ClInclude Include="Utils.hpp" />
+    <ClInclude Include="actor.hpp" />
+    <ClInclude Include="asset.hpp" />
+    <ClInclude Include="error.hpp" />
+    <ClInclude Include="game.hpp" />
+    <ClInclude Include="graphics.hpp" />
+    <ClInclude Include="graphics_utils.hpp" />
+    <ClInclude Include="main_menu.hpp" />
+    <ClInclude Include="splash_screen.hpp" />
+    <ClInclude Include="splash_screen_graphics.hpp" />
+    <ClInclude Include="utils.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

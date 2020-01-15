@@ -1,4 +1,4 @@
-#include "MainMenuScene.hpp"
+#include "main_menu.hpp"
 
 namespace main_menu
 {

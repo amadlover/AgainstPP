@@ -70,9 +70,9 @@ int WINAPI wWinMain (_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE previous_hInst
 			game::run ();
 		}
 	}
-	catch (GraphicsError Err)
+	catch (egraphics_error Err)
 	{
-		LogError (Err);
+		log_error (Err);
 	}
 	catch (std::runtime_error Err)
 	{

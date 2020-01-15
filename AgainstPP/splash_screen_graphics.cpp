@@ -1,7 +1,7 @@
-#include "SplashSceneGraphics.hpp"
+#include "splash_screen_graphics.hpp"
 #include "Error.hpp"
 #include "Utils.hpp"
-#include "GraphicUtils.hpp"
+#include "graphics_utils.hpp"
 #include "glm/vec2.hpp"
 
 #define TINYGLTF_IMPLEMENTATION
@@ -76,7 +76,7 @@ void _SplashSceneGraphics::_LoadGLTFData (std::string FilePath, std::vector<Asse
 	}
 
 	vk::Buffer StagingBuffer; vk::DeviceMemory StagingBufferMemory;
-	GraphicUtils::CreateBufferAndBufferMemory (_G, (ImageMemorySize + VertexIndexMemorySize), vk::BufferUsageFlagBits::eTransferSrc, vk::SharingMode::eExclusive, _G->GraphicsQueueFamilies, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, StagingBuffer, StagingBufferMemory);
+	graphics_utils::create_buffer_and_buffer_memory (_G, (ImageMemorySize + VertexIndexMemorySize), vk::BufferUsageFlagBits::eTransferSrc, vk::SharingMode::eExclusive, _G->GraphicsQueueFamilies, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, StagingBuffer, StagingBufferMemory);
 
 	_G->GraphicsDevice.destroyBuffer (StagingBuffer);
 	_G->GraphicsDevice.freeMemory (StagingBufferMemory);
@@ -97,21 +97,21 @@ void _SplashSceneGraphics::_CreateDeviceTextureImage ()
 	vk::DeviceMemory StagingBufferMemory;
 	vk::Buffer StagingBuffer;
 
-	std::string TexturePath = Utils::GetFullPath ("\\Images\\SplashScreen\\SplashScreen.tga");
+	std::string TexturePath = utils::get_full_path ("\\Images\\SplashScreen\\SplashScreen.tga");
 
 	int Width; int Height; int Components;
 	uint8_t* Pixels = stbi_load (TexturePath.c_str (), &Width, &Height, &Components, 4);
 
-	GraphicUtils::CreateBufferAndBufferMemory (_G, (vk::DeviceSize)(Width * Height * Components), vk::BufferUsageFlagBits::eTransferSrc, vk::SharingMode::eExclusive, _G->GraphicsQueueFamilies, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, StagingBuffer, StagingBufferMemory);
+	graphics_utils::create_buffer_and_buffer_memory (_G, (vk::DeviceSize)(Width * Height * Components), vk::BufferUsageFlagBits::eTransferSrc, vk::SharingMode::eExclusive, _G->GraphicsQueueFamilies, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, StagingBuffer, StagingBufferMemory);
 	HANDLE Data = _G->GraphicsDevice.mapMemory (StagingBufferMemory, 0, (vk::DeviceSize)(Width * Height * Components));
 	memcpy (Data, Pixels, (Width * Height * Components));
 	_G->GraphicsDevice.unmapMemory (StagingBufferMemory);
 
-	GraphicUtils::CreateImageAndImageMemory (_G, vk::ImageType::e2D, vk::Format::eR8G8B8A8Unorm, vk::Extent3D (Width, Height, 1), 1, 1, vk::SampleCountFlagBits::e1, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled, vk::SharingMode::eExclusive, _G->GraphicsQueueFamilies, vk::ImageLayout::eUndefined, vk::MemoryPropertyFlagBits::eDeviceLocal, _TextureImage, _TextureImageMemory);
+	graphics_utils::CreateImageAndImageMemory (_G, vk::ImageType::e2D, vk::Format::eR8G8B8A8Unorm, vk::Extent3D (Width, Height, 1), 1, 1, vk::SampleCountFlagBits::e1, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled, vk::SharingMode::eExclusive, _G->GraphicsQueueFamilies, vk::ImageLayout::eUndefined, vk::MemoryPropertyFlagBits::eDeviceLocal, _TextureImage, _TextureImageMemory);
 
-	GraphicUtils::ChangeImageLayout (_G, _CommandPool, _TextureImage, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, vk::PipelineStageFlagBits::eTopOfPipe, vk::PipelineStageFlagBits::eTransfer, {}, vk::AccessFlagBits::eTransferWrite);
-	GraphicUtils::CopyBufferToImage (_G, _CommandPool, StagingBuffer, _TextureImage, vk::Extent3D (Width, Height, 1), vk::ImageLayout::eTransferDstOptimal);
-	GraphicUtils::ChangeImageLayout (_G, _CommandPool, _TextureImage, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eShaderReadOnlyOptimal, vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eFragmentShader, vk::AccessFlagBits::eTransferWrite, vk::AccessFlagBits::eShaderRead);
+	graphics_utils::ChangeImageLayout (_G, _CommandPool, _TextureImage, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, vk::PipelineStageFlagBits::eTopOfPipe, vk::PipelineStageFlagBits::eTransfer, {}, vk::AccessFlagBits::eTransferWrite);
+	graphics_utils::CopyBufferToImage (_G, _CommandPool, StagingBuffer, _TextureImage, vk::Extent3D (Width, Height, 1), vk::ImageLayout::eTransferDstOptimal);
+	graphics_utils::ChangeImageLayout (_G, _CommandPool, _TextureImage, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eShaderReadOnlyOptimal, vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eFragmentShader, vk::AccessFlagBits::eTransferWrite, vk::AccessFlagBits::eShaderRead);
 
 	_G->GraphicsDevice.destroyBuffer (StagingBuffer);
 	_G->GraphicsDevice.freeMemory (StagingBufferMemory);
@@ -268,11 +268,11 @@ void _SplashSceneGraphics::_CreateShaders ()
 	_PipelineShaderStageCreateInfos = std::vector<vk::PipelineShaderStageCreateInfo> (2);
 	_ShaderModules = std::vector<vk::ShaderModule> (2);
 
-	std::string VertFilePath = Utils::GetFullPath ("\\Shaders\\SplashScreen\\vert.spv");
-	std::string FragFilePath = Utils::GetFullPath ("\\Shaders\\SplashScreen\\frag.spv");
+	std::string VertFilePath = utils::get_full_path ("\\Shaders\\SplashScreen\\vert.spv");
+	std::string FragFilePath = utils::get_full_path ("\\Shaders\\SplashScreen\\frag.spv");
 
-	GraphicUtils::CreateShader (_G->GraphicsDevice, VertFilePath, vk::ShaderStageFlagBits::eVertex, _ShaderModules[0], _PipelineShaderStageCreateInfos[0]);
-	GraphicUtils::CreateShader (_G->GraphicsDevice, FragFilePath, vk::ShaderStageFlagBits::eFragment, _ShaderModules[1], _PipelineShaderStageCreateInfos[1]);
+	graphics_utils::CreateShader (_G->GraphicsDevice, VertFilePath, vk::ShaderStageFlagBits::eVertex, _ShaderModules[0], _PipelineShaderStageCreateInfos[0]);
+	graphics_utils::CreateShader (_G->GraphicsDevice, FragFilePath, vk::ShaderStageFlagBits::eFragment, _ShaderModules[1], _PipelineShaderStageCreateInfos[1]);
 }
 
 void _SplashSceneGraphics::Draw ()

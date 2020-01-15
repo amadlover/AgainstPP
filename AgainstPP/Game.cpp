@@ -1,96 +1,11 @@
-#include "Game.hpp"
+#include "game.hpp"
 
 #include <Windows.h>
 
 #include <memory>
 
-#include "SplashScreenScene.hpp"
-#include "MainMenuScene.hpp"
-
-Game::Game (HINSTANCE HInstance, HWND HWnd)
-{
-	OutputDebugString (L"Game::Game\n");
-
-	_G = std::make_unique<BaseGraphics> (HInstance, HWnd);
-
-	_CurrentScene = std::make_shared<SplashScreenScene> (_G);
-
-	_CurrentSceneType = SceneType::SplashScreen;
-}
-
-Game::~Game ()
-{
-	OutputDebugString (L"Game::~Game\n");
-}
-
-void Game::ProcessKeyboardInput (WPARAM wParam, LPARAM lParam)
-{
-	switch (_CurrentSceneType)
-	{
-	case SceneType::SplashScreen:
-		switch (wParam)
-		{
-		case VK_ESCAPE:
-			_CurrentScene = std::make_shared<MainMenuScene> ();
-			
-			_CurrentSceneType = SceneType::MainMenu;
-
-			break;
-
-		default:
-			break;
-		}
-
-		break;
-
-	case SceneType::MainMenu:
-		switch (wParam)
-		{
-		case VK_ESCAPE:
-			_CurrentScene = std::make_shared<SplashScreenScene> (_G);
-
-			_CurrentSceneType = SceneType::SplashScreen;
-
-			break;
-
-		default:
-			break;
-		}
-
-		break;
-
-	default:
-		break;
-	}
-}
-
-void Game::ProcessLeftMouseClick ()
-{
-}
-
-void Game::ProcessMiddleMouseClick ()
-{
-}
-
-void Game::ProcessRightMouseClick ()
-{
-}
-
-void Game::ProcessMouseMovement (WPARAM wParam, LPARAM lParam)
-{
-}
-
-void Game::ProcessWindowDestroy ()
-{
-}
-
-void Game::Run ()
-{
-	if (_CurrentScene)
-	{
-		_CurrentScene->Draw ();
-	}
-}
+#include "splash_screen.hpp"
+#include "main_menu.hpp"
 
 namespace game 
 {
@@ -111,39 +26,17 @@ namespace game
 	escene_state splash_screen_state = escene_state::exited;
 	escene_state main_menu_state = escene_state::exited;
 
-	void init (HINSTANCE hInstance, HWND hWnd)
-	{
-		graphics::init (hInstance, hWnd);
-	}
-
-	void run ()
-	{
-		switch (current_scene)
-		{
-		case ecurrent_scene::splash_screen:
-			OutputDebugString (L"running splash screen\n");
-			break;
-
-		case ecurrent_scene::main_menu:
-			OutputDebugString (L"running main menu\n");
-			break;
-		}
-	}
-
-	void exit ()
-	{
-	}
-
 	void process_keyboard_input (WPARAM wParam, LPARAM lParam)
 	{
 		switch (current_scene)
 		{
 		case ecurrent_scene::splash_screen:
-
 			switch (wParam)
 			{
 			case VK_ESCAPE:
+				splash_screen::exit ();
 				splash_screen_state = escene_state::exited;
+
 				current_scene = ecurrent_scene::main_menu;
 
 				break;
@@ -155,11 +48,12 @@ namespace game
 			break;
 
 		case ecurrent_scene::main_menu:
-
 			switch (wParam)
 			{
 			case VK_ESCAPE:
+				main_menu::exit ();
 				main_menu_state = escene_state::exited;
+
 				current_scene = ecurrent_scene::splash_screen;
 				
 				break;
@@ -193,5 +87,47 @@ namespace game
 
 	void process_window_destroy ()
 	{
+	}
+
+	void init (HINSTANCE hInstance, HWND hWnd)
+	{
+		common_graphics::init (hInstance, hWnd);
+	}
+
+	void run ()
+	{
+		switch (current_scene)
+		{
+		case ecurrent_scene::splash_screen:
+			if (splash_screen_state == escene_state::exited)
+			{
+				splash_screen::init ();
+				splash_screen_state = escene_state::inited;
+			}
+			else if (splash_screen_state == escene_state::inited)
+			{
+				splash_screen::run ();
+			}
+			
+			break;
+
+		case ecurrent_scene::main_menu:
+			if (main_menu_state == escene_state::exited)
+			{
+				main_menu::init ();
+				main_menu_state = escene_state::inited;
+			}
+			else if (main_menu_state == escene_state::inited)
+			{
+				main_menu::run ();
+			}
+
+			break;
+		}
+	}
+
+	void exit ()
+	{
+		common_graphics::exit ();
 	}
 }

@@ -2,9 +2,8 @@
 
 #include <string>
 
-class Utils
+namespace utils
 {
-public:
-	static std::string GetFullPath (std::string PartialFilepath);
-};
+	std::string get_full_path (std::string PartialFilepath);
+}
 

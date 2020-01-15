@@ -1,6 +1,6 @@
 #include <Windows.h>
 
-#include "BaseGraphics.hpp"
+#include "graphics.hpp"
 #include "Error.hpp"
 
 #include <vulkan/vulkan_win32.h>
@@ -193,7 +193,7 @@ void BaseGraphics::_CreateSwapChain ()
 
 	if (!PhysicalDevice.getSurfaceSupportKHR (GraphicsQueueFamilies[0], Surface))
 	{
-		throw GraphicsError::eSURFACE_SUPPORT;
+		throw egraphics_error::surface_support;
 	}
 
 	for (auto SurfaceFormat : PhysicalDevice.getSurfaceFormatsKHR (Surface))
@@ -274,7 +274,7 @@ BaseGraphics::~BaseGraphics ()
 	}
 }
 
-namespace graphics
+namespace common_graphics
 {
 
 	void init (HINSTANCE hInstance, HWND hWnd)

@@ -47,7 +47,7 @@ private:
 	vk::PresentModeKHR ChosenPresentMode;
 };
 
-namespace graphics
+namespace common_graphics
 {
 	void init (HINSTANCE hInstance, HWND hWnd);
 	void run ();
