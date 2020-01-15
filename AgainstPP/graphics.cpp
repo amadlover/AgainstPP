@@ -273,3 +273,19 @@ BaseGraphics::~BaseGraphics ()
 		Instance.destroy ();
 	}
 }
+
+namespace graphics
+{
+
+	void init (HINSTANCE hInstance, HWND hWnd)
+	{
+	}
+
+	void run ()
+	{
+	}
+
+	void exit ()
+	{
+	}
+}

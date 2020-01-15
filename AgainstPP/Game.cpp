@@ -91,3 +91,107 @@ void Game::Run ()
 		_CurrentScene->Draw ();
 	}
 }
+
+namespace game 
+{
+	enum class ecurrent_scene
+	{
+		splash_screen,
+		main_menu,
+	};
+
+	enum class escene_state
+	{
+		inited,
+		exited
+	};
+
+	ecurrent_scene current_scene = ecurrent_scene::splash_screen;
+
+	escene_state splash_screen_state = escene_state::exited;
+	escene_state main_menu_state = escene_state::exited;
+
+	void init (HINSTANCE hInstance, HWND hWnd)
+	{
+		graphics::init (hInstance, hWnd);
+	}
+
+	void run ()
+	{
+		switch (current_scene)
+		{
+		case ecurrent_scene::splash_screen:
+			OutputDebugString (L"running splash screen\n");
+			break;
+
+		case ecurrent_scene::main_menu:
+			OutputDebugString (L"running main menu\n");
+			break;
+		}
+	}
+
+	void exit ()
+	{
+	}
+
+	void process_keyboard_input (WPARAM wParam, LPARAM lParam)
+	{
+		switch (current_scene)
+		{
+		case ecurrent_scene::splash_screen:
+
+			switch (wParam)
+			{
+			case VK_ESCAPE:
+				splash_screen_state = escene_state::exited;
+				current_scene = ecurrent_scene::main_menu;
+
+				break;
+
+			default:
+				break;
+			}
+
+			break;
+
+		case ecurrent_scene::main_menu:
+
+			switch (wParam)
+			{
+			case VK_ESCAPE:
+				main_menu_state = escene_state::exited;
+				current_scene = ecurrent_scene::splash_screen;
+				
+				break;
+
+			default:
+				break;
+			}
+
+			break;
+
+		default:
+			break;
+		}
+	}
+
+	void process_left_mouse_click ()
+	{
+	}
+
+	void process_middle_mouse_click ()
+	{
+	}
+
+	void process_right_mouse_click ()
+	{
+	}
+
+	void process_mouse_movement (WPARAM wParam, LPARAM lParam)
+	{
+	}
+
+	void process_window_destroy ()
+	{
+	}
+}

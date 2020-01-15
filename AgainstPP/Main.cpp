@@ -4,14 +4,11 @@
 #include "Game.hpp"
 #include "Error.hpp"
 
-std::unique_ptr<Game> G;
-
 LRESULT CALLBACK WindowProc (HWND WindowHandle, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (Msg)
 	{
 	case WM_DESTROY:
-		G->ProcessWindowDestroy ();
 		PostQuitMessage (0);
 		break;
 
@@ -20,7 +17,7 @@ LRESULT CALLBACK WindowProc (HWND WindowHandle, UINT Msg, WPARAM wParam, LPARAM 
 		break;
 
 	case WM_KEYDOWN:
-		G->ProcessKeyboardInput (wParam, lParam);
+		game::process_keyboard_input (wParam, lParam);
 		break;
 
 	default:
@@ -30,37 +27,37 @@ LRESULT CALLBACK WindowProc (HWND WindowHandle, UINT Msg, WPARAM wParam, LPARAM 
 	return DefWindowProc (WindowHandle, Msg, wParam, lParam);
 }
 
-int WINAPI wWinMain (_In_ HINSTANCE HInstance, _In_opt_ HINSTANCE PreviousHInstance, _In_ PWSTR CmdLine, _In_ int CmdShow)
+int WINAPI wWinMain (_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE previous_hInstance, _In_ PWSTR cmd_line, _In_ int CmdShow)
 {
 	WNDCLASS WC = { 0 };
 
 	WC.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
 	WC.lpfnWndProc = WindowProc;
-	WC.hInstance = HInstance;
+	WC.hInstance = hInstance;
 	WC.lpszClassName = L"Against";
-	WC.hCursor = LoadCursor (HInstance, IDC_ARROW);
+	WC.hCursor = LoadCursor (hInstance, IDC_ARROW);
 
 	if (!RegisterClass (&WC))
 	{
 		return 1;
 	}
 
-	HWND WindowHandle = CreateWindow (L"Against", L"Against", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 1280, 720, NULL, NULL, HInstance, NULL);
+	HWND hWnd = CreateWindow (L"Against", L"Against", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 1280, 720, NULL, NULL, hInstance, NULL);
 
-	if (!WindowHandle)
+	if (!hWnd)
 	{
 		return 1;
 	}
 
-	ShowWindow (WindowHandle, CmdShow);
-	UpdateWindow (WindowHandle);
+	ShowWindow (hWnd, CmdShow);
+	UpdateWindow (hWnd);
 
 	MSG Msg;
 	ZeroMemory (&Msg, sizeof (Msg));
 
 	try
 	{
-		G = std::make_unique<Game> (HInstance, WindowHandle);
+		game::init,  (hInstance, hWnd);
 
 		while (Msg.message != WM_QUIT)
 		{
@@ -70,7 +67,7 @@ int WINAPI wWinMain (_In_ HINSTANCE HInstance, _In_opt_ HINSTANCE PreviousHInsta
 				DispatchMessage (&Msg);
 			}
 
-			G->Run ();
+			game::run ();
 		}
 	}
 	catch (GraphicsError Err)
@@ -84,7 +81,9 @@ int WINAPI wWinMain (_In_ HINSTANCE HInstance, _In_opt_ HINSTANCE PreviousHInsta
 		OutputDebugString (Buff);
 	}
 
-	DestroyWindow (WindowHandle);
+	game::exit ();
+
+	DestroyWindow (hWnd);
 
 	return 0;
 }

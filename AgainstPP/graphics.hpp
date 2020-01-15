@@ -46,3 +46,10 @@ private:
 	vk::SurfaceKHR Surface;
 	vk::PresentModeKHR ChosenPresentMode;
 };
+
+namespace graphics
+{
+	void init (HINSTANCE hInstance, HWND hWnd);
+	void run ();
+	void exit ();
+}

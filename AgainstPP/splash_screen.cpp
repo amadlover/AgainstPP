@@ -23,3 +23,24 @@ SplashScreenScene::~SplashScreenScene ()
 {
 	OutputDebugString (L"SplashScreenScene::~SplashScreenScene\n");
 }
+
+namespace splash_screen
+{
+	void test ()
+	{
+
+	}
+
+	void init ()
+	{
+		test ();
+	}
+
+	void run ()
+	{
+	}
+
+	void exit ()
+	{
+	}
+}
