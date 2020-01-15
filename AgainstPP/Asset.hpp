@@ -33,3 +33,13 @@ public:
 
 	std::string Name;
 };
+
+namespace asset
+{
+	struct asset
+	{
+
+	};
+
+	void import_assets (const std::string& file_path, std::vector<asset>& assets);
+}

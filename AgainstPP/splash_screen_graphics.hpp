@@ -55,3 +55,10 @@ private:
 	std::vector<vk::Fence> _SwapchainFences;
 };
 
+namespace splash_screen_graphics
+{
+	struct splash_screen_graphics
+	{
+
+	};
+}

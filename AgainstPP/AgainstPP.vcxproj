@@ -184,6 +184,7 @@ xcopy "$(ProjectDir)UIElements" "$(SolutionDir)$(Platform)\$(Configuration)\UIEl
     <ClCompile Include="game.cpp" />
     <ClCompile Include="graphics.cpp" />
     <ClCompile Include="graphics_utils.cpp" />
+    <ClCompile Include="image.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="main_menu.cpp" />
     <ClCompile Include="splash_screen.cpp" />
@@ -197,6 +198,7 @@ xcopy "$(ProjectDir)UIElements" "$(SolutionDir)$(Platform)\$(Configuration)\UIEl
     <ClInclude Include="game.hpp" />
     <ClInclude Include="graphics.hpp" />
     <ClInclude Include="graphics_utils.hpp" />
+    <ClInclude Include="image.hpp" />
     <ClInclude Include="main_menu.hpp" />
     <ClInclude Include="splash_screen.hpp" />
     <ClInclude Include="splash_screen_graphics.hpp" />

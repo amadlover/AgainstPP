@@ -1,9 +1,9 @@
 #pragma once
 
-class Actor
+namespace actor
 {
-public:
-	Actor () {}
-	~Actor () {}
-};
+	struct actor
+	{
 
+	};
+}
