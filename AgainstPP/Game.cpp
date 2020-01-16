@@ -87,10 +87,12 @@ namespace game
 
 	void process_window_destroy ()
 	{
+
 	}
 
 	void init (HINSTANCE hInstance, HWND hWnd)
 	{
+		OutputDebugString (L"game::init\n");
 		common_graphics::init (hInstance, hWnd);
 	}
 
@@ -128,6 +130,20 @@ namespace game
 
 	void exit ()
 	{
+		OutputDebugString (L"game::exit\n");
+
+		if (splash_screen_state == escene_state::inited)
+		{
+			splash_screen::exit ();
+			splash_screen_state = escene_state::exited;
+		}
+
+		if (main_menu_state == escene_state::inited)
+		{
+			main_menu::exit ();
+			main_menu_state = escene_state::exited;
+		}
+
 		common_graphics::exit ();
 	}
 }

@@ -59,6 +59,18 @@ namespace splash_screen_graphics
 {
 	struct splash_screen_graphics
 	{
+		splash_screen_graphics () 
+		{
+			OutputDebugString (L"splash_screen_graphics\n");
+		}
 
+		~splash_screen_graphics ()
+		{
+			OutputDebugString (L"~splash_screen_graphics\n");
+		}
 	};
+
+	void init ();
+	void run ();
+	void exit ();
 }

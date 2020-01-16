@@ -4,12 +4,17 @@
 #include "Game.hpp"
 #include "Error.hpp"
 
-LRESULT CALLBACK WindowProc (HWND WindowHandle, UINT Msg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WindowProc (
+	HWND WindowHandle, 
+	UINT Msg, 
+	WPARAM wParam, 
+	LPARAM lParam
+)
 {
 	switch (Msg)
 	{
 	case WM_DESTROY:
-		PostQuitMessage (0);
+		game::process_window_destroy ();
 		break;
 
 	case WM_CLOSE:
@@ -24,10 +29,20 @@ LRESULT CALLBACK WindowProc (HWND WindowHandle, UINT Msg, WPARAM wParam, LPARAM 
 		break;
 	}
 
-	return DefWindowProc (WindowHandle, Msg, wParam, lParam);
+	return DefWindowProc (
+		WindowHandle, 
+		Msg, 
+		wParam, 
+		lParam
+	);
 }
 
-int WINAPI wWinMain (_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE previous_hInstance, _In_ PWSTR cmd_line, _In_ int CmdShow)
+int WINAPI wWinMain (
+	_In_ HINSTANCE hInstance, 
+	_In_opt_ HINSTANCE previous_hInstance, 
+	_In_ PWSTR cmd_line, 
+	_In_ int CmdShow
+)
 {
 	WNDCLASS WC = { 0 };
 
@@ -42,7 +57,19 @@ int WINAPI wWinMain (_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE previous_hInst
 		return 1;
 	}
 
-	HWND hWnd = CreateWindow (L"Against", L"Against", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 1280, 720, NULL, NULL, hInstance, NULL);
+	HWND hWnd = CreateWindow (
+		L"Against", 
+		L"Against", 
+		WS_OVERLAPPEDWINDOW, 
+		CW_USEDEFAULT, 
+		CW_USEDEFAULT, 
+		1280, 
+		720, 
+		NULL, 
+		NULL, 
+		hInstance, 
+		NULL
+	);
 
 	if (!hWnd)
 	{
@@ -53,11 +80,17 @@ int WINAPI wWinMain (_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE previous_hInst
 	UpdateWindow (hWnd);
 
 	MSG Msg;
-	ZeroMemory (&Msg, sizeof (Msg));
+	ZeroMemory (
+		&Msg, 
+		sizeof (Msg)
+	);
 
 	try
 	{
-		game::init,  (hInstance, hWnd);
+		game::init (
+			hInstance, 
+			hWnd
+		);
 
 		while (Msg.message != WM_QUIT)
 		{

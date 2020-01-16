@@ -279,13 +279,16 @@ namespace common_graphics
 
 	void init (HINSTANCE hInstance, HWND hWnd)
 	{
+		OutputDebugString (L"common_graphics::init\n");
 	}
 
 	void run ()
 	{
+		OutputDebugString (L"common_graphics::run\n");
 	}
 
 	void exit ()
 	{
+		OutputDebugString (L"common_graphics::exit\n");
 	}
 }

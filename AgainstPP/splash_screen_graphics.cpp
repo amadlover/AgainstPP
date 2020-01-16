@@ -367,3 +367,23 @@ _SplashSceneGraphics::~_SplashSceneGraphics ()
 		_G->GraphicsDevice.destroyDescriptorPool (_DescriptorPool);
 	}
 }
+
+namespace splash_screen_graphics
+{
+	std::unique_ptr<splash_screen_graphics> graphics_ptr (new splash_screen_graphics ());
+
+	void init ()
+	{
+		OutputDebugString (L"splash_screen_graphics::init\n");
+	}
+
+	void run ()
+	{
+		OutputDebugString (L"splash_screen_graphics::run\n");
+	}
+
+	void exit ()
+	{
+		OutputDebugString (L"splash_screen_graphics::exit\n");
+	}
+}
