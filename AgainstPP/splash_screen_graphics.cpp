@@ -372,14 +372,18 @@ namespace splash_screen_graphics
 {
 	std::unique_ptr<splash_screen_graphics> graphics_ptr (new splash_screen_graphics ());
 
-	void init ()
+	void create_command_pool ()
+	{
+
+	}
+
+	void init (const std::vector<asset::gltf_asset>& gltf_assets, const std::vector<image::gltf_image> &images)
 	{
 		OutputDebugString (L"splash_screen_graphics::init\n");
 	}
 
 	void run ()
 	{
-		OutputDebugString (L"splash_screen_graphics::run\n");
 	}
 
 	void exit ()

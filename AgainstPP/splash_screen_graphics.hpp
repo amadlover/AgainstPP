@@ -1,6 +1,6 @@
 #pragma once
 
-#include "graphics.hpp"
+#include "common_graphics.hpp"
 #include "asset.hpp"
 #include "actor.hpp"
 
@@ -59,18 +59,11 @@ namespace splash_screen_graphics
 {
 	struct splash_screen_graphics
 	{
-		splash_screen_graphics () 
-		{
-			OutputDebugString (L"splash_screen_graphics\n");
-		}
-
-		~splash_screen_graphics ()
-		{
-			OutputDebugString (L"~splash_screen_graphics\n");
-		}
+		std::vector<asset::vk_asset> vk_assets;
+		std::vector<image::vk_image> vk_images;
 	};
 
-	void init ();
+	void init (const std::vector<asset::gltf_asset>& gltf_assets, const std::vector<image::gltf_image>& images);
 	void run ();
 	void exit ();
 }

@@ -49,6 +49,11 @@ private:
 
 namespace common_graphics
 {
+	struct common_graphics
+	{
+		vk::Device graphics_device;
+	};
+
 	void init (HINSTANCE hInstance, HWND hWnd);
 	void run ();
 	void exit ();

@@ -4,7 +4,7 @@
 
 #include <vulkan.hpp>
 
-#include "graphics.hpp"
+#include "common_graphics.hpp"
 
 namespace graphics_utils
 {

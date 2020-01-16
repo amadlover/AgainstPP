@@ -11,7 +11,6 @@ namespace main_menu
 
 	void run ()
 	{
-		OutputDebugString (L"main_menu::run\n");
 	}
 
 	void exit ()

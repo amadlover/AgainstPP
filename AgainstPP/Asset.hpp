@@ -54,6 +54,9 @@ namespace asset
 		vk::DeviceMemory* buffer_memory;
 
 		vk::DeviceSize positions_offset;
+		vk::DeviceSize normals_offset;
+		vk::DeviceSize uv0s_offset;
+		vk::DeviceSize uv1s_offset;
 		vk::DeviceSize indices_offset;
 
 		std::vector<uint32_t> indices;
@@ -82,7 +85,7 @@ namespace asset
 	struct gltf_texture
 	{
 		std::string name;
-		image::gltf_image* gltf_image;
+		uint32_t gltf_image_index;
 	};
 
 	struct gltf_material
@@ -91,7 +94,7 @@ namespace asset
 		gltf_texture base_color_texture;
 	};
 
-	struct gltf_graphics_primitve
+	struct gltf_graphics_primitive
 	{
 		std::vector<uint8_t> positions;
 		std::vector<uint8_t> normals;
@@ -100,7 +103,7 @@ namespace asset
 
 		std::vector<uint32_t> indices;
 
-		gltf_material mat;
+		gltf_material material;
 	};
 
 	struct gltf_physics_primitive
@@ -114,7 +117,7 @@ namespace asset
 		std::string name;
 		uint32_t id;
 
-		std::vector<gltf_graphics_primitve> graphics_primitves;
+		std::vector<gltf_graphics_primitive> graphics_primitves;
 		std::vector<gltf_physics_primitive> physics_primitives;
 	};
 

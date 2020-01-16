@@ -36,9 +36,6 @@
     <ClCompile Include="asset.cpp">
       <Filter>asset</Filter>
     </ClCompile>
-    <ClCompile Include="graphics.cpp">
-      <Filter>graphics</Filter>
-    </ClCompile>
     <ClCompile Include="splash_screen_graphics.cpp">
       <Filter>graphics</Filter>
     </ClCompile>
@@ -69,13 +66,13 @@
     <ClCompile Include="image.cpp">
       <Filter>image</Filter>
     </ClCompile>
+    <ClCompile Include="common_graphics.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="asset.hpp">
       <Filter>asset</Filter>
-    </ClInclude>
-    <ClInclude Include="graphics.hpp">
-      <Filter>graphics</Filter>
     </ClInclude>
     <ClInclude Include="splash_screen_graphics.hpp">
       <Filter>graphics</Filter>
@@ -103,6 +100,9 @@
     </ClInclude>
     <ClInclude Include="image.hpp">
       <Filter>image</Filter>
+    </ClInclude>
+    <ClInclude Include="common_graphics.hpp">
+      <Filter>graphics</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

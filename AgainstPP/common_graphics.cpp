@@ -1,6 +1,6 @@
 #include <Windows.h>
 
-#include "graphics.hpp"
+#include "common_graphics.hpp"
 #include "Error.hpp"
 
 #include <vulkan/vulkan_win32.h>
@@ -276,10 +276,68 @@ BaseGraphics::~BaseGraphics ()
 
 namespace common_graphics
 {
+	std::unique_ptr<common_graphics> common_graphics_obj_ptr (new common_graphics ());
+
+	bool is_validataion_needed = false;
+
+	std::vector<const char*> requested_instance_layers;
+	std::vector<const char*> requested_instance_extensions;
+
+	vk::Instance instance;
+
+	void populate_instance_layers_and_extensions ()
+	{
+		if (is_validataion_needed)
+		{
+			std::vector<vk::LayerProperties> layer_properties = vk::enumerateInstanceLayerProperties ();
+			std::vector<vk::LayerProperties>::iterator it = std::find_if (layer_properties.begin (), layer_properties.end (), [](const vk::LayerProperties& layer_property) { return strcmp (layer_property.layerName, "VK_LAYER_LUNARG_standard_validation") == 0; });
+
+			if (it != layer_properties.end ())
+			{
+				requested_instance_layers.push_back ("VK_LAYER_LUNARG_standard_validation");
+			}
+		}
+
+		std::vector<vk::ExtensionProperties> extension_properties = vk::enumerateInstanceExtensionProperties ();
+		std::vector<vk::ExtensionProperties>::iterator it = std::find_if (extension_properties.begin (), extension_properties.end (), [](const vk::ExtensionProperties& extension_property) { return strcmp (extension_property.extensionName, VK_KHR_SURFACE_EXTENSION_NAME) == 0; });
+
+		if (it != extension_properties.end ())
+		{
+			requested_instance_extensions.push_back (VK_KHR_SURFACE_EXTENSION_NAME);
+		}
+
+		it = std::find_if (extension_properties.begin (), extension_properties.end (), [](const vk::ExtensionProperties& extension_property) { return strcmp (extension_property.extensionName, "VK_KHR_win32_surface") == 0; });
+
+		if (it != extension_properties.end ()) 
+		{
+			requested_instance_extensions.push_back ("VK_KHR_win32_surface");
+		}
+
+		if (is_validataion_needed)
+		{
+			it = std::find_if (extension_properties.begin (), extension_properties.end (), [](const vk::ExtensionProperties& extension_property) { return strcmp (extension_property.extensionName, VK_EXT_DEBUG_UTILS_EXTENSION_NAME) == 0; });
+			requested_instance_extensions.push_back (VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+		}
+	}
+
+	void create_instance ()
+	{
+		vk::ApplicationInfo AI ("Against", 1, "Against", 1, VK_API_VERSION_1_1);
+		vk::InstanceCreateInfo instance_create_info ({}, &AI, requested_instance_layers.size (), requested_instance_layers.data (), requested_instance_extensions.size (), requested_instance_extensions.data ());
+
+		instance = vk::createInstance (instance_create_info);
+	}
 
 	void init (HINSTANCE hInstance, HWND hWnd)
 	{
 		OutputDebugString (L"common_graphics::init\n");
+	
+#ifdef _DEBUG
+		is_validataion_needed = true;
+#endif
+
+		populate_instance_layers_and_extensions ();
+		create_instance ();
 	}
 
 	void run ()
@@ -290,5 +348,10 @@ namespace common_graphics
 	void exit ()
 	{
 		OutputDebugString (L"common_graphics::exit\n");
+
+		if (instance != VK_NULL_HANDLE)
+		{
+			instance.destroy();
+		}
 	}
 }

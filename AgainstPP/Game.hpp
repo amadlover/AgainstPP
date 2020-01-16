@@ -3,7 +3,7 @@
 #include <Windows.h>
 #include <memory>
 
-#include "graphics.hpp"
+#include "common_graphics.hpp"
 #include "splash_screen.hpp"
 #include "main_menu.hpp"
 

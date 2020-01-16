@@ -12,7 +12,7 @@ namespace splash_screen
 		image::import_gltf_images (utils::get_full_path ("\\UIElements\\SplashScreen\\SplashScreen.gltf"), splash_screen_obj_ptr->gltf_images);
 		asset::import_gltf_assets (utils::get_full_path ("\\UIElements\\SplashScreen\\SplashScreen.gltf"), splash_screen_obj_ptr->gltf_assets);
 
-		splash_screen_graphics::init ();
+		splash_screen_graphics::init (splash_screen_obj_ptr->gltf_assets, splash_screen_obj_ptr->gltf_images);
 	}
 
 	void run ()
