@@ -17,8 +17,6 @@ namespace splash_screen
 
 	void run ()
 	{
-		OutputDebugString (L"splash_screen::run\n");
-
 		splash_screen_graphics::run ();
 	}
 

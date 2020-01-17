@@ -5,52 +5,20 @@
 
 #include <vulkan/vulkan_win32.h>
 
-PFN_vkCreateDebugUtilsMessengerEXT pfnVkCreateDebugUtilsMessengerEXT;
-PFN_vkDestroyDebugUtilsMessengerEXT pfnVkDestroyDebugUtilsMessengerEXT;
+PFN_vkCreateDebugUtilsMessengerEXT pfn_vk_create_debug_utils_messenger_ext;
+PFN_vkDestroyDebugUtilsMessengerEXT pfn_vk_destroy_debug_utils_messenger_ext;
 
 VKAPI_ATTR VkResult VKAPI_CALL vkCreateDebugUtilsMessengerEXT (VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pMessenger)
 {
-	return pfnVkCreateDebugUtilsMessengerEXT (instance, pCreateInfo, pAllocator, pMessenger);
+	return pfn_vk_create_debug_utils_messenger_ext (instance, pCreateInfo, pAllocator, pMessenger);
 }
 
 VKAPI_ATTR void VKAPI_CALL vkDestroyDebugUtilsMessengerEXT (VkInstance instance, VkDebugUtilsMessengerEXT messenger, VkAllocationCallbacks const* pAllocator)
 {
-	return pfnVkDestroyDebugUtilsMessengerEXT (instance, messenger, pAllocator);
+	return pfn_vk_destroy_debug_utils_messenger_ext (instance, messenger, pAllocator);
 }
 
-VkResult CreateDebugUtilsMessenger (VkInstance Instance, const VkDebugUtilsMessengerCreateInfoEXT* DebugUtilsMessengerCreateInfo, const VkAllocationCallbacks* AllocationCallbacks, VkDebugUtilsMessengerEXT* DebugUtilsMessenger)
-{
-	OutputDebugString (L"CreateDebugUtilsMessenger\n");
-
-	PFN_vkCreateDebugUtilsMessengerEXT Func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr (Instance, "vkCreateDebugUtilsMessengerEXT");
-
-	if (Func)
-	{
-		return Func (Instance, DebugUtilsMessengerCreateInfo, AllocationCallbacks, DebugUtilsMessenger);
-	}
-	else
-	{
-		return VK_ERROR_INITIALIZATION_FAILED;
-	}
-}
-
-void DestroyDebugUtilsMessenger (VkInstance Instance, VkDebugUtilsMessengerEXT DebugUtilsMessenger, const VkAllocationCallbacks* AllocationCallbacks)
-{
-	OutputDebugString (L"DestroyDebugUtilsMessenger\n");
-
-	PFN_vkDestroyDebugUtilsMessengerEXT Func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr (Instance, "vkDestroyDebugUtilsMessengerEXT");
-
-	if (Func)
-	{
-		Func (Instance, DebugUtilsMessenger, AllocationCallbacks);
-	}
-	else
-	{
-		OutputDebugString (L"Could not Destroy Debug Utils Messenger\n");
-	}
-}
-
-VKAPI_ATTR VkBool32 VKAPI_CALL DebugMessengerCallback (VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageTypes, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData)
+VKAPI_ATTR VkBool32 VKAPI_CALL debug_messenger_callback (VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageTypes, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData)
 {
 	if (pCallbackData)
 	{
@@ -127,12 +95,12 @@ void BaseGraphics::_SetupDebugUtilsMessenger ()
 {
 	OutputDebugString (L"BaseGraphics::_SetupDebugUtilsMessenger\n");
 
-	pfnVkCreateDebugUtilsMessengerEXT = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(Instance.getProcAddr ("vkCreateDebugUtilsMessengerEXT"));
-	pfnVkDestroyDebugUtilsMessengerEXT = reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(Instance.getProcAddr ("vkDestroyDebugUtilsMessengerEXT"));
+	pfn_vk_create_debug_utils_messenger_ext = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(Instance.getProcAddr ("vkCreateDebugUtilsMessengerEXT"));
+	pfn_vk_destroy_debug_utils_messenger_ext = reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(Instance.getProcAddr ("vkDestroyDebugUtilsMessengerEXT"));
 
 	vk::DebugUtilsMessageSeverityFlagsEXT severityFlags (vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning | vk::DebugUtilsMessageSeverityFlagBitsEXT::eError);// | vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo | vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose);
 	vk::DebugUtilsMessageTypeFlagsEXT messageTypeFlags (vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral | vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance | vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation);
-	DebugUtilsMessenger = Instance.createDebugUtilsMessengerEXT (vk::DebugUtilsMessengerCreateInfoEXT ({}, severityFlags, messageTypeFlags, &DebugMessengerCallback));
+	DebugUtilsMessenger = Instance.createDebugUtilsMessengerEXT (vk::DebugUtilsMessengerCreateInfoEXT ({}, severityFlags, messageTypeFlags, &debug_messenger_callback));
 }
 
 void BaseGraphics::_GetPhysicalDevice ()
@@ -149,7 +117,6 @@ void BaseGraphics::_GetPhysicalDevice ()
 			GraphicsQueueFamilies.push_back (i);
 			break;
 		}
-
 		++i;
 	}
 
@@ -216,7 +183,7 @@ void BaseGraphics::_CreateSwapChain ()
 	vk::SurfaceCapabilitiesKHR SurfaceCapabilities = PhysicalDevice.getSurfaceCapabilitiesKHR (Surface);
 	SurfaceExtent = SurfaceCapabilities.currentExtent;
 
-	vk::SwapchainCreateInfoKHR SwapchainCreateInfo{ {}, Surface, SurfaceCapabilities.minImageCount + 1, ChosenSurfaceFormat.format, ChosenSurfaceFormat.colorSpace, SurfaceExtent, 1, SurfaceCapabilities.supportedUsageFlags, vk::SharingMode::eExclusive, 1, &GraphicsQueueFamilies[0], SurfaceCapabilities.currentTransform, vk::CompositeAlphaFlagBitsKHR::eOpaque, ChosenPresentMode, VK_TRUE, VK_NULL_HANDLE };
+	vk::SwapchainCreateInfoKHR SwapchainCreateInfo ({}, Surface, SurfaceCapabilities.minImageCount + 1, ChosenSurfaceFormat.format, ChosenSurfaceFormat.colorSpace, SurfaceExtent, 1, SurfaceCapabilities.supportedUsageFlags, vk::SharingMode::eExclusive, 1, &GraphicsQueueFamilies[0], SurfaceCapabilities.currentTransform, vk::CompositeAlphaFlagBitsKHR::eOpaque, ChosenPresentMode, VK_TRUE, VK_NULL_HANDLE);
 	Swapchain = GraphicsDevice.createSwapchainKHR (SwapchainCreateInfo);
 
 	SwapchainImages = GraphicsDevice.getSwapchainImagesKHR (Swapchain);
@@ -282,7 +249,12 @@ namespace common_graphics
 
 	std::vector<const char*> requested_instance_layers;
 	std::vector<const char*> requested_instance_extensions;
+	std::vector<const char*> requested_device_extensions;
 
+	vk::PresentModeKHR chosen_present_mode;
+	vk::SurfaceKHR surface;
+	vk::PhysicalDevice physical_device;
+	vk::DebugUtilsMessengerEXT debug_utils_messenger;
 	vk::Instance instance;
 
 	void populate_instance_layers_and_extensions ()
@@ -290,7 +262,13 @@ namespace common_graphics
 		if (is_validataion_needed)
 		{
 			std::vector<vk::LayerProperties> layer_properties = vk::enumerateInstanceLayerProperties ();
-			std::vector<vk::LayerProperties>::iterator it = std::find_if (layer_properties.begin (), layer_properties.end (), [](const vk::LayerProperties& layer_property) { return strcmp (layer_property.layerName, "VK_LAYER_LUNARG_standard_validation") == 0; });
+			std::vector<vk::LayerProperties>::iterator it = std::find_if (
+				layer_properties.begin (), 
+				layer_properties.end (), 
+				[](const vk::LayerProperties& layer_property) { 
+					return strcmp (layer_property.layerName, "VK_LAYER_LUNARG_standard_validation") == 0; 
+				}
+			);
 
 			if (it != layer_properties.end ())
 			{
@@ -299,14 +277,26 @@ namespace common_graphics
 		}
 
 		std::vector<vk::ExtensionProperties> extension_properties = vk::enumerateInstanceExtensionProperties ();
-		std::vector<vk::ExtensionProperties>::iterator it = std::find_if (extension_properties.begin (), extension_properties.end (), [](const vk::ExtensionProperties& extension_property) { return strcmp (extension_property.extensionName, VK_KHR_SURFACE_EXTENSION_NAME) == 0; });
+		std::vector<vk::ExtensionProperties>::iterator it = std::find_if (
+			extension_properties.begin (), 
+			extension_properties.end (), 
+			[](const vk::ExtensionProperties& extension_property) {
+				return strcmp (extension_property.extensionName, VK_KHR_SURFACE_EXTENSION_NAME) == 0; 
+			}
+		);
 
 		if (it != extension_properties.end ())
 		{
 			requested_instance_extensions.push_back (VK_KHR_SURFACE_EXTENSION_NAME);
 		}
 
-		it = std::find_if (extension_properties.begin (), extension_properties.end (), [](const vk::ExtensionProperties& extension_property) { return strcmp (extension_property.extensionName, "VK_KHR_win32_surface") == 0; });
+		it = std::find_if (
+			extension_properties.begin (), 
+			extension_properties.end (), 
+			[](const vk::ExtensionProperties& extension_property) {
+				return strcmp (extension_property.extensionName, "VK_KHR_win32_surface") == 0; 
+			}
+		);
 
 		if (it != extension_properties.end ()) 
 		{
@@ -315,7 +305,13 @@ namespace common_graphics
 
 		if (is_validataion_needed)
 		{
-			it = std::find_if (extension_properties.begin (), extension_properties.end (), [](const vk::ExtensionProperties& extension_property) { return strcmp (extension_property.extensionName, VK_EXT_DEBUG_UTILS_EXTENSION_NAME) == 0; });
+			it = std::find_if (
+				extension_properties.begin (),
+				extension_properties.end (),
+				[](const vk::ExtensionProperties& extension_property) {
+					return strcmp (extension_property.extensionName, VK_EXT_DEBUG_UTILS_EXTENSION_NAME) == 0; 
+				}
+			);
 			requested_instance_extensions.push_back (VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 		}
 	}
@@ -323,9 +319,187 @@ namespace common_graphics
 	void create_instance ()
 	{
 		vk::ApplicationInfo AI ("Against", 1, "Against", 1, VK_API_VERSION_1_1);
-		vk::InstanceCreateInfo instance_create_info ({}, &AI, requested_instance_layers.size (), requested_instance_layers.data (), requested_instance_extensions.size (), requested_instance_extensions.data ());
+		vk::InstanceCreateInfo instance_create_info (
+			{}, 
+			&AI, 
+			requested_instance_layers.size (), 
+			requested_instance_layers.data (), 
+			requested_instance_extensions.size (), 
+			requested_instance_extensions.data ()
+		);
 
 		instance = vk::createInstance (instance_create_info);
+	}
+
+	void setup_debug_utils_messenger ()
+	{
+		pfn_vk_create_debug_utils_messenger_ext = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(instance.getProcAddr ("vkCreateDebugUtilsMessengerEXT"));
+		pfn_vk_destroy_debug_utils_messenger_ext = reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(instance.getProcAddr ("vkDestroyDebugUtilsMessengerEXT"));
+
+		vk::DebugUtilsMessageSeverityFlagsEXT severityFlags (
+			vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
+			vk::DebugUtilsMessageSeverityFlagBitsEXT::eError| 
+			vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo | 
+			vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose);
+		
+		vk::DebugUtilsMessageTypeFlagsEXT messageTypeFlags (
+			vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral | 
+			vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance | 
+			vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation
+		);
+
+		debug_utils_messenger = instance.createDebugUtilsMessengerEXT (
+			vk::DebugUtilsMessengerCreateInfoEXT (
+				{}, 
+				severityFlags, 
+				messageTypeFlags, 
+				&debug_messenger_callback
+			)
+		);
+	}
+
+	void get_physical_device ()
+	{
+		physical_device = instance.enumeratePhysicalDevices ().front ();
+
+		uint32_t i = 0;
+		for (auto queue_family_property : physical_device.getQueueFamilyProperties ())
+		{
+			if ((queue_family_property.queueFlags & vk::QueueFlagBits::eGraphics) && queue_family_property.queueCount > 1)
+			{
+				common_graphics_obj_ptr->graphics_queue_family_indices.push_back (i);
+				break;
+			}
+			++i;
+		}
+
+		common_graphics_obj_ptr->physical_device_limits = physical_device.getProperties ().limits;
+		common_graphics_obj_ptr->physical_device_memory_properties = physical_device.getMemoryProperties ();
+	}
+
+	void create_surface (HINSTANCE hInstance, HWND hWnd)
+	{
+		surface = instance.createWin32SurfaceKHR (
+			vk::Win32SurfaceCreateInfoKHR ({}, 
+				hInstance, 
+				hWnd
+			)
+		);
+	}
+
+	void populate_graphics_device_extensions () 
+	{
+		OutputDebugString (L"BaseGraphics::_PopulateGraphicsDeviceExtensions\n");
+
+		std::vector<vk::ExtensionProperties> extension_properties = physical_device.enumerateDeviceExtensionProperties ();
+		std::vector< vk::ExtensionProperties>::iterator It = std::find_if (
+			extension_properties.begin (), 
+			extension_properties.end (), 
+			[](const vk::ExtensionProperties& ExtensionProperty) { 
+				return strcmp (ExtensionProperty.extensionName, VK_KHR_SWAPCHAIN_EXTENSION_NAME) == 0; 
+			}
+		);
+
+		requested_device_extensions.push_back (VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+	}
+
+	void create_graphics_device_and_queue ()
+	{
+		float priorities = 1.f;
+
+		vk::DeviceQueueCreateInfo queue_create_info (
+			{}, 
+			common_graphics_obj_ptr->graphics_queue_family_indices[0], 
+			1, 
+			&priorities
+		);
+		vk::DeviceCreateInfo device_create_info (
+			{}, 
+			1, 
+			&queue_create_info, 
+			0, 
+			NULL, 
+			requested_device_extensions.size (), 
+			requested_device_extensions.data ()
+		);
+
+		common_graphics_obj_ptr->graphics_device = physical_device.createDevice (device_create_info);
+		common_graphics_obj_ptr->graphics_queue = common_graphics_obj_ptr->graphics_device.getQueue (common_graphics_obj_ptr->graphics_queue_family_indices[0], 0);
+	}
+
+	void create_swapchain ()
+	{
+		if (!physical_device.getSurfaceSupportKHR (common_graphics_obj_ptr->graphics_queue_family_indices[0], surface))
+		{
+			throw egraphics_error::surface_support;
+		}
+
+		for (auto SurfaceFormat : physical_device.getSurfaceFormatsKHR (surface))
+		{
+			if (SurfaceFormat.format == vk::Format::eB8G8R8A8Unorm)
+			{
+				common_graphics_obj_ptr->chosen_surface_format = SurfaceFormat.format;
+				break;
+			}
+		}
+
+		for (auto PresentMode : physical_device.getSurfacePresentModesKHR (surface))
+		{
+			if (PresentMode == vk::PresentModeKHR::eMailbox)
+			{
+				chosen_present_mode = PresentMode;
+			}
+		}
+
+		vk::SurfaceCapabilitiesKHR surface_capabilities = physical_device.getSurfaceCapabilitiesKHR (surface);
+		common_graphics_obj_ptr->surface_extent = surface_capabilities.currentExtent;
+
+		vk::SwapchainCreateInfoKHR swapchain_create_info (
+			{},
+			surface,
+			surface_capabilities.minImageCount + 1,
+			common_graphics_obj_ptr->chosen_surface_format.format,
+			common_graphics_obj_ptr->chosen_surface_format.colorSpace,
+			common_graphics_obj_ptr->surface_extent,
+			1,
+			surface_capabilities.supportedUsageFlags,
+			vk::SharingMode::eExclusive,
+			1,
+			&common_graphics_obj_ptr->graphics_queue_family_indices[0],
+			surface_capabilities.currentTransform,
+			vk::CompositeAlphaFlagBitsKHR::eOpaque,
+			chosen_present_mode,
+			VK_TRUE,
+			VK_NULL_HANDLE
+		);
+		
+		common_graphics_obj_ptr->swapchain = common_graphics_obj_ptr->graphics_device.createSwapchainKHR (swapchain_create_info);
+
+		common_graphics_obj_ptr->swapchain_images = common_graphics_obj_ptr->graphics_device.getSwapchainImagesKHR (common_graphics_obj_ptr->swapchain);
+
+		vk::ComponentMapping components (vk::ComponentSwizzle::eR, vk::ComponentSwizzle::eG, vk::ComponentSwizzle::eB, vk::ComponentSwizzle::eA);
+		vk::ImageSubresourceRange subresource_range (vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1);
+
+		vk::ImageViewCreateInfo swapchain_image_view_create_info (
+			{}, 
+			nullptr, 
+			vk::ImageViewType::e2D, 
+			common_graphics_obj_ptr->chosen_surface_format.format, 
+			components, 
+			subresource_range
+		);
+
+		for (auto swapchain_image : common_graphics_obj_ptr->swapchain_images)
+		{
+			swapchain_image_view_create_info.image = swapchain_image;
+			common_graphics_obj_ptr->swapchain_imageviews.push_back (common_graphics_obj_ptr->graphics_device.createImageView (swapchain_image_view_create_info));
+		}
+	}
+
+	void create_command_pool ()
+	{
+		vk::CommandPoolCreateInfo command_pool_create_info ({}, common_graphics_obj_ptr->graphics_queue_family_indices[0]);
+		common_graphics_obj_ptr->command_pool = common_graphics_obj_ptr->graphics_device.createCommandPool (command_pool_create_info);
 	}
 
 	void init (HINSTANCE hInstance, HWND hWnd)
@@ -338,6 +512,11 @@ namespace common_graphics
 
 		populate_instance_layers_and_extensions ();
 		create_instance ();
+		
+		if (is_validataion_needed)
+		{
+			setup_debug_utils_messenger ();
+		}
 	}
 
 	void run ()
@@ -348,6 +527,8 @@ namespace common_graphics
 	void exit ()
 	{
 		OutputDebugString (L"common_graphics::exit\n");
+
+		instance.destroyDebugUtilsMessengerEXT (debug_utils_messenger);
 
 		if (instance != VK_NULL_HANDLE)
 		{
