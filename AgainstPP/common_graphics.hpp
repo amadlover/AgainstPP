@@ -64,7 +64,6 @@ namespace common_graphics
 		vk::CommandPool command_pool;
 	};
 
-	void init (HINSTANCE hInstance, HWND hWnd);
-	void run ();
+	void init (HINSTANCE hInstance, HWND hWnd, common_graphics* ptr);
 	void exit ();
 }

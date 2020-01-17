@@ -243,7 +243,7 @@ BaseGraphics::~BaseGraphics ()
 
 namespace common_graphics
 {
-	std::unique_ptr<common_graphics> common_graphics_obj_ptr (new common_graphics ());
+	common_graphics* common_graphics_obj_ptr;
 
 	bool is_validataion_needed = false;
 
@@ -263,10 +263,10 @@ namespace common_graphics
 		{
 			std::vector<vk::LayerProperties> layer_properties = vk::enumerateInstanceLayerProperties ();
 			std::vector<vk::LayerProperties>::iterator it = std::find_if (
-				layer_properties.begin (), 
-				layer_properties.end (), 
-				[](const vk::LayerProperties& layer_property) { 
-					return strcmp (layer_property.layerName, "VK_LAYER_LUNARG_standard_validation") == 0; 
+				layer_properties.begin (),
+				layer_properties.end (),
+				[](const vk::LayerProperties& layer_property) {
+					return strcmp (layer_property.layerName, "VK_LAYER_LUNARG_standard_validation") == 0;
 				}
 			);
 
@@ -278,10 +278,10 @@ namespace common_graphics
 
 		std::vector<vk::ExtensionProperties> extension_properties = vk::enumerateInstanceExtensionProperties ();
 		std::vector<vk::ExtensionProperties>::iterator it = std::find_if (
-			extension_properties.begin (), 
-			extension_properties.end (), 
+			extension_properties.begin (),
+			extension_properties.end (),
 			[](const vk::ExtensionProperties& extension_property) {
-				return strcmp (extension_property.extensionName, VK_KHR_SURFACE_EXTENSION_NAME) == 0; 
+				return strcmp (extension_property.extensionName, VK_KHR_SURFACE_EXTENSION_NAME) == 0;
 			}
 		);
 
@@ -291,14 +291,14 @@ namespace common_graphics
 		}
 
 		it = std::find_if (
-			extension_properties.begin (), 
-			extension_properties.end (), 
+			extension_properties.begin (),
+			extension_properties.end (),
 			[](const vk::ExtensionProperties& extension_property) {
-				return strcmp (extension_property.extensionName, "VK_KHR_win32_surface") == 0; 
+				return strcmp (extension_property.extensionName, "VK_KHR_win32_surface") == 0;
 			}
 		);
 
-		if (it != extension_properties.end ()) 
+		if (it != extension_properties.end ())
 		{
 			requested_instance_extensions.push_back ("VK_KHR_win32_surface");
 		}
@@ -309,7 +309,7 @@ namespace common_graphics
 				extension_properties.begin (),
 				extension_properties.end (),
 				[](const vk::ExtensionProperties& extension_property) {
-					return strcmp (extension_property.extensionName, VK_EXT_DEBUG_UTILS_EXTENSION_NAME) == 0; 
+					return strcmp (extension_property.extensionName, VK_EXT_DEBUG_UTILS_EXTENSION_NAME) == 0;
 				}
 			);
 			requested_instance_extensions.push_back (VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
@@ -320,11 +320,11 @@ namespace common_graphics
 	{
 		vk::ApplicationInfo AI ("Against", 1, "Against", 1, VK_API_VERSION_1_1);
 		vk::InstanceCreateInfo instance_create_info (
-			{}, 
-			&AI, 
-			requested_instance_layers.size (), 
-			requested_instance_layers.data (), 
-			requested_instance_extensions.size (), 
+			{},
+			&AI,
+			requested_instance_layers.size (),
+			requested_instance_layers.data (),
+			requested_instance_extensions.size (),
 			requested_instance_extensions.data ()
 		);
 
@@ -338,21 +338,21 @@ namespace common_graphics
 
 		vk::DebugUtilsMessageSeverityFlagsEXT severityFlags (
 			vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
-			vk::DebugUtilsMessageSeverityFlagBitsEXT::eError| 
-			vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo | 
-			vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose);
-		
+			vk::DebugUtilsMessageSeverityFlagBitsEXT::eError);
+		/*vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo |
+		vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose);*/
+
 		vk::DebugUtilsMessageTypeFlagsEXT messageTypeFlags (
-			vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral | 
-			vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance | 
+			vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral |
+			vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance |
 			vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation
 		);
 
 		debug_utils_messenger = instance.createDebugUtilsMessengerEXT (
 			vk::DebugUtilsMessengerCreateInfoEXT (
-				{}, 
-				severityFlags, 
-				messageTypeFlags, 
+				{},
+				severityFlags,
+				messageTypeFlags,
 				&debug_messenger_callback
 			)
 		);
@@ -380,23 +380,21 @@ namespace common_graphics
 	void create_surface (HINSTANCE hInstance, HWND hWnd)
 	{
 		surface = instance.createWin32SurfaceKHR (
-			vk::Win32SurfaceCreateInfoKHR ({}, 
-				hInstance, 
+			vk::Win32SurfaceCreateInfoKHR ({},
+				hInstance,
 				hWnd
 			)
 		);
 	}
 
-	void populate_graphics_device_extensions () 
+	void populate_graphics_device_extensions ()
 	{
-		OutputDebugString (L"BaseGraphics::_PopulateGraphicsDeviceExtensions\n");
-
 		std::vector<vk::ExtensionProperties> extension_properties = physical_device.enumerateDeviceExtensionProperties ();
 		std::vector< vk::ExtensionProperties>::iterator It = std::find_if (
-			extension_properties.begin (), 
-			extension_properties.end (), 
-			[](const vk::ExtensionProperties& ExtensionProperty) { 
-				return strcmp (ExtensionProperty.extensionName, VK_KHR_SWAPCHAIN_EXTENSION_NAME) == 0; 
+			extension_properties.begin (),
+			extension_properties.end (),
+			[](const vk::ExtensionProperties& ExtensionProperty) {
+				return strcmp (ExtensionProperty.extensionName, VK_KHR_SWAPCHAIN_EXTENSION_NAME) == 0;
 			}
 		);
 
@@ -408,18 +406,18 @@ namespace common_graphics
 		float priorities = 1.f;
 
 		vk::DeviceQueueCreateInfo queue_create_info (
-			{}, 
-			common_graphics_obj_ptr->graphics_queue_family_indices[0], 
-			1, 
+			{},
+			common_graphics_obj_ptr->graphics_queue_family_indices[0],
+			1,
 			&priorities
 		);
 		vk::DeviceCreateInfo device_create_info (
-			{}, 
-			1, 
-			&queue_create_info, 
-			0, 
-			NULL, 
-			requested_device_extensions.size (), 
+			{},
+			1,
+			&queue_create_info,
+			0,
+			NULL,
+			requested_device_extensions.size (),
 			requested_device_extensions.data ()
 		);
 
@@ -443,11 +441,12 @@ namespace common_graphics
 			}
 		}
 
-		for (auto PresentMode : physical_device.getSurfacePresentModesKHR (surface))
+		for (auto present_mode : physical_device.getSurfacePresentModesKHR (surface))
 		{
-			if (PresentMode == vk::PresentModeKHR::eMailbox)
+			if (present_mode == vk::PresentModeKHR::eMailbox)
 			{
-				chosen_present_mode = PresentMode;
+				chosen_present_mode = present_mode;
+				break;
 			}
 		}
 
@@ -465,27 +464,26 @@ namespace common_graphics
 			surface_capabilities.supportedUsageFlags,
 			vk::SharingMode::eExclusive,
 			1,
-			&common_graphics_obj_ptr->graphics_queue_family_indices[0],
+			& common_graphics_obj_ptr->graphics_queue_family_indices[0],
 			surface_capabilities.currentTransform,
 			vk::CompositeAlphaFlagBitsKHR::eOpaque,
 			chosen_present_mode,
 			VK_TRUE,
 			VK_NULL_HANDLE
 		);
-		
-		common_graphics_obj_ptr->swapchain = common_graphics_obj_ptr->graphics_device.createSwapchainKHR (swapchain_create_info);
 
+		common_graphics_obj_ptr->swapchain = common_graphics_obj_ptr->graphics_device.createSwapchainKHR (swapchain_create_info);
 		common_graphics_obj_ptr->swapchain_images = common_graphics_obj_ptr->graphics_device.getSwapchainImagesKHR (common_graphics_obj_ptr->swapchain);
 
 		vk::ComponentMapping components (vk::ComponentSwizzle::eR, vk::ComponentSwizzle::eG, vk::ComponentSwizzle::eB, vk::ComponentSwizzle::eA);
 		vk::ImageSubresourceRange subresource_range (vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1);
 
 		vk::ImageViewCreateInfo swapchain_image_view_create_info (
-			{}, 
-			nullptr, 
-			vk::ImageViewType::e2D, 
-			common_graphics_obj_ptr->chosen_surface_format.format, 
-			components, 
+			{},
+			nullptr,
+			vk::ImageViewType::e2D,
+			common_graphics_obj_ptr->chosen_surface_format.format,
+			components,
 			subresource_range
 		);
 
@@ -502,37 +500,69 @@ namespace common_graphics
 		common_graphics_obj_ptr->command_pool = common_graphics_obj_ptr->graphics_device.createCommandPool (command_pool_create_info);
 	}
 
-	void init (HINSTANCE hInstance, HWND hWnd)
+	void init (HINSTANCE hInstance, HWND hWnd, common_graphics* ptr)
 	{
 		OutputDebugString (L"common_graphics::init\n");
-	
+
+		common_graphics_obj_ptr = ptr;
+
 #ifdef _DEBUG
 		is_validataion_needed = true;
 #endif
 
 		populate_instance_layers_and_extensions ();
 		create_instance ();
-		
+
 		if (is_validataion_needed)
 		{
 			setup_debug_utils_messenger ();
 		}
-	}
 
-	void run ()
-	{
-		OutputDebugString (L"common_graphics::run\n");
+		get_physical_device ();
+		create_surface (hInstance, hWnd);
+		populate_graphics_device_extensions ();
+		create_graphics_device_and_queue ();
+		create_swapchain ();
+		create_command_pool ();
 	}
 
 	void exit ()
 	{
 		OutputDebugString (L"common_graphics::exit\n");
 
+		if (common_graphics_obj_ptr->command_pool != VK_NULL_HANDLE)
+		{
+			common_graphics_obj_ptr->graphics_device.destroyCommandPool (common_graphics_obj_ptr->command_pool);
+		}
+
+		for (auto& swapchain_imageview : common_graphics_obj_ptr->swapchain_imageviews)
+		{
+			if (swapchain_imageview != VK_NULL_HANDLE)
+			{
+				common_graphics_obj_ptr->graphics_device.destroyImageView (swapchain_imageview);
+			}
+		}
+
+		if (common_graphics_obj_ptr->swapchain != VK_NULL_HANDLE)
+		{
+			common_graphics_obj_ptr->graphics_device.destroySwapchainKHR (common_graphics_obj_ptr->swapchain);
+		}
+
+		if (common_graphics_obj_ptr->graphics_device != VK_NULL_HANDLE)
+		{
+			common_graphics_obj_ptr->graphics_device.destroy ();
+		}
+
+		if (surface != VK_NULL_HANDLE)
+		{
+			instance.destroySurfaceKHR (surface);
+		}
+
 		instance.destroyDebugUtilsMessengerEXT (debug_utils_messenger);
 
 		if (instance != VK_NULL_HANDLE)
 		{
-			instance.destroy();
+			instance.destroy ();
 		}
 	}
 }

@@ -4,7 +4,7 @@
 
 namespace graphics_utils
 {
-	void SubmitOneTimeCmd (vk::Queue GraphicsQueue, vk::CommandBuffer CommandBuffer)
+	void submit_one_time_cmd (vk::Queue GraphicsQueue, vk::CommandBuffer CommandBuffer)
 	{
 		vk::SubmitInfo SubmitInfo (0, nullptr, nullptr, 1, &CommandBuffer, 0, nullptr);
 		vk::ArrayProxy<const vk::SubmitInfo> SubmitInfos (1, &SubmitInfo);
@@ -25,35 +25,142 @@ namespace graphics_utils
 		return 0;
 	}
 
-	void create_buffer_and_buffer_memory (BaseGraphics* G, vk::DeviceSize Size, vk::BufferUsageFlags Usage, vk::SharingMode SharingMode, const std::vector<uint32_t>& QueueFamilies, vk::MemoryPropertyFlags RequiredMemoryTypes, vk::Buffer& OutBuffer, vk::DeviceMemory& OutBufferMemory)
+	void CreateBufferAndBufferMemory (
+		BaseGraphics* G,
+		vk::DeviceSize Size, 
+		vk::BufferUsageFlags Usage, 
+		vk::SharingMode SharingMode, 
+		const std::vector<uint32_t>& QueueFamilies, 
+		vk::MemoryPropertyFlags RequiredMemoryTypes, 
+		vk::Buffer& OutBuffer, 
+		vk::DeviceMemory& OutBufferMemory
+	)
 	{
-		const vk::BufferCreateInfo BufferCreateInfo ({}, Size, Usage, SharingMode, QueueFamilies.size (), QueueFamilies.data ());
+		const vk::BufferCreateInfo buffer_create_info (
+			{}, 
+			Size, 
+			Usage, 
+			SharingMode, 
+			QueueFamilies.size (), 
+			QueueFamilies.data ()
+		);
 
-		OutBuffer = G->GraphicsDevice.createBuffer (BufferCreateInfo);
+		OutBuffer = G->GraphicsDevice.createBuffer (buffer_create_info);
+
+		vk::MemoryRequirements buffer_memory_requirements = G->GraphicsDevice.getBufferMemoryRequirements (OutBuffer);
+		vk::MemoryAllocateInfo BufferMemoryAllocateInfo (
+			buffer_memory_requirements.size,
+			get_memory_type_index (buffer_memory_requirements,
+				G->PhysicalDeviceMemoryProperties,
+				RequiredMemoryTypes
+			)
+		);
+
+		OutBufferMemory= G->GraphicsDevice.allocateMemory (BufferMemoryAllocateInfo);
+		G->GraphicsDevice.bindBufferMemory (OutBuffer, OutBufferMemory, 0);
 	}
 
-	void allocate_bind_memory (vk::Device graphics_device, const vk::Buffer& Buffer, vk::PhysicalDeviceMemoryProperties physical_device_memory_properties, vk::MemoryPropertyFlags required_types, vk::DeviceMemory& out_buffer_memory)
+	void create_buffer (
+		vk::Device graphics_device, 
+		vk::DeviceSize size, 
+		vk::BufferUsageFlags usage, 
+		vk::SharingMode sharing_mode, 
+		const std::vector<uint32_t>& queue_family_indices, 
+		vk::Buffer& out_buffer
+	)
+	{
+		const vk::BufferCreateInfo buffer_create_info (
+			{}, 
+			size, 
+			usage, 
+			sharing_mode, 
+			queue_family_indices.size (), 
+			queue_family_indices.data ()
+		);
+
+		out_buffer = graphics_device.createBuffer (buffer_create_info);
+	}
+
+	void allocate_bind_memory
+	(
+		const vk::Device& graphics_device,
+		const vk::Buffer& Buffer,
+		const vk::PhysicalDeviceMemoryProperties& physical_device_memory_properties,
+		vk::MemoryPropertyFlags required_types,
+		vk::DeviceMemory& out_buffer_memory
+	)
 	{
 		vk::MemoryRequirements buffer_memory_requirements = graphics_device.getBufferMemoryRequirements (Buffer);
-		vk::MemoryAllocateInfo BufferMemoryAllocateInfo (buffer_memory_requirements.size, get_memory_type_index (buffer_memory_requirements, physical_device_memory_properties, required_types));
+		vk::MemoryAllocateInfo BufferMemoryAllocateInfo (
+			buffer_memory_requirements.size, 
+			get_memory_type_index (buffer_memory_requirements, 
+				physical_device_memory_properties, 
+				required_types
+			)
+		);
 
 		out_buffer_memory = graphics_device.allocateMemory (BufferMemoryAllocateInfo);
 		graphics_device.bindBufferMemory (Buffer, out_buffer_memory, 0);
 	}
 
-	void CreateImageAndImageMemory (BaseGraphics* G, vk::ImageType ImageType, vk::Format Format, vk::Extent3D Extent, uint32_t MipLevels, uint32_t ArrayLayers, vk::SampleCountFlagBits Samples, vk::ImageTiling Tiling, vk::ImageUsageFlags Usage, vk::SharingMode SharingMode, std::vector<uint32_t> QueueFamilies, vk::ImageLayout InitialLayout, vk::MemoryPropertyFlags RequiredMemoryTypes, vk::Image& OutImage, vk::DeviceMemory& OutImageMemory)
+	void CreateImageAndImageMemory (BaseGraphics* G, 
+		vk::ImageType ImageType, 
+		vk::Format Format, 
+		vk::Extent3D Extent, 
+		uint32_t MipLevels, 
+		uint32_t ArrayLayers, 
+		vk::SampleCountFlagBits Samples, 
+		vk::ImageTiling Tiling, 
+		vk::ImageUsageFlags Usage, 
+		vk::SharingMode SharingMode, 
+		std::vector<uint32_t> QueueFamilies, 
+		vk::ImageLayout InitialLayout, 
+		vk::MemoryPropertyFlags RequiredMemoryTypes, 
+		vk::Image& OutImage, 
+		vk::DeviceMemory& OutImageMemory)
 	{
-		vk::ImageCreateInfo ImageCreateInfo ({}, ImageType, Format, Extent, MipLevels, ArrayLayers, Samples, Tiling, Usage, SharingMode, QueueFamilies[0], QueueFamilies.data (), InitialLayout);
+		vk::ImageCreateInfo ImageCreateInfo (
+			{}, 
+			ImageType, 
+			Format, 
+			Extent, 
+			MipLevels, 
+			ArrayLayers, 
+			Samples, 
+			Tiling, 
+			Usage, 
+			SharingMode, 
+			QueueFamilies[0], 
+			QueueFamilies.data (), 
+			InitialLayout
+		);
 		OutImage = G->GraphicsDevice.createImage (ImageCreateInfo);
 
 		vk::MemoryRequirements ImageMemoryRequirements = G->GraphicsDevice.getImageMemoryRequirements (OutImage);
-		vk::MemoryAllocateInfo ImageMemoryAllocateInfo (ImageMemoryRequirements.size, get_memory_type_index (ImageMemoryRequirements, G->PhysicalDeviceMemoryProperties, RequiredMemoryTypes));
+		vk::MemoryAllocateInfo ImageMemoryAllocateInfo (
+			ImageMemoryRequirements.size, 
+			get_memory_type_index (
+				ImageMemoryRequirements, 
+				G->PhysicalDeviceMemoryProperties, 
+				RequiredMemoryTypes
+			)
+		);
 
 		OutImageMemory = G->GraphicsDevice.allocateMemory (ImageMemoryAllocateInfo);
 		G->GraphicsDevice.bindImageMemory (OutImage, OutImageMemory, 0);
 	}
 
-	void ChangeImageLayout (BaseGraphics* G, vk::CommandPool CommandPool, vk::Image& Image, vk::ImageLayout OldLayout, vk::ImageLayout NewLayout, vk::PipelineStageFlags SrcStageMask, vk::PipelineStageFlags DstStageMask, vk::AccessFlags SrcAccessMask, vk::AccessFlags DstAccessMask)
+	void ChangeImageLayout (
+		BaseGraphics* G, 
+		vk::CommandPool CommandPool, 
+		vk::Image& Image, 
+		vk::ImageLayout OldLayout, 
+		vk::ImageLayout NewLayout, 
+		vk::PipelineStageFlags SrcStageMask, 
+		vk::PipelineStageFlags DstStageMask, 
+		vk::AccessFlags SrcAccessMask, 
+		vk::AccessFlags DstAccessMask
+	)
 	{
 		vk::CommandBufferAllocateInfo CommandBufferAllocateInfo (CommandPool, vk::CommandBufferLevel::ePrimary, 1);
 		vk::CommandBuffer CommandBuffer = G->GraphicsDevice.allocateCommandBuffers (CommandBufferAllocateInfo).front ();
@@ -67,12 +174,19 @@ namespace graphics_utils
 		CommandBuffer.pipelineBarrier (SrcStageMask, DstStageMask, {}, {}, {}, ImageMemoryBarriers);
 		CommandBuffer.end ();
 
-		SubmitOneTimeCmd (G->GraphicsQueue, CommandBuffer);
+		submit_one_time_cmd (G->GraphicsQueue, CommandBuffer);
 
 		G->GraphicsDevice.freeCommandBuffers (CommandPool, CommandBuffer);
 	}
 
-	void CopyBufferToImage (BaseGraphics* G, vk::CommandPool CommandPool, vk::Buffer Buffer, vk::Image& Image, vk::Extent3D ImageExtent, vk::ImageLayout DstImageLayout)
+	void CopyBufferToImage (
+		BaseGraphics* G, 
+		vk::CommandPool CommandPool, 
+		vk::Buffer Buffer, 
+		vk::Image& Image, 
+		vk::Extent3D ImageExtent, 
+		vk::ImageLayout DstImageLayout
+	)
 	{
 		vk::CommandBufferAllocateInfo CommandBufferAllocateInfo (CommandPool, vk::CommandBufferLevel::ePrimary, 1);
 		vk::CommandBuffer CommandBuffer = G->GraphicsDevice.allocateCommandBuffers (CommandBufferAllocateInfo).front ();
@@ -86,12 +200,18 @@ namespace graphics_utils
 		CommandBuffer.copyBufferToImage (Buffer, Image, DstImageLayout, BufferImageCopies);
 		CommandBuffer.end ();
 
-		SubmitOneTimeCmd (G->GraphicsQueue, CommandBuffer);
+		submit_one_time_cmd (G->GraphicsQueue, CommandBuffer);
 
 		G->GraphicsDevice.freeCommandBuffers (CommandPool, CommandBuffer);
 	}
 
-	void CopyBufferToBuffer (BaseGraphics* G, vk::CommandPool CommandPool, vk::Buffer SrcBuffer, vk::Buffer DstBuffer, vk::DeviceSize Size)
+	void CopyBufferToBuffer (
+		BaseGraphics* G, 
+		vk::CommandPool CommandPool, 
+		vk::Buffer SrcBuffer, 
+		vk::Buffer DstBuffer, 
+		vk::DeviceSize Size
+	)
 	{
 		vk::CommandBufferAllocateInfo CommandBufferAllocateInfo (CommandPool, vk::CommandBufferLevel::ePrimary, 1);
 		vk::CommandBuffer CommandBuffer = G->GraphicsDevice.allocateCommandBuffers (CommandBufferAllocateInfo).front ();
@@ -103,12 +223,18 @@ namespace graphics_utils
 		CommandBuffer.copyBuffer (SrcBuffer, DstBuffer, BufferCopy);
 		CommandBuffer.end ();
 
-		SubmitOneTimeCmd (G->GraphicsQueue, CommandBuffer);
+		submit_one_time_cmd (G->GraphicsQueue, CommandBuffer);
 
 		G->GraphicsDevice.freeCommandBuffers (CommandPool, CommandBuffer);
 	}
 
-	void CreateShader (vk::Device GraphicsDevice, std::string FilePath, vk::ShaderStageFlagBits ShaderStage, vk::ShaderModule& ShaderModule, vk::PipelineShaderStageCreateInfo& ShaderStageCreateInfo)
+	void CreateShader (
+		vk::Device GraphicsDevice, 
+		std::string FilePath, 
+		vk::ShaderStageFlagBits ShaderStage, 
+		vk::ShaderModule& ShaderModule, 
+		vk::PipelineShaderStageCreateInfo& ShaderStageCreateInfo
+	)
 	{
 		std::ifstream File (FilePath, std::ios::in | std::ios::binary | std::ios::ate);
 

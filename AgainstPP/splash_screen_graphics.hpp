@@ -63,7 +63,9 @@ namespace splash_screen_graphics
 		std::vector<image::vk_image> vk_images;
 	};
 
-	void init (const std::vector<asset::gltf_asset>& gltf_assets, const std::vector<image::gltf_image>& images);
+	static std::unique_ptr<splash_screen_graphics> graphics_ptr (new splash_screen_graphics ());
+
+	void init (const std::vector<asset::gltf_asset>& gltf_assets, const std::vector<image::gltf_image>& images, common_graphics::common_graphics* ptr);
 	void run ();
 	void exit ();
 }

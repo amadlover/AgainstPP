@@ -76,7 +76,7 @@ void _SplashSceneGraphics::_LoadGLTFData (std::string FilePath, std::vector<Asse
 	}
 
 	vk::Buffer StagingBuffer; vk::DeviceMemory StagingBufferMemory;
-	graphics_utils::create_buffer_and_buffer_memory (_G, (ImageMemorySize + VertexIndexMemorySize), vk::BufferUsageFlagBits::eTransferSrc, vk::SharingMode::eExclusive, _G->GraphicsQueueFamilies, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, StagingBuffer, StagingBufferMemory);
+	graphics_utils::CreateBufferAndBufferMemory (_G, (ImageMemorySize + VertexIndexMemorySize), vk::BufferUsageFlagBits::eTransferSrc, vk::SharingMode::eExclusive, _G->GraphicsQueueFamilies, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, StagingBuffer, StagingBufferMemory);
 
 	_G->GraphicsDevice.destroyBuffer (StagingBuffer);
 	_G->GraphicsDevice.freeMemory (StagingBufferMemory);
@@ -102,7 +102,7 @@ void _SplashSceneGraphics::_CreateDeviceTextureImage ()
 	int Width; int Height; int Components;
 	uint8_t* Pixels = stbi_load (TexturePath.c_str (), &Width, &Height, &Components, 4);
 
-	graphics_utils::create_buffer_and_buffer_memory (_G, (vk::DeviceSize)(Width * Height * Components), vk::BufferUsageFlagBits::eTransferSrc, vk::SharingMode::eExclusive, _G->GraphicsQueueFamilies, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, StagingBuffer, StagingBufferMemory);
+	graphics_utils::CreateBufferAndBufferMemory (_G, (vk::DeviceSize)(Width * Height * Components), vk::BufferUsageFlagBits::eTransferSrc, vk::SharingMode::eExclusive, _G->GraphicsQueueFamilies, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, StagingBuffer, StagingBufferMemory);
 	HANDLE Data = _G->GraphicsDevice.mapMemory (StagingBufferMemory, 0, (vk::DeviceSize)(Width * Height * Components));
 	memcpy (Data, Pixels, (Width * Height * Components));
 	_G->GraphicsDevice.unmapMemory (StagingBufferMemory);
@@ -370,11 +370,60 @@ _SplashSceneGraphics::~_SplashSceneGraphics ()
 
 namespace splash_screen_graphics
 {
-	std::unique_ptr<splash_screen_graphics> graphics_ptr (new splash_screen_graphics ());
+	common_graphics::common_graphics* common_graphics_obj_ptr;
 
-	void init (const std::vector<asset::gltf_asset>& gltf_assets, const std::vector<image::gltf_image> &images)
+	void create_vulkan_handles_for_images (const std::vector<image::gltf_image>& gltf_images)
+	{
+
+	}
+
+	void create_vulkan_handles_for_assets (const std::vector<asset::gltf_asset>& gltf_assets)
+	{
+		vk::DeviceSize total_size = 0;
+
+		for (auto asset : gltf_assets)
+		{
+			for (auto graphics_primitive : asset.graphics_primitves)
+			{
+				total_size = (vk::DeviceSize)graphics_primitive.positions.size () + 
+							(vk::DeviceSize)graphics_primitive.normals.size () + 
+							(vk::DeviceSize)graphics_primitive.uv0s.size () + 
+							(vk::DeviceSize)graphics_primitive.uv1s.size () + 
+							(vk::DeviceSize)(graphics_primitive.indices.size () * sizeof (uint32_t));
+			}
+		}
+
+		vk::Buffer staging_buffer;
+		vk::DeviceMemory staging_buffer_memory;
+
+		graphics_utils::create_buffer (
+			common_graphics_obj_ptr->graphics_device,
+			total_size, 
+			vk::BufferUsageFlagBits::eTransferSrc, 
+			vk::SharingMode::eExclusive, 
+			common_graphics_obj_ptr->graphics_queue_family_indices,
+			staging_buffer
+		);
+
+		graphics_utils::allocate_bind_memory (
+			common_graphics_obj_ptr->graphics_device,
+			staging_buffer,
+			common_graphics_obj_ptr->physical_device_memory_properties,
+			vk::MemoryPropertyFlagBits::eHostVisible,
+			staging_buffer_memory
+		);
+
+		common_graphics_obj_ptr->graphics_device.destroyBuffer (staging_buffer);
+		common_graphics_obj_ptr->graphics_device.freeMemory (staging_buffer_memory);
+	}
+
+	void init (const std::vector<asset::gltf_asset>& gltf_assets, const std::vector<image::gltf_image>& gltf_images, common_graphics::common_graphics* ptr)
 	{
 		OutputDebugString (L"splash_screen_graphics::init\n");
+		common_graphics_obj_ptr = ptr;
+
+		create_vulkan_handles_for_images (gltf_images);
+		create_vulkan_handles_for_assets (gltf_assets);
 	}
 
 	void run ()

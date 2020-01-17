@@ -26,6 +26,8 @@ namespace game
 	escene_state splash_screen_state = escene_state::exited;
 	escene_state main_menu_state = escene_state::exited;
 
+	std::unique_ptr<common_graphics::common_graphics> common_graphics_obj_ptr (new common_graphics::common_graphics ());
+
 	void process_keyboard_input (WPARAM wParam, LPARAM lParam)
 	{
 		switch (current_scene)
@@ -93,7 +95,8 @@ namespace game
 	void init (HINSTANCE hInstance, HWND hWnd)
 	{
 		OutputDebugString (L"game::init\n");
-		common_graphics::init (hInstance, hWnd);
+
+		common_graphics::init (hInstance, hWnd, common_graphics_obj_ptr.get ());
 	}
 
 	void run ()
@@ -103,7 +106,7 @@ namespace game
 		case ecurrent_scene::splash_screen:
 			if (splash_screen_state == escene_state::exited)
 			{
-				splash_screen::init ();
+				splash_screen::init (common_graphics_obj_ptr.get ());
 				splash_screen_state = escene_state::inited;
 			}
 			else if (splash_screen_state == escene_state::inited)

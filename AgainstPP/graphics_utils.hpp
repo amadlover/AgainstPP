@@ -8,7 +8,7 @@
 
 namespace graphics_utils
 {
-	void create_buffer_and_buffer_memory 
+	void CreateBufferAndBufferMemory 
 	(
 		BaseGraphics* G, 
 		vk::DeviceSize Size, 
@@ -20,11 +20,20 @@ namespace graphics_utils
 		vk::DeviceMemory& OutBufferMemory
 	);
 
+	void create_buffer (
+		vk::Device graphics_device,
+		vk::DeviceSize size,
+		vk::BufferUsageFlags usage,
+		vk::SharingMode sharing_mode,
+		const std::vector<uint32_t>& queue_family_indices,
+		vk::Buffer& out_buffer
+	);
+
 	void allocate_bind_memory 
 	(
-		vk::Device graphics_device, 
-		const vk::Buffer Buffers, 
-		vk::PhysicalDeviceMemoryProperties physical_device_memory_properties, 
+		const vk::Device& graphics_device, 
+		const vk::Buffer& Buffer, 
+		const vk::PhysicalDeviceMemoryProperties& physical_device_memory_properties, 
 		vk::MemoryPropertyFlags required_types, 
 		vk::DeviceMemory& out_buffer_memory
 	);
@@ -90,5 +99,5 @@ namespace graphics_utils
 	);
 
 	//uint32_t get_memory_type_index (vk::MemoryRequirements MemoryRequirements, vk::PhysicalDeviceMemoryProperties MemoryProperties, vk::MemoryPropertyFlags RequiredMemoryTypes);
-	//void SubmitOneTimeCmd (vk::Queue GraphicsQueue, vk::CommandBuffer CommandBuffer);
+	//void submit_one_time_cmd (vk::Queue GraphicsQueue, vk::CommandBuffer CommandBuffer);
 };

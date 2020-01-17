@@ -20,7 +20,9 @@ namespace splash_screen
 		std::vector<actor::actor> actors;
 	};
 
-	void init ();
+	static std::unique_ptr<splash_screen> splash_screen_obj_ptr (new splash_screen ());
+
+	void init (common_graphics::common_graphics* common_graphics_obj_ptr);
 	void run ();
 	void exit ();
 }
