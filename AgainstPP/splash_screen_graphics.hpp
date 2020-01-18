@@ -59,7 +59,7 @@ namespace splash_screen_graphics
 {
 	struct splash_screen_graphics
 	{
-		std::vector<mesh::vk_asset> vk_assets;
+		std::vector<mesh::vk_mesh> vk_meshes;
 		std::vector<image::vk_image> vk_images;
 	};
 

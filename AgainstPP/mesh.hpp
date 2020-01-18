@@ -68,15 +68,12 @@ namespace mesh
 		vk::DeviceMemory* buffer_memory;
 
 		vk::DeviceSize positions_offset;
-		vk::DeviceSize normals_offset;
-		vk::DeviceSize uv0s_offset;
-		vk::DeviceSize uv1s_offset;
 		vk::DeviceSize indices_offset;
 
 		std::vector<uint32_t> indices;
 	};
 
-	struct vk_asset
+	struct vk_mesh
 	{
 		std::vector<vk_graphics_primitive> graphics_primitives;
 		std::vector<vk_physics_primitive> physics_primitives;
@@ -100,8 +97,9 @@ namespace mesh
 		std::vector<uint8_t> normals;
 		std::vector<uint8_t> uv0s;
 		std::vector<uint8_t> uv1s;
+		std::vector<uint8_t> indices;
 
-		std::vector<uint32_t> indices;
+		vk::IndexType index_type;
 
 		gltf_material material;
 	};
@@ -109,7 +107,9 @@ namespace mesh
 	struct gltf_physics_primitive
 	{
 		std::vector<uint8_t> positions;
-		std::vector<uint32_t> indices;
+		std::vector<uint8_t> indices;
+		
+		vk::IndexType index_type;
 	};
 
 	struct gltf_mesh
