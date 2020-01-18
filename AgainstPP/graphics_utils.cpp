@@ -206,6 +206,8 @@ namespace graphics_utils
 		command_buffer.end ();
 
 		submit_one_time_cmd (command_buffer);
+
+		common_graphics_obj_ptr->graphics_device.freeCommandBuffers (command_pool, 1, &command_buffer);
 	}
 
 	void allocate_bind_image_memory ()
