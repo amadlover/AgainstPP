@@ -4,7 +4,7 @@
 
 #include <vulkan.hpp>
 
-#include "BaseGraphics.hpp"
+#include "common_graphics.hpp"
 
 class GraphicUtils
 {
@@ -21,3 +21,36 @@ private:
 	static uint32_t GetMemoryTypeIndex (vk::MemoryRequirements MemoryRequirements, vk::PhysicalDeviceMemoryProperties MemoryProperties, vk::MemoryPropertyFlags RequiredMemoryTypes);
 	static void SubmitOneTimeCmd (vk::Queue GraphicsQueue, vk::CommandBuffer CommandBuffer);
 };
+
+namespace graphics_utils
+{
+	void init (common_graphics::common_graphics* ptr);
+
+	void allocate_bind_buffer_memory (
+		vk::Buffer buffer, 
+		vk::MemoryPropertyFlags required_types, 
+		vk::DeviceMemory& out_memory
+	);
+
+	void map_data_to_buffer (
+		vk::DeviceMemory memory, 
+		vk::DeviceSize offset, 
+		vk::DeviceSize size, 
+		void* data_source
+	);
+	void copy_buffer_to_buffer (vk::CommandPool command_pool,
+		vk::Buffer src_buffer,
+		vk::Buffer dst_buffer,
+		vk::DeviceSize size
+	);
+
+	void allocate_bind_image_memory ();
+	void copy_buffer_to_image ();
+
+	void create_shader (
+		std::string file_path, 
+		vk::ShaderStageFlagBits shader_stage, 
+		vk::ShaderModule& shader_module, 
+		vk::PipelineShaderStageCreateInfo& shader_stage_create_info
+	);
+}
