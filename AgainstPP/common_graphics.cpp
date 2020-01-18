@@ -1,5 +1,6 @@
 #include <Windows.h>
 
+#include "graphics_utils.hpp"
 #include "common_graphics.hpp"
 #include "Error.hpp"
 

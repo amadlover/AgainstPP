@@ -370,6 +370,7 @@ _SplashSceneGraphics::~_SplashSceneGraphics ()
 
 namespace splash_screen_graphics
 {
+	splash_screen_graphics* splash_screen_graphics_obj_ptr;
 	common_graphics::common_graphics* common_graphics_obj_ptr;
 
 	void create_vulkan_handles_for_images (const std::vector<image::gltf_image>& gltf_images)
@@ -393,8 +394,8 @@ namespace splash_screen_graphics
 			}
 		}
 
-		vk::Buffer staging_buffer;
-		vk::DeviceMemory staging_buffer_memory;
+		vk::Buffer staging_buffer = graphics_utils::create_buffer (total_size, vk::BufferUsageFlagBits::eTransferSrc, vk::SharingMode::eExclusive);
+		vk::DeviceMemory staging_buffer_memory = graphics_utils::allocate_bind_buffer_memory (staging_buffer, vk::MemoryPropertyFlagBits::eHostVisible);
 
 		common_graphics_obj_ptr->graphics_device.destroyBuffer (staging_buffer);
 		common_graphics_obj_ptr->graphics_device.freeMemory (staging_buffer_memory);

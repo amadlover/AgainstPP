@@ -7,6 +7,8 @@
 #include "splash_screen.hpp"
 #include "main_menu.hpp"
 
+#include "graphics_utils.hpp"
+
 namespace game 
 {
 	enum class ecurrent_scene
@@ -97,6 +99,7 @@ namespace game
 		OutputDebugString (L"game::init\n");
 
 		common_graphics::init (hInstance, hWnd, common_graphics_obj_ptr.get ());
+		graphics_utils::init (common_graphics_obj_ptr.get ());
 	}
 
 	void run ()
