@@ -377,13 +377,13 @@ namespace splash_screen_graphics
 
 	}
 
-	void create_vulkan_handles_for_assets (const std::vector<asset::gltf_asset>& gltf_assets)
+	void create_vulkan_handles_for_meshes (const std::vector<mesh::gltf_mesh>& gltf_meshes)
 	{
 		vk::DeviceSize total_size = 0;
 
-		for (auto asset : gltf_assets)
+		for (auto mesh : gltf_meshes)
 		{
-			for (auto graphics_primitive : asset.graphics_primitves)
+			for (auto graphics_primitive : mesh.graphics_primitves)
 			{
 				total_size = (vk::DeviceSize)graphics_primitive.positions.size () + 
 							(vk::DeviceSize)graphics_primitive.normals.size () + 
@@ -400,13 +400,13 @@ namespace splash_screen_graphics
 		common_graphics_obj_ptr->graphics_device.freeMemory (staging_buffer_memory);
 	}
 
-	void init (const std::vector<asset::gltf_asset>& gltf_assets, const std::vector<image::gltf_image>& gltf_images, common_graphics::common_graphics* ptr)
+	void init (const std::vector<mesh::gltf_mesh>& gltf_meshes, const std::vector<image::gltf_image>& gltf_images, common_graphics::common_graphics* ptr)
 	{
 		OutputDebugString (L"splash_screen_graphics::init\n");
 		common_graphics_obj_ptr = ptr;
 
 		create_vulkan_handles_for_images (gltf_images);
-		create_vulkan_handles_for_assets (gltf_assets);
+		create_vulkan_handles_for_meshes (gltf_meshes);
 	}
 
 	void run ()

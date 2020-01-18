@@ -36,7 +36,7 @@ public:
 	std::string Name;
 };
 
-namespace asset
+namespace mesh
 {
 	struct vk_texture
 	{
@@ -112,7 +112,7 @@ namespace asset
 		std::vector<uint32_t> indices;
 	};
 
-	struct gltf_asset
+	struct gltf_mesh
 	{
 		std::string name;
 		uint32_t id;
@@ -121,12 +121,12 @@ namespace asset
 		std::vector<gltf_physics_primitive> physics_primitives;
 	};
 
-	void import_gltf_assets (
+	void import_gltf_meshes (
 		const std::string& file_path, 
-		std::vector<gltf_asset>& gltf_assets
+		std::vector<gltf_mesh>& gltf_meshes
 	);
 
-	void destroy_gltf_assets (
-		std::vector<gltf_asset>& gltf_assets
+	void destroy_gltf_meshes (
+		std::vector<gltf_mesh>& gltf_meshes
 	);
 }

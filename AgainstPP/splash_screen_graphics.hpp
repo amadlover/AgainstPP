@@ -1,7 +1,7 @@
 #pragma once
 
 #include "common_graphics.hpp"
-#include "asset.hpp"
+#include "mesh.hpp"
 #include "actor.hpp"
 
 #include <memory>
@@ -59,13 +59,13 @@ namespace splash_screen_graphics
 {
 	struct splash_screen_graphics
 	{
-		std::vector<asset::vk_asset> vk_assets;
+		std::vector<mesh::vk_asset> vk_assets;
 		std::vector<image::vk_image> vk_images;
 	};
 
 	static std::unique_ptr<splash_screen_graphics> graphics_ptr (new splash_screen_graphics ());
 
-	void init (const std::vector<asset::gltf_asset>& gltf_assets, const std::vector<image::gltf_image>& images, common_graphics::common_graphics* ptr);
+	void init (const std::vector<mesh::gltf_mesh>& gltf_meshes, const std::vector<image::gltf_image>& images, common_graphics::common_graphics* ptr);
 	void run ();
 	void exit ();
 }

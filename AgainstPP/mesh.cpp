@@ -1,4 +1,4 @@
-#include "Asset.hpp"
+#include "mesh.hpp"
 
 #include "tiny_gltf.h"
 
@@ -12,7 +12,7 @@ Asset::~Asset ()
 
 }
 
-namespace asset
+namespace mesh
 {
 	void import_gltf_attributes (const tinygltf::Model& model, const tinygltf::Primitive& primitive, gltf_graphics_primitive& graphics_primitive)
 	{
@@ -114,7 +114,7 @@ namespace asset
 		tmp_graphics_primitive.material.base_color_texture.gltf_image_index = model.textures[model.materials[primitive.material].pbrMetallicRoughness.baseColorTexture.index].source;
 	}
 
-	void import_gltf_graphics_primitives (const tinygltf::Model& model, std::vector<gltf_asset>& gltf_assets)
+	void import_gltf_graphics_primitives (const tinygltf::Model& model, std::vector<gltf_mesh>& gltf_meshes)
 	{
 		for (auto node : model.nodes)
 		{
@@ -128,7 +128,7 @@ namespace asset
 				continue;
 			}
 
-			gltf_asset tmp_asset;
+			gltf_mesh tmp_asset;
 			tmp_asset.name = node.name;
 
 			auto mesh = model.meshes[node.mesh];
@@ -144,18 +144,18 @@ namespace asset
 				tmp_asset.graphics_primitves.push_back (tmp_graphics_primitive);
 			}
 
-			gltf_assets.push_back (tmp_asset);
+			gltf_meshes.push_back (tmp_asset);
 		}
 	}
 
-	void import_gltf_physics_primitive (const tinygltf::Model& model, std::vector<gltf_asset>& gltf_assets)
+	void import_gltf_physics_primitive (const tinygltf::Model& model, std::vector<gltf_mesh>& gltf_meshes)
 	{
 
 	}
 
-	void import_gltf_assets (
+	void import_gltf_meshes (
 		const std::string& file_path, 
-		std::vector<gltf_asset>& gltf_assets
+		std::vector<gltf_mesh>& gltf_meshes
 	)
 	{
 		tinygltf::Model model;
@@ -168,14 +168,14 @@ namespace asset
 			throw std::runtime_error (error);
 		}
 
-		import_gltf_graphics_primitives (model, gltf_assets);
-		import_gltf_physics_primitive (model, gltf_assets);
+		import_gltf_graphics_primitives (model, gltf_meshes);
+		import_gltf_physics_primitive (model, gltf_meshes);
 	}
 
-	void destroy_gltf_assets (
-		std::vector<gltf_asset>& gltf_assets
+	void destroy_gltf_meshes (
+		std::vector<gltf_mesh>& gltf_meshes
 	)
 	{
-		gltf_assets.clear ();
+		gltf_meshes.clear ();
 	}
 }

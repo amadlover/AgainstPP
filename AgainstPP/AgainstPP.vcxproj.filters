@@ -19,9 +19,6 @@
     <Filter Include="graphics">
       <UniqueIdentifier>{8c9bc19c-2486-4836-b48b-0f3813d73403}</UniqueIdentifier>
     </Filter>
-    <Filter Include="asset">
-      <UniqueIdentifier>{c7c0b09c-de91-46ba-ba0b-c54fbf7a7c98}</UniqueIdentifier>
-    </Filter>
     <Filter Include="actor">
       <UniqueIdentifier>{20290496-9d12-478a-8914-e3dd24ffb57f}</UniqueIdentifier>
     </Filter>
@@ -31,11 +28,11 @@
     <Filter Include="utils">
       <UniqueIdentifier>{ae742e2c-2da7-40ad-b960-caf9b75c362f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="mesh">
+      <UniqueIdentifier>{c7c0b09c-de91-46ba-ba0b-c54fbf7a7c98}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="asset.cpp">
-      <Filter>asset</Filter>
-    </ClCompile>
     <ClCompile Include="splash_screen_graphics.cpp">
       <Filter>graphics</Filter>
     </ClCompile>
@@ -69,11 +66,11 @@
     <ClCompile Include="common_graphics.cpp">
       <Filter>graphics</Filter>
     </ClCompile>
+    <ClCompile Include="mesh.cpp">
+      <Filter>mesh</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="asset.hpp">
-      <Filter>asset</Filter>
-    </ClInclude>
     <ClInclude Include="splash_screen_graphics.hpp">
       <Filter>graphics</Filter>
     </ClInclude>
@@ -103,6 +100,9 @@
     </ClInclude>
     <ClInclude Include="common_graphics.hpp">
       <Filter>graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="mesh.hpp">
+      <Filter>mesh</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

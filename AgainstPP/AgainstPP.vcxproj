@@ -179,7 +179,7 @@ xcopy "$(ProjectDir)UIElements" "$(SolutionDir)$(Platform)\$(Configuration)\UIEl
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="actor.cpp" />
-    <ClCompile Include="asset.cpp" />
+    <ClCompile Include="mesh.cpp" />
     <ClCompile Include="error.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="common_graphics.cpp" />
@@ -193,7 +193,7 @@ xcopy "$(ProjectDir)UIElements" "$(SolutionDir)$(Platform)\$(Configuration)\UIEl
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="actor.hpp" />
-    <ClInclude Include="asset.hpp" />
+    <ClInclude Include="mesh.hpp" />
     <ClInclude Include="error.hpp" />
     <ClInclude Include="game.hpp" />
     <ClInclude Include="common_graphics.hpp" />
