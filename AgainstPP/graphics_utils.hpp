@@ -41,7 +41,7 @@ namespace graphics_utils
 		vk::DeviceMemory& memory, 
 		vk::DeviceSize offset, 
 		vk::DeviceSize size, 
-		void* data_source
+		const void* data_source
 	);
 
 	void copy_buffer_to_buffer (

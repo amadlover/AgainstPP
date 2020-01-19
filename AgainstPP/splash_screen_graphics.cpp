@@ -373,8 +373,45 @@ namespace splash_screen_graphics
 	std::unique_ptr<splash_screen_graphics> splash_screen_graphics_obj_ptr (new splash_screen_graphics ());
 	common_graphics::common_graphics* common_graphics_obj_ptr;
 
+	void check_for_similar_images (uint32_t start_index, const image::gltf_image& current_image, const std::vector<image::gltf_image>& gltf_images, std::vector<uint32_t>& similar_images)
+	{
+		while (start_index < gltf_images.size ())
+		{
+			if (current_image.width == gltf_images.at (start_index).width && current_image.height == gltf_images.at (start_index).height)
+			{
+				similar_images.push_back (start_index);
+			}
+
+			++start_index;
+		}
+	}
+
 	void create_vulkan_handles_for_images (const std::vector<image::gltf_image>& gltf_images)
 	{
+		uint32_t index = 0;
+		for (auto image : gltf_images)
+		{
+			std::vector<uint32_t> similar_images_indices;
+			similar_images_indices.reserve (gltf_images.size ());
+			similar_images_indices[0] = index;
+			uint32_t start_index = index + 1;
+			check_for_similar_images (start_index, image, gltf_images, similar_images_indices);
+
+			for (uint32_t similar_index : similar_images_indices)
+			{
+				const image::gltf_image similar_image = gltf_images.at (similar_index);
+				
+			}
+			
+			++index;
+		}
+	}
+
+	void map_data (vk::DeviceMemory& device_memory, vk::DeviceSize& offset, vk::DeviceSize& data_offset_for_memory, const std::vector<uint8_t>& data)
+	{
+		graphics_utils::map_data_to_buffer (device_memory, offset, data.size (), data.data ());
+		data_offset_for_memory = offset;
+		offset += data.size ();
 	}
 
 	void create_vulkan_handles_for_meshes (const std::vector<mesh::gltf_mesh>& gltf_meshes)
@@ -401,57 +438,56 @@ namespace splash_screen_graphics
 
 		for (auto mesh : gltf_meshes)
 		{
-			mesh::vk_mesh vk_mesh;
+			mesh::vk_mesh vk_mesh = {};
 			vk_mesh.graphics_primitives.reserve (mesh.graphics_primitves.size ());
 			
 			for (auto graphics_primitive : mesh.graphics_primitves)
 			{
-				mesh::vk_graphics_primitive vk_graphics_primitive;
+				mesh::vk_graphics_primitive vk_graphics_primitive = {};
 			
 				if (graphics_primitive.positions.size () > 0)
 				{
-					graphics_utils::map_data_to_buffer (staging_buffer_memory, offset, graphics_primitive.positions.size (), graphics_primitive.positions.data ());
-
-					vk_graphics_primitive.positions_offset = offset;
-					offset += graphics_primitive.positions.size ();
+					map_data (staging_buffer_memory, offset, vk_graphics_primitive.positions_offset, graphics_primitive.positions);
 				}
 
 				if (graphics_primitive.normals.size () > 0)
 				{
-					graphics_utils::map_data_to_buffer (staging_buffer_memory, offset, graphics_primitive.normals.size (), graphics_primitive.normals.data ());
-
-					vk_graphics_primitive.normals_offset = offset;
-					offset += graphics_primitive.normals.size ();
+					map_data (staging_buffer_memory, offset, vk_graphics_primitive.normals_offset, graphics_primitive.normals);
 				}
 
 				if (graphics_primitive.uv0s.size () > 0)
 				{
-					graphics_utils::map_data_to_buffer (staging_buffer_memory, offset, graphics_primitive.uv0s.size (), graphics_primitive.uv0s.data ());
-
-					vk_graphics_primitive.uv0s_offset = offset;
-					offset += graphics_primitive.uv0s.size ();
+					map_data (staging_buffer_memory, offset, vk_graphics_primitive.uv0s_offset, graphics_primitive.uv0s);
 				}
 
-				if (graphics_primitive.uv1s.size () > 1)
+				if (graphics_primitive.uv1s.size () > 0)
 				{
-					graphics_utils::map_data_to_buffer (staging_buffer_memory, offset, graphics_primitive.uv1s.size (), graphics_primitive.uv1s.data ());
-
-					vk_graphics_primitive.uv1s_offset = offset;
-					offset += graphics_primitive.uv1s.size ();
+					map_data (staging_buffer_memory, offset, vk_graphics_primitive.uv1s_offset, graphics_primitive.uv1s);
 				}
 
 				if (graphics_primitive.indices.size () > 0)
 				{
-					graphics_utils::map_data_to_buffer (staging_buffer_memory, offset, graphics_primitive.indices.size (), graphics_primitive.indices.data ());
-
-					vk_graphics_primitive.indices_offset = offset;
-					offset += graphics_primitive.indices.size ();
+					map_data (staging_buffer_memory, offset, vk_graphics_primitive.indices_offset, graphics_primitive.indices);
 				}
 
 				vk_mesh.graphics_primitives.push_back (vk_graphics_primitive);
 			}
 
 			splash_screen_graphics_obj_ptr->vk_meshes.push_back (vk_mesh);
+		}
+
+		splash_screen_graphics_obj_ptr->vertex_index_buffer = graphics_utils::create_buffer (total_size, vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eIndexBuffer, vk::SharingMode::eExclusive);
+		splash_screen_graphics_obj_ptr->vertex_index_buffer_memory = graphics_utils::allocate_bind_buffer_memory (splash_screen_graphics_obj_ptr->vertex_index_buffer, vk::MemoryPropertyFlagBits::eDeviceLocal);
+
+		graphics_utils::copy_buffer_to_buffer (common_graphics_obj_ptr->command_pool, staging_buffer, splash_screen_graphics_obj_ptr->vertex_index_buffer, total_size);
+
+		for (auto& vk_mesh : splash_screen_graphics_obj_ptr->vk_meshes)
+		{
+			for (auto& graphics_primitive : vk_mesh.graphics_primitives)
+			{
+				graphics_primitive.buffer = &splash_screen_graphics_obj_ptr->vertex_index_buffer;
+				graphics_primitive.buffer_memory = &splash_screen_graphics_obj_ptr->vertex_index_buffer_memory;
+			}
 		}
 
 		common_graphics_obj_ptr->graphics_device.destroyBuffer (staging_buffer);
@@ -474,5 +510,15 @@ namespace splash_screen_graphics
 	void exit ()
 	{
 		OutputDebugString (L"splash_screen_graphics::exit\n");
+
+		if (splash_screen_graphics_obj_ptr->vertex_index_buffer != VK_NULL_HANDLE)
+		{
+			common_graphics_obj_ptr->graphics_device.destroyBuffer (splash_screen_graphics_obj_ptr->vertex_index_buffer);
+		}
+
+		if (splash_screen_graphics_obj_ptr->vertex_index_buffer_memory != VK_NULL_HANDLE)
+		{
+			common_graphics_obj_ptr->graphics_device.freeMemory (splash_screen_graphics_obj_ptr->vertex_index_buffer_memory);
+		}
 	}
 }

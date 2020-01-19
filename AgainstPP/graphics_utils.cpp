@@ -198,7 +198,7 @@ namespace graphics_utils
 		vk::DeviceMemory& memory,
 		vk::DeviceSize offset,
 		vk::DeviceSize size,
-		void* data_source
+		const void* data_source
 	)
 	{
 		HANDLE data = common_graphics_obj_ptr->graphics_device.mapMemory (memory, offset, size);
