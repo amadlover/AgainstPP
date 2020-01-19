@@ -400,7 +400,6 @@ namespace splash_screen_graphics
 			for (uint32_t similar_index : similar_images_indices)
 			{
 				const image::gltf_image similar_image = gltf_images.at (similar_index);
-				
 			}
 			
 			++index;
