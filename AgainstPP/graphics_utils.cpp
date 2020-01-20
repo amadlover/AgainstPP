@@ -242,7 +242,7 @@ namespace graphics_utils
 			vk::ImageType::e2D, 
 			format, 
 			extent, 
-			0, 
+			1, 
 			array_layers, 
 			vk::SampleCountFlagBits::e1, 
 			vk::ImageTiling::eOptimal, 

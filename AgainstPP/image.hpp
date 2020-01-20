@@ -6,12 +6,8 @@ namespace image
 {
 	struct vk_image
 	{
-		vk::Image* image;
-		uint32_t layer_index;
 		vk::ImageView* image_view;
-		vk::DescriptorSet descriptor_set;
-		vk::DeviceMemory* memory;
-		VkDeviceSize offset;
+		vk::DescriptorSet* descriptor_set;
 	};
 
 	struct gltf_image

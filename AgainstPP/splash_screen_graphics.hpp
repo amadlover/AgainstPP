@@ -64,9 +64,13 @@ namespace splash_screen_graphics
 
 		vk::DeviceMemory vertex_index_buffer_memory;
 		vk::Buffer vertex_index_buffer;
+
+		vk::DeviceMemory image_memory;
+		std::vector<vk::ImageView> image_views;
+		std::vector<vk::Image> images;
 	};
 
-	void init (const std::vector<mesh::gltf_mesh>& gltf_meshes, const std::vector<image::gltf_image>& images, common_graphics::common_graphics* ptr);
+	void init (std::vector<mesh::gltf_mesh>& gltf_meshes, std::vector<image::gltf_image>& images, common_graphics::common_graphics* ptr);
 	void run ();
 	void exit ();
 }

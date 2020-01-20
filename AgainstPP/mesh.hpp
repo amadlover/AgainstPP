@@ -40,12 +40,13 @@ namespace mesh
 {
 	struct vk_texture
 	{
-		image::vk_image image;
+		uint32_t vk_image_view_index;
+		vk::ImageView* image_view;
 	};
 
 	struct vk_material
 	{
-		vk_texture texture;
+		vk_texture base_color_texture;
 	};
 
 	struct vk_graphics_primitive
@@ -60,6 +61,8 @@ namespace mesh
 		vk::DeviceSize indices_offset;
 
 		std::vector<uint32_t> indices;
+
+		vk_material material;
 	};
 
 	struct vk_physics_primitive
