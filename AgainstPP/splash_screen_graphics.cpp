@@ -377,7 +377,7 @@ namespace splash_screen_graphics
 		uint32_t from_index, 
 		const image::gltf_image& current_image, 
 		const std::vector<image::gltf_image>& gltf_images, 
-		std::vector<uint32_t>& similar_images
+		std::vector<uint32_t>& similar_image_indices
 	)
 	{
 		while (from_index < gltf_images.size ())
@@ -385,7 +385,7 @@ namespace splash_screen_graphics
 			if (current_image.width == gltf_images.at (from_index).width &&
 				current_image.height == gltf_images.at (from_index).height)
 			{
-				similar_images.push_back (from_index);
+				similar_image_indices.push_back (from_index);
 			}
 
 			++from_index;
@@ -394,14 +394,37 @@ namespace splash_screen_graphics
 
 	void create_vk_images (const std::vector<image::gltf_image>& gltf_images)
 	{
-		uint32_t index = 0;
 		std::map<vk::Image, std::vector<uint32_t>> vkimage_similarindices;
 
-		for (auto image : gltf_images)
+		for (uint32_t index = 0; index < gltf_images.size(); index++)
 		{
+			bool is_index_already_processed = false;
+			for (const auto& vk_image_similar_indices : vkimage_similarindices)
+			{
+				for (const auto& processed_index : vk_image_similar_indices.second)
+				{
+					if (processed_index == index)
+					{
+						is_index_already_processed = true;
+						break;
+					}
+				}
+				if (is_index_already_processed)
+				{
+					break;
+				}
+			}
+
+			if (is_index_already_processed) 
+			{
+				continue;
+			}
+
+			image::gltf_image image = gltf_images.at (index);
 			std::vector<uint32_t> similar_images_indices;
 			similar_images_indices.reserve (gltf_images.size ());
 			similar_images_indices.push_back (index);
+			
 			uint32_t start_index = index + 1;
 			check_for_similar_image_indices (
 				start_index,
@@ -434,8 +457,6 @@ namespace splash_screen_graphics
 			);
 
 			vkimage_similarindices.insert (std::make_pair (vkimage, similar_images_indices));
-			
-			++index;
 		}
 		
 		std::vector<vk::Image> images;
@@ -513,11 +534,11 @@ namespace splash_screen_graphics
 	{
 		vk::DeviceSize total_size = 0;
 
-		for (auto mesh : gltf_meshes)
+		for (const auto& mesh : gltf_meshes)
 		{
-			for (auto graphics_primitive : mesh.graphics_primitves)
+			for (const auto& graphics_primitive : mesh.graphics_primitves)
 			{
-				total_size = (vk::DeviceSize)graphics_primitive.positions.size () + 
+				total_size += (vk::DeviceSize)graphics_primitive.positions.size () + 
 							(vk::DeviceSize)graphics_primitive.normals.size () + 
 							(vk::DeviceSize)graphics_primitive.uv0s.size () + 
 							(vk::DeviceSize)graphics_primitive.uv1s.size () + 
@@ -531,12 +552,12 @@ namespace splash_screen_graphics
 		splash_screen_graphics_obj_ptr->vk_meshes.reserve (gltf_meshes.size ());
 		vk::DeviceSize offset = 0;
 
-		for (auto mesh : gltf_meshes)
+		for (const auto& mesh : gltf_meshes)
 		{
 			mesh::vk_mesh vk_mesh = {};
 			vk_mesh.graphics_primitives.reserve (mesh.graphics_primitves.size ());
 			
-			for (auto graphics_primitive : mesh.graphics_primitves)
+			for (const auto& graphics_primitive : mesh.graphics_primitves)
 			{
 				mesh::vk_graphics_primitive vk_graphics_primitive = {};
 			
@@ -590,6 +611,8 @@ namespace splash_screen_graphics
 					);
 				}
 
+				vk_graphics_primitive.indices_type = graphics_primitive.indices_type;
+				vk_graphics_primitive.indices = graphics_primitive.indices;
 				vk_mesh.graphics_primitives.push_back (vk_graphics_primitive);
 			}
 

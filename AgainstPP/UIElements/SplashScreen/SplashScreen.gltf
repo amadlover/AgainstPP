@@ -8,38 +8,93 @@
         {
             "name" : "Scene",
             "nodes" : [
-                0,
-                1
+                0
             ]
         }
     ],
     "nodes" : [
         {
             "mesh" : 0,
-            "name" : "Plane"
-        },
-        {
-            "mesh" : 1,
-            "name" : "CS_Plane_00"
+            "name" : "Cube"
         }
     ],
     "materials" : [
         {
             "doubleSided" : true,
-            "name" : "Material",
+            "name" : "Top",
             "pbrMetallicRoughness" : {
                 "baseColorTexture" : {
                     "index" : 0,
                     "texCoord" : 0
                 },
                 "metallicFactor" : 0,
-                "roughnessFactor" : 0.4000000059604645
+                "roughnessFactor" : 0.5
+            }
+        },
+        {
+            "doubleSided" : true,
+            "name" : "Front",
+            "pbrMetallicRoughness" : {
+                "baseColorTexture" : {
+                    "index" : 1,
+                    "texCoord" : 0
+                },
+                "metallicFactor" : 0,
+                "roughnessFactor" : 0.5
+            }
+        },
+        {
+            "doubleSided" : true,
+            "name" : "Right",
+            "pbrMetallicRoughness" : {
+                "baseColorTexture" : {
+                    "index" : 2,
+                    "texCoord" : 0
+                },
+                "metallicFactor" : 0,
+                "roughnessFactor" : 0.5
+            }
+        },
+        {
+            "doubleSided" : true,
+            "name" : "Down",
+            "pbrMetallicRoughness" : {
+                "baseColorTexture" : {
+                    "index" : 3,
+                    "texCoord" : 0
+                },
+                "metallicFactor" : 0,
+                "roughnessFactor" : 0.5
+            }
+        },
+        {
+            "doubleSided" : true,
+            "name" : "Left",
+            "pbrMetallicRoughness" : {
+                "baseColorTexture" : {
+                    "index" : 4,
+                    "texCoord" : 0
+                },
+                "metallicFactor" : 0,
+                "roughnessFactor" : 0.5
+            }
+        },
+        {
+            "doubleSided" : true,
+            "name" : "Back",
+            "pbrMetallicRoughness" : {
+                "baseColorTexture" : {
+                    "index" : 5,
+                    "texCoord" : 0
+                },
+                "metallicFactor" : 0,
+                "roughnessFactor" : 0.5
             }
         }
     ],
     "meshes" : [
         {
-            "name" : "Plane",
+            "name" : "Cube",
             "primitives" : [
                 {
                     "attributes" : {
@@ -48,18 +103,46 @@
                     },
                     "indices" : 2,
                     "material" : 0
-                }
-            ]
-        },
-        {
-            "name" : "CS_Plane",
-            "primitives" : [
+                },
                 {
                     "attributes" : {
                         "POSITION" : 3,
                         "TEXCOORD_0" : 4
                     },
-                    "indices" : 2
+                    "indices" : 2,
+                    "material" : 1
+                },
+                {
+                    "attributes" : {
+                        "POSITION" : 5,
+                        "TEXCOORD_0" : 6
+                    },
+                    "indices" : 2,
+                    "material" : 2
+                },
+                {
+                    "attributes" : {
+                        "POSITION" : 7,
+                        "TEXCOORD_0" : 8
+                    },
+                    "indices" : 2,
+                    "material" : 3
+                },
+                {
+                    "attributes" : {
+                        "POSITION" : 9,
+                        "TEXCOORD_0" : 10
+                    },
+                    "indices" : 2,
+                    "material" : 4
+                },
+                {
+                    "attributes" : {
+                        "POSITION" : 11,
+                        "TEXCOORD_0" : 12
+                    },
+                    "indices" : 2,
+                    "material" : 5
                 }
             ]
         }
@@ -67,13 +150,53 @@
     "textures" : [
         {
             "source" : 0
+        },
+        {
+            "source" : 1
+        },
+        {
+            "source" : 2
+        },
+        {
+            "source" : 3
+        },
+        {
+            "source" : 4
+        },
+        {
+            "source" : 5
         }
     ],
     "images" : [
         {
             "mimeType" : "image/png",
-            "name" : "SplashScreen",
-            "uri" : "SplashScreen.png"
+            "name" : "top",
+            "uri" : "top.png"
+        },
+        {
+            "mimeType" : "image/png",
+            "name" : "front",
+            "uri" : "front.png"
+        },
+        {
+            "mimeType" : "image/png",
+            "name" : "right",
+            "uri" : "right.png"
+        },
+        {
+            "mimeType" : "image/png",
+            "name" : "down",
+            "uri" : "down.png"
+        },
+        {
+            "mimeType" : "image/png",
+            "name" : "left",
+            "uri" : "left.png"
+        },
+        {
+            "mimeType" : "image/png",
+            "name" : "back",
+            "uri" : "back.png"
         }
     ],
     "accessors" : [
@@ -84,12 +207,12 @@
             "max" : [
                 1,
                 1,
-                4.371138828673793e-08
+                1
             ],
             "min" : [
                 -1,
-                -1,
-                -4.371138828673793e-08
+                1,
+                -1
             ],
             "type" : "VEC3"
         },
@@ -111,18 +234,106 @@
             "count" : 4,
             "max" : [
                 1,
-                0,
-                1
+                1,
+                -1
             ],
             "min" : [
                 -1,
-                0,
+                -1,
                 -1
             ],
             "type" : "VEC3"
         },
         {
             "bufferView" : 4,
+            "componentType" : 5126,
+            "count" : 4,
+            "type" : "VEC2"
+        },
+        {
+            "bufferView" : 5,
+            "componentType" : 5126,
+            "count" : 4,
+            "max" : [
+                1,
+                1,
+                1
+            ],
+            "min" : [
+                1,
+                -1,
+                -1
+            ],
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 6,
+            "componentType" : 5126,
+            "count" : 4,
+            "type" : "VEC2"
+        },
+        {
+            "bufferView" : 7,
+            "componentType" : 5126,
+            "count" : 4,
+            "max" : [
+                1,
+                -1,
+                1
+            ],
+            "min" : [
+                -1,
+                -1,
+                -1
+            ],
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 8,
+            "componentType" : 5126,
+            "count" : 4,
+            "type" : "VEC2"
+        },
+        {
+            "bufferView" : 9,
+            "componentType" : 5126,
+            "count" : 4,
+            "max" : [
+                -1,
+                1,
+                1
+            ],
+            "min" : [
+                -1,
+                -1,
+                -1
+            ],
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 10,
+            "componentType" : 5126,
+            "count" : 4,
+            "type" : "VEC2"
+        },
+        {
+            "bufferView" : 11,
+            "componentType" : 5126,
+            "count" : 4,
+            "max" : [
+                1,
+                1,
+                1
+            ],
+            "min" : [
+                -1,
+                -1,
+                1
+            ],
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 12,
             "componentType" : 5126,
             "count" : 4,
             "type" : "VEC2"
@@ -153,11 +364,51 @@
             "buffer" : 0,
             "byteLength" : 32,
             "byteOffset" : 140
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 48,
+            "byteOffset" : 172
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 32,
+            "byteOffset" : 220
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 48,
+            "byteOffset" : 252
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 32,
+            "byteOffset" : 300
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 48,
+            "byteOffset" : 332
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 32,
+            "byteOffset" : 380
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 48,
+            "byteOffset" : 412
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 32,
+            "byteOffset" : 460
         }
     ],
     "buffers" : [
         {
-            "byteLength" : 172,
+            "byteLength" : 492,
             "uri" : "SplashScreen.bin"
         }
     ]

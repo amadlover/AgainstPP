@@ -109,7 +109,7 @@ namespace mesh
 
 		if (accessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE)
 		{
-			physics_primitive.index_type = vk::IndexType::eUint8EXT;
+			physics_primitive.indices_type = vk::IndexType::eUint8EXT;
 			/*const uint8_t* data_start = reinterpret_cast<const uint8_t*>(&(model.buffers[buffer_view.buffer].data[accessor.byteOffset + buffer_view.byteOffset]));
 
 			for (uint32_t i = 0; i < accessor.count; i++)
@@ -119,7 +119,7 @@ namespace mesh
 		}
 		else if (accessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT)
 		{
-			physics_primitive.index_type = vk::IndexType::eUint16;
+			physics_primitive.indices_type = vk::IndexType::eUint16;
 			/*const uint16_t* data_start = reinterpret_cast<const uint16_t*>(&(model.buffers[buffer_view.buffer].data[accessor.byteOffset + buffer_view.byteOffset]));
 
 			for (uint32_t i = 0; i < accessor.count; i++)
@@ -129,7 +129,7 @@ namespace mesh
 		}
 		else if (accessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT)
 		{
-			physics_primitive.index_type = vk::IndexType::eUint32;
+			physics_primitive.indices_type = vk::IndexType::eUint32;
 			/*const uint32_t* data_start = reinterpret_cast<const uint32_t*>(&(model.buffers[buffer_view.buffer].data[accessor.byteOffset + buffer_view.byteOffset]));
 
 			for (uint32_t i = 0; i < accessor.count; i++)
@@ -156,7 +156,7 @@ namespace mesh
 
 		if (accessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE)
 		{
-			graphics_primitive.index_type = vk::IndexType::eUint8EXT;
+			graphics_primitive.indices_type = vk::IndexType::eUint8EXT;
 			/*const uint8_t* data_start = reinterpret_cast<const uint8_t*>(&(model.buffers[buffer_view.buffer].data[accessor.byteOffset + buffer_view.byteOffset]));
 
 			for (uint32_t i = 0; i < accessor.count; i++)
@@ -166,7 +166,7 @@ namespace mesh
 		}
 		else if (accessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT)
 		{
-			graphics_primitive.index_type = vk::IndexType::eUint16;
+			graphics_primitive.indices_type = vk::IndexType::eUint16;
 			/*const uint16_t* data_start = reinterpret_cast<const uint16_t*>(&(model.buffers[buffer_view.buffer].data[accessor.byteOffset + buffer_view.byteOffset]));
 
 			for (uint32_t i = 0; i < accessor.count; i++)
@@ -176,7 +176,7 @@ namespace mesh
 		}
 		else if (accessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT)
 		{
-			graphics_primitive.index_type = vk::IndexType::eUint32;
+			graphics_primitive.indices_type = vk::IndexType::eUint32;
 			/*const uint32_t* data_start = reinterpret_cast<const uint32_t*>(&(model.buffers[buffer_view.buffer].data[accessor.byteOffset + buffer_view.byteOffset]));
 
 			for (uint32_t i = 0; i < accessor.count; i++)

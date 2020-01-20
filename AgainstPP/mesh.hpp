@@ -60,7 +60,8 @@ namespace mesh
 		vk::DeviceSize uv1s_offset;
 		vk::DeviceSize indices_offset;
 
-		std::vector<uint32_t> indices;
+		std::vector<uint8_t> indices;
+		vk::IndexType indices_type;
 
 		vk_material material;
 	};
@@ -102,7 +103,7 @@ namespace mesh
 		std::vector<uint8_t> uv1s;
 		std::vector<uint8_t> indices;
 
-		vk::IndexType index_type;
+		vk::IndexType indices_type;
 
 		gltf_material material;
 	};
@@ -112,7 +113,7 @@ namespace mesh
 		std::vector<uint8_t> positions;
 		std::vector<uint8_t> indices;
 		
-		vk::IndexType index_type;
+		vk::IndexType indices_type;
 	};
 
 	struct gltf_mesh
