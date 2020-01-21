@@ -193,6 +193,8 @@ xcopy "$(ProjectDir)UIElements" "$(SolutionDir)$(Platform)\$(Configuration)\UIEl
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="actor.hpp" />
+    <ClInclude Include="enums.hpp" />
+    <ClInclude Include="event.hpp" />
     <ClInclude Include="mesh.hpp" />
     <ClInclude Include="error.hpp" />
     <ClInclude Include="game.hpp" />

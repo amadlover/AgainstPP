@@ -31,6 +31,12 @@
     <Filter Include="mesh">
       <UniqueIdentifier>{c7c0b09c-de91-46ba-ba0b-c54fbf7a7c98}</UniqueIdentifier>
     </Filter>
+    <Filter Include="events">
+      <UniqueIdentifier>{7f66e89d-fe78-496d-90f6-4a21b337f6ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="enums">
+      <UniqueIdentifier>{656d37ba-5eca-44fa-b8d3-717ba19a4812}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="splash_screen_graphics.cpp">
@@ -103,6 +109,12 @@
     </ClInclude>
     <ClInclude Include="mesh.hpp">
       <Filter>mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="event.hpp">
+      <Filter>events</Filter>
+    </ClInclude>
+    <ClInclude Include="enums.hpp">
+      <Filter>enums</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

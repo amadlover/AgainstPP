@@ -5,6 +5,7 @@
 #include "image.hpp"
 #include "actor.hpp"
 #include "mesh.hpp"
+#include "event.hpp"
 
 #include <memory>
 
@@ -20,7 +21,8 @@ namespace splash_screen
 		std::vector<actor::actor> actors;
 	};
 
-	void init (common_graphics::common_graphics* common_graphics_obj_ptr);
+	void init (common_graphics::common_graphics* common_graphics_obj_ptr, event::event* ptr);
+	void process_keyboard_input (WPARAM wParam, LPARAM lParam);
 	void run ();
 	void exit ();
 }

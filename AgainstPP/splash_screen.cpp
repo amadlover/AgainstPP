@@ -1,11 +1,14 @@
 #include "splash_screen.hpp"
 #include "utils.hpp"
+#include "enums.hpp"
 
 namespace splash_screen
 {
 	std::unique_ptr<splash_screen> splash_screen_obj_ptr (new splash_screen ());
 
-	void init (common_graphics::common_graphics* common_graphics_obj_ptr)
+	event::event* event_obj_ptr;
+
+	void init (common_graphics::common_graphics* common_graphics_obj_ptr, event::event* ptr)
 	{
 		OutputDebugString (L"splash_screen::init\n");
 
@@ -13,6 +16,20 @@ namespace splash_screen
 		mesh::import_gltf_meshes (utils::get_full_path ("\\UIElements\\SplashScreen\\SplashScreen.gltf"), splash_screen_obj_ptr->gltf_meshes);
 
 		splash_screen_graphics::init (splash_screen_obj_ptr->gltf_meshes, splash_screen_obj_ptr->gltf_images, common_graphics_obj_ptr);
+		event_obj_ptr = ptr;
+	}
+
+	void process_keyboard_input (WPARAM wParam, LPARAM lParam)
+	{
+		switch (wParam)
+		{
+		case VK_ESCAPE:
+			event_obj_ptr->gts (e_scene_type::main_menu);
+			break;
+
+		default:
+			break;
+		}
 	}
 
 	void run ()
