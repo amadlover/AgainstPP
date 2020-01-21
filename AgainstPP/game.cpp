@@ -66,11 +66,13 @@ namespace game
 		{
 		case e_scene_type::splash_screen:
 			splash_screen::exit ();
+			splash_screen_state = e_scene_state::exited;
 			
 			break;
 
 		case e_scene_type::main_menu:
 			main_menu::exit ();
+			main_menu_state = e_scene_state::exited;
 
 			break;
 
@@ -95,7 +97,7 @@ namespace game
 	{
 		OutputDebugString (L"game::init\n");
 
-		event_obj_ptr->gts = go_to_scene;
+		event_obj_ptr->go_to_scene = go_to_scene;
 
 		common_graphics::init (hInstance, hWnd, common_graphics_obj_ptr.get ());
 		graphics_utils::init (common_graphics_obj_ptr.get ());
@@ -120,8 +122,17 @@ namespace game
 	{
 		OutputDebugString (L"game::exit\n");
 
-		splash_screen::exit ();
-		main_menu::exit ();
+		if (splash_screen_state != e_scene_state::exited)
+		{
+			splash_screen::exit ();
+			splash_screen_state = e_scene_state::exited;
+		}
+		
+		if (main_menu_state != e_scene_state::exited)
+		{
+			main_menu::exit ();
+			main_menu_state = e_scene_state::exited;
+		}
 
 		common_graphics::exit ();
 	}

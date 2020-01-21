@@ -17,7 +17,7 @@ namespace main_menu
 		switch (wParam)
 		{
 		case VK_ESCAPE:
-			event_obj_ptr->gts (e_scene_type::splash_screen);
+			event_obj_ptr->go_to_scene (e_scene_type::splash_screen);
 
 		default:
 			break;
