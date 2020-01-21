@@ -372,6 +372,12 @@ namespace splash_screen_graphics
 {
 	std::unique_ptr<splash_screen_graphics> splash_screen_graphics_obj_ptr (new splash_screen_graphics ());
 	common_graphics::common_graphics* common_graphics_obj_ptr;
+	vk::Device graphics_device;
+	vk::Sampler common_sampler;
+	vk::RenderPass renderpass;
+	std::vector<vk::Framebuffer> swapchain_framebuffers;
+	vk::PipelineLayout graphics_pipeline_layout;
+	vk::Pipeline graphics_pipeline;
 
 	void check_for_similar_image_indices (
 		uint32_t from_index, 
@@ -499,7 +505,7 @@ namespace splash_screen_graphics
 				image_subresource_range.baseArrayLayer = similar_index_counter;
 				image_view_create_info.subresourceRange = image_subresource_range;
 
-				vk::ImageView image_view = common_graphics_obj_ptr->graphics_device.createImageView (image_view_create_info);
+				vk::ImageView image_view = graphics_device.createImageView (image_view_create_info);
 
 				for (auto& vk_mesh : splash_screen_graphics_obj_ptr->vk_meshes)
 				{
@@ -653,8 +659,202 @@ namespace splash_screen_graphics
 			++mesh_counter;
 		}
 
-		common_graphics_obj_ptr->graphics_device.destroyBuffer (staging_buffer);
-		common_graphics_obj_ptr->graphics_device.freeMemory (staging_buffer_memory);
+		graphics_device.destroyBuffer (staging_buffer);
+		graphics_device.freeMemory (staging_buffer_memory);
+	}
+
+	void create_common_sampler ()
+	{
+		vk::SamplerCreateInfo sampler_create_info (
+			{},
+			vk::Filter::eLinear,
+			vk::Filter::eLinear,
+			vk::SamplerMipmapMode::eLinear,
+			vk::SamplerAddressMode::eClampToBorder,
+			vk::SamplerAddressMode::eClampToBorder,
+			vk::SamplerAddressMode::eClampToBorder,
+			0,
+			0,
+			0,
+			0,
+			{},
+			0,
+			0,
+			vk::BorderColor::eFloatOpaqueBlack,
+			0
+
+		);
+
+		common_sampler = graphics_device.createSampler (sampler_create_info);
+	}
+
+	void create_descriptor_sets ()
+	{
+		vk::DescriptorPoolSize pool_size (vk::DescriptorType::eCombinedImageSampler, 1);
+		vk::DescriptorPoolCreateInfo descriptor_pool_create_info ({}, 1, 1, &pool_size);
+		vk::DescriptorPool descriptor_pool = graphics_device.createDescriptorPool (descriptor_pool_create_info);
+		
+		vk::DescriptorSetLayoutBinding descriptor_set_layout_binding (0, vk::DescriptorType::eCombinedImageSampler, 1, vk::ShaderStageFlagBits::eFragment);
+		vk::DescriptorSetLayoutCreateInfo descriptor_set_layout_create_info ({}, 1, &descriptor_set_layout_binding);
+		vk::DescriptorSetLayout descriptor_set_layout = graphics_device.createDescriptorSetLayout (descriptor_set_layout_create_info);
+
+		vk::DescriptorSetAllocateInfo descriptor_set_allocate_info (descriptor_pool, 1, &descriptor_set_layout);
+		
+		for (auto& mesh : splash_screen_graphics_obj_ptr->vk_meshes)
+		{
+			for (auto& graphics_primitive : mesh.graphics_primitives)
+			{
+				graphics_primitive.material.base_color_texture.descriptor_set = graphics_device.allocateDescriptorSets (descriptor_set_allocate_info).front ();
+				vk::DescriptorImageInfo descriptor_image_info (
+					common_sampler, 
+					*graphics_primitive.material.base_color_texture.image_view, 
+					vk::ImageLayout::eShaderReadOnlyOptimal
+				);
+
+				vk::WriteDescriptorSet write_descriptor_set (
+					graphics_primitive.material.base_color_texture.descriptor_set, 
+					0, 
+					0, 
+					1,
+					vk::DescriptorType::eCombinedImageSampler,
+					&descriptor_image_info);
+				
+				graphics_device.updateDescriptorSets (1, &write_descriptor_set, 0, nullptr);
+			}
+		}
+	}
+
+	void create_renderpasses ()
+	{
+		vk::AttachmentDescription color_attachment_description (
+			{},
+			common_graphics_obj_ptr->chosen_surface_format.format,
+			vk::SampleCountFlagBits::e1,
+			vk::AttachmentLoadOp::eClear,
+			vk::AttachmentStoreOp::eStore,
+			vk::AttachmentLoadOp::eDontCare,
+			vk::AttachmentStoreOp::eDontCare,
+			vk::ImageLayout::eUndefined,
+			vk::ImageLayout::ePresentSrcKHR
+		);
+
+		vk::AttachmentReference color_attachment_reference (1, vk::ImageLayout::eColorAttachmentOptimal);
+
+		vk::SubpassDescription subpass_description (
+			{},
+			vk::PipelineBindPoint::eGraphics,
+			{},
+			{},
+			1,
+			&color_attachment_reference
+		);
+
+		vk::RenderPassCreateInfo renderpass_create_info (
+			{},
+			1,
+			&color_attachment_description,
+			1,
+			&subpass_description,
+			0,
+			nullptr
+		);
+
+		renderpass = graphics_device.createRenderPass (renderpass_create_info);
+	}
+
+	void create_framebuffers ()
+	{
+		vk::FramebufferCreateInfo framebuffer_create_info (
+			{},
+			renderpass,
+			1,
+			{},
+			common_graphics_obj_ptr->surface_extent.width,
+			common_graphics_obj_ptr->surface_extent.height,
+			1
+		);
+
+		for (auto swapchain_imageview : common_graphics_obj_ptr->swapchain_imageviews)
+		{
+			framebuffer_create_info.pAttachments = &swapchain_imageview;
+			graphics_device.createFramebuffer (framebuffer_create_info);
+		}
+	}
+
+	void create_shaders ()
+	{
+
+	}
+
+	void create_graphics_pipeline ()
+	{
+		vk::VertexInputBindingDescription vertex_input_binding_description[2] = {
+			{0, sizeof (float) * 3, vk::VertexInputRate::eVertex},
+			{1, sizeof (float) * 2, vk::VertexInputRate::eVertex}
+		};
+		vk::VertexInputAttributeDescription vertex_pos_input_attribute_description[2] = {
+			{0, 0, vk::Format::eR32G32B32Sfloat, 0},
+			{1, 1, vk::Format::eR32G32Sfloat, 0}
+		};
+		vk::PipelineVertexInputStateCreateInfo vertex_input_state_create_info (
+			{},
+			2,
+			vertex_input_binding_description,
+			2,
+			vertex_pos_input_attribute_description
+		);
+		vk::PipelineInputAssemblyStateCreateInfo pipeline_input_assembly_state_create_info (
+			{},
+			vk::PrimitiveTopology::eTriangleList,
+			0
+		);
+		vk::PipelineRasterizationStateCreateInfo pipeline_rasterization_state_create_info (
+			{},
+			0,
+			0,
+			vk::PolygonMode::eFill,
+			vk::CullModeFlagBits::eBack,
+			vk::FrontFace::eCounterClockwise
+		);
+		vk::PipelineColorBlendAttachmentState pipeline_color_blend_attachment_state (
+			{}, {}, {}, {}, {}, {}, {},
+			vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA
+		);
+		vk::PipelineColorBlendStateCreateInfo pipeline_color_blend_state_create_info (
+			{},
+			{},
+			{},
+			1,
+			&pipeline_color_blend_attachment_state,
+			{ 1,1,1,1 }
+		);
+
+		vk::Viewport viewport (0, 0, (float)common_graphics_obj_ptr->surface_extent.width, (float)common_graphics_obj_ptr->surface_extent.height, 0, 1);
+		vk::Rect2D scissor ({}, common_graphics_obj_ptr->surface_extent);
+		vk::PipelineViewportStateCreateInfo pipeline_viewport_state_create_info (
+			{},
+			1,
+			&viewport,
+			1,
+			&scissor
+		);
+
+		vk::PipelineMultisampleStateCreateInfo pipeline_multisample_state_create_info ({}, vk::SampleCountFlagBits::e1);
+
+		vk::GraphicsPipelineCreateInfo graphics_pipeline_create_info (
+		);
+
+		graphics_device.createGraphicsPipeline ({}, graphics_pipeline_create_info);
+	}
+
+	void create_command_buffers ()
+	{
+
+	}
+
+	void create_sync_objects ()
+	{
+
 	}
 
 	void init (
@@ -665,12 +865,16 @@ namespace splash_screen_graphics
 	{
 		OutputDebugString (L"splash_screen_graphics::init\n");
 		common_graphics_obj_ptr = ptr;
+		graphics_device = common_graphics_obj_ptr->graphics_device;
 
 		create_vk_meshes (gltf_meshes);
 		create_vk_images (gltf_images);
 
 		gltf_images.clear ();
 		gltf_meshes.clear ();
+
+		create_common_sampler ();
+		create_descriptor_sets ();
 	}
 
 	void run ()
@@ -683,19 +887,19 @@ namespace splash_screen_graphics
 
 		if (splash_screen_graphics_obj_ptr->vertex_index_buffer != VK_NULL_HANDLE)
 		{
-			common_graphics_obj_ptr->graphics_device.destroyBuffer (splash_screen_graphics_obj_ptr->vertex_index_buffer);
+			graphics_device.destroyBuffer (splash_screen_graphics_obj_ptr->vertex_index_buffer);
 		}
 
 		if (splash_screen_graphics_obj_ptr->vertex_index_buffer_memory != VK_NULL_HANDLE)
 		{
-			common_graphics_obj_ptr->graphics_device.freeMemory (splash_screen_graphics_obj_ptr->vertex_index_buffer_memory);
+			graphics_device.freeMemory (splash_screen_graphics_obj_ptr->vertex_index_buffer_memory);
 		}
 
 		for (auto& image_view : splash_screen_graphics_obj_ptr->image_views)
 		{
 			if (image_view != VK_NULL_HANDLE)
 			{
-				common_graphics_obj_ptr->graphics_device.destroyImageView (image_view);
+				graphics_device.destroyImageView (image_view);
 			}
 		}
 
@@ -703,13 +907,13 @@ namespace splash_screen_graphics
 		{
 			if (image != VK_NULL_HANDLE)
 			{
-				common_graphics_obj_ptr->graphics_device.destroyImage (image);
+				graphics_device.destroyImage (image);
 			}
 		}
 
 		if (splash_screen_graphics_obj_ptr->image_memory != VK_NULL_HANDLE)
 		{
-			common_graphics_obj_ptr->graphics_device.freeMemory (splash_screen_graphics_obj_ptr->image_memory);
+			graphics_device.freeMemory (splash_screen_graphics_obj_ptr->image_memory);
 		}
 
 		splash_screen_graphics_obj_ptr->images.clear ();

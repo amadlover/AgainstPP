@@ -42,6 +42,7 @@ namespace mesh
 	{
 		uint32_t vk_image_view_index;
 		vk::ImageView* image_view;
+		vk::DescriptorSet descriptor_set;
 	};
 
 	struct vk_material

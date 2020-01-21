@@ -26,7 +26,7 @@ enum class egraphics_error
 	allocate_descriptor_set,
 	create_render_pass,
 	create_shader_module,
-	create_framebuffer,
+	create_framebuffers,
 	begin_command_buffer,
 	end_command_buffer,
 	reset_command_buffer,

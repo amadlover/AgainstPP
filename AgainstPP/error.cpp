@@ -101,7 +101,7 @@ void log_error (egraphics_error Err)
 		OutputDebugString (L"BaseGraphics Error: Create Shader Module\n");
 		break;
 
-	case egraphics_error::create_framebuffer:
+	case egraphics_error::create_framebuffers:
 		OutputDebugString (L"BaseGraphics Error: Create Framebuffer\n");
 		break;
 
