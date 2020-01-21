@@ -41,7 +41,7 @@ namespace mesh
 	struct vk_texture
 	{
 		uint32_t vk_image_view_index;
-		vk::ImageView* image_view;
+		vk::ImageView image_view;
 		vk::DescriptorSet descriptor_set;
 	};
 

@@ -373,11 +373,18 @@ namespace splash_screen_graphics
 	std::unique_ptr<splash_screen_graphics> splash_screen_graphics_obj_ptr (new splash_screen_graphics ());
 	common_graphics::common_graphics* common_graphics_obj_ptr;
 	vk::Device graphics_device;
-	vk::Sampler common_sampler;
 	vk::RenderPass renderpass;
 	std::vector<vk::Framebuffer> swapchain_framebuffers;
 	vk::PipelineLayout graphics_pipeline_layout;
 	vk::Pipeline graphics_pipeline;
+	std::vector<vk::PipelineShaderStageCreateInfo> pipeline_shader_stage_create_infos;
+	vk::ShaderModule vertex_shader_module;
+	vk::ShaderModule fragment_shader_module;
+	vk::DescriptorPool descriptor_pool;
+	std::vector<vk::DescriptorSetLayout> descriptor_set_layouts;
+	vk::Semaphore signal_semaphore;
+	vk::Semaphore wait_semaphore;
+	std::vector<vk::Fence> swapchain_fences;
 
 	void check_for_similar_image_indices (
 		uint32_t from_index, 
@@ -513,7 +520,7 @@ namespace splash_screen_graphics
 					{
 						if (graphics_primitive.material.base_color_texture.vk_image_view_index == similar_index)
 						{
-							graphics_primitive.material.base_color_texture.image_view = &image_view;
+							graphics_primitive.material.base_color_texture.image_view = image_view;
 						}
 					}
 				}
@@ -663,40 +670,20 @@ namespace splash_screen_graphics
 		graphics_device.freeMemory (staging_buffer_memory);
 	}
 
-	void create_common_sampler ()
-	{
-		vk::SamplerCreateInfo sampler_create_info (
-			{},
-			vk::Filter::eLinear,
-			vk::Filter::eLinear,
-			vk::SamplerMipmapMode::eLinear,
-			vk::SamplerAddressMode::eClampToBorder,
-			vk::SamplerAddressMode::eClampToBorder,
-			vk::SamplerAddressMode::eClampToBorder,
-			0,
-			0,
-			0,
-			0,
-			{},
-			0,
-			0,
-			vk::BorderColor::eFloatOpaqueBlack,
-			0
-
-		);
-
-		common_sampler = graphics_device.createSampler (sampler_create_info);
-	}
-
 	void create_descriptor_sets ()
 	{
 		vk::DescriptorPoolSize pool_size (vk::DescriptorType::eCombinedImageSampler, 1);
-		vk::DescriptorPoolCreateInfo descriptor_pool_create_info ({}, 1, 1, &pool_size);
-		vk::DescriptorPool descriptor_pool = graphics_device.createDescriptorPool (descriptor_pool_create_info);
+		vk::DescriptorPoolCreateInfo descriptor_pool_create_info (
+			{}, 
+			6, 
+			1, 
+			&pool_size);
+		descriptor_pool = graphics_device.createDescriptorPool (descriptor_pool_create_info);
 		
 		vk::DescriptorSetLayoutBinding descriptor_set_layout_binding (0, vk::DescriptorType::eCombinedImageSampler, 1, vk::ShaderStageFlagBits::eFragment);
 		vk::DescriptorSetLayoutCreateInfo descriptor_set_layout_create_info ({}, 1, &descriptor_set_layout_binding);
 		vk::DescriptorSetLayout descriptor_set_layout = graphics_device.createDescriptorSetLayout (descriptor_set_layout_create_info);
+		descriptor_set_layouts.push_back (descriptor_set_layout);
 
 		vk::DescriptorSetAllocateInfo descriptor_set_allocate_info (descriptor_pool, 1, &descriptor_set_layout);
 		
@@ -706,8 +693,8 @@ namespace splash_screen_graphics
 			{
 				graphics_primitive.material.base_color_texture.descriptor_set = graphics_device.allocateDescriptorSets (descriptor_set_allocate_info).front ();
 				vk::DescriptorImageInfo descriptor_image_info (
-					common_sampler, 
-					*graphics_primitive.material.base_color_texture.image_view, 
+					common_graphics_obj_ptr->common_sampler, 
+					graphics_primitive.material.base_color_texture.image_view, 
 					vk::ImageLayout::eShaderReadOnlyOptimal
 				);
 
@@ -738,7 +725,7 @@ namespace splash_screen_graphics
 			vk::ImageLayout::ePresentSrcKHR
 		);
 
-		vk::AttachmentReference color_attachment_reference (1, vk::ImageLayout::eColorAttachmentOptimal);
+		vk::AttachmentReference color_attachment_reference (0, vk::ImageLayout::eColorAttachmentOptimal);
 
 		vk::SubpassDescription subpass_description (
 			{},
@@ -777,13 +764,36 @@ namespace splash_screen_graphics
 		for (auto swapchain_imageview : common_graphics_obj_ptr->swapchain_imageviews)
 		{
 			framebuffer_create_info.pAttachments = &swapchain_imageview;
-			graphics_device.createFramebuffer (framebuffer_create_info);
+			swapchain_framebuffers.push_back (graphics_device.createFramebuffer (framebuffer_create_info));
 		}
 	}
 
 	void create_shaders ()
 	{
-
+		pipeline_shader_stage_create_infos.resize (2);
+		
+		graphics_utils::create_shader (
+			utils::get_full_path ("\\Shaders\\SplashScreen\\vert.spv"),
+			vk::ShaderStageFlagBits::eVertex,
+			vertex_shader_module,
+			pipeline_shader_stage_create_infos[0]
+		);
+		graphics_utils::create_shader (
+			utils::get_full_path ("\\Shaders\\SplashScreen\\frag.spv"),
+			vk::ShaderStageFlagBits::eFragment,
+			fragment_shader_module,
+			pipeline_shader_stage_create_infos[1]
+		);
+	}
+	
+	void create_graphics_pipeline_layout ()
+	{
+		vk::PipelineLayoutCreateInfo pipeline_layout_create_info (
+			{},
+			descriptor_set_layouts.size (),
+			descriptor_set_layouts.data ()
+		);
+		graphics_pipeline_layout = graphics_device.createPipelineLayout (pipeline_layout_create_info);
 	}
 
 	void create_graphics_pipeline ()
@@ -796,7 +806,7 @@ namespace splash_screen_graphics
 			{0, 0, vk::Format::eR32G32B32Sfloat, 0},
 			{1, 1, vk::Format::eR32G32Sfloat, 0}
 		};
-		vk::PipelineVertexInputStateCreateInfo vertex_input_state_create_info (
+		vk::PipelineVertexInputStateCreateInfo pipeline_vertex_input_state_create_info (
 			{},
 			2,
 			vertex_input_binding_description,
@@ -814,7 +824,12 @@ namespace splash_screen_graphics
 			0,
 			vk::PolygonMode::eFill,
 			vk::CullModeFlagBits::eBack,
-			vk::FrontFace::eCounterClockwise
+			vk::FrontFace::eCounterClockwise,
+			{},
+			{},
+			{},
+			{},
+			1
 		);
 		vk::PipelineColorBlendAttachmentState pipeline_color_blend_attachment_state (
 			{}, {}, {}, {}, {}, {}, {},
@@ -842,19 +857,41 @@ namespace splash_screen_graphics
 		vk::PipelineMultisampleStateCreateInfo pipeline_multisample_state_create_info ({}, vk::SampleCountFlagBits::e1);
 
 		vk::GraphicsPipelineCreateInfo graphics_pipeline_create_info (
+			{},
+			pipeline_shader_stage_create_infos.size (),
+			pipeline_shader_stage_create_infos.data (),
+			&pipeline_vertex_input_state_create_info,
+			&pipeline_input_assembly_state_create_info,
+			{},
+			&pipeline_viewport_state_create_info,
+			&pipeline_rasterization_state_create_info,
+			&pipeline_multisample_state_create_info,
+			{},
+			&pipeline_color_blend_state_create_info,
+			{},
+			graphics_pipeline_layout,
+			renderpass,
+			{},
+			{},
+			{}
 		);
 
-		graphics_device.createGraphicsPipeline ({}, graphics_pipeline_create_info);
-	}
-
-	void create_command_buffers ()
-	{
-
+		graphics_pipeline = graphics_device.createGraphicsPipeline ({}, graphics_pipeline_create_info);
 	}
 
 	void create_sync_objects ()
 	{
+		vk::SemaphoreCreateInfo semaphore_create_info;
+		signal_semaphore = graphics_device.createSemaphore (semaphore_create_info);
+		wait_semaphore = graphics_device.createSemaphore (semaphore_create_info);
 
+		swapchain_fences.resize (common_graphics_obj_ptr->swapchain_images.size ());
+		vk::FenceCreateInfo fence_create_info (vk::FenceCreateFlagBits::eSignaled);
+
+		for (auto& swapchain_fence : swapchain_fences)
+		{
+			swapchain_fence = graphics_device.createFence (fence_create_info);
+		}
 	}
 
 	void init (
@@ -873,8 +910,13 @@ namespace splash_screen_graphics
 		gltf_images.clear ();
 		gltf_meshes.clear ();
 
-		create_common_sampler ();
 		create_descriptor_sets ();
+		create_renderpasses ();
+		create_framebuffers ();
+		create_shaders ();
+		create_graphics_pipeline_layout ();
+		create_graphics_pipeline ();
+		create_sync_objects ();
 	}
 
 	void run ()
@@ -884,6 +926,78 @@ namespace splash_screen_graphics
 	void exit ()
 	{
 		OutputDebugString (L"splash_screen_graphics::exit\n");
+
+		graphics_device.waitForFences (swapchain_fences.size (), swapchain_fences.data (), VK_TRUE, UINT64_MAX);
+
+		for (auto& swapchain_fence : swapchain_fences)
+		{
+			if (swapchain_fence != VK_NULL_HANDLE)
+			{
+				graphics_device.destroyFence (swapchain_fence);
+			}
+		}
+
+		swapchain_fences.clear ();
+
+		if (wait_semaphore != VK_NULL_HANDLE)
+		{
+			graphics_device.destroySemaphore (wait_semaphore);
+		}
+
+		if (signal_semaphore != VK_NULL_HANDLE)
+		{
+			graphics_device.destroySemaphore (signal_semaphore);
+		}
+
+		for (auto& swapchain_framebuffer : swapchain_framebuffers)
+		{
+			if (swapchain_framebuffer != VK_NULL_HANDLE)
+			{
+				graphics_device.destroyFramebuffer (swapchain_framebuffer);
+			}
+		}
+
+		swapchain_framebuffers.clear ();
+
+		if (vertex_shader_module != VK_NULL_HANDLE)
+		{
+			graphics_device.destroyShaderModule (vertex_shader_module);
+		}
+
+		if (fragment_shader_module != VK_NULL_HANDLE)
+		{
+			graphics_device.destroyShaderModule (fragment_shader_module);
+		}
+
+		if (renderpass != VK_NULL_HANDLE)
+		{
+			graphics_device.destroyRenderPass (renderpass);
+		}
+
+		for (auto& descriptor_set_layout : descriptor_set_layouts)
+		{
+			if (descriptor_set_layout != VK_NULL_HANDLE)
+			{
+				graphics_device.destroyDescriptorSetLayout (descriptor_set_layout);
+			}
+		}
+
+		descriptor_set_layouts.clear ();
+
+		if (graphics_pipeline_layout != VK_NULL_HANDLE)
+		{
+			graphics_device.destroyPipelineLayout (graphics_pipeline_layout);
+		}
+
+		if (graphics_pipeline != VK_NULL_HANDLE)
+		{
+			graphics_device.destroyPipeline (graphics_pipeline);
+		}
+
+		if (descriptor_pool != VK_NULL_HANDLE)
+		{
+			graphics_device.destroyDescriptorPool (descriptor_pool);
+		}
 
 		if (splash_screen_graphics_obj_ptr->vertex_index_buffer != VK_NULL_HANDLE)
 		{
@@ -902,6 +1016,7 @@ namespace splash_screen_graphics
 				graphics_device.destroyImageView (image_view);
 			}
 		}
+		splash_screen_graphics_obj_ptr->image_views.clear ();
 
 		for (auto& image : splash_screen_graphics_obj_ptr->images)
 		{
@@ -910,14 +1025,13 @@ namespace splash_screen_graphics
 				graphics_device.destroyImage (image);
 			}
 		}
+		splash_screen_graphics_obj_ptr->images.clear ();
 
 		if (splash_screen_graphics_obj_ptr->image_memory != VK_NULL_HANDLE)
 		{
 			graphics_device.freeMemory (splash_screen_graphics_obj_ptr->image_memory);
 		}
 
-		splash_screen_graphics_obj_ptr->images.clear ();
-		splash_screen_graphics_obj_ptr->image_views.clear ();
 		splash_screen_graphics_obj_ptr->vk_images.clear ();
 		splash_screen_graphics_obj_ptr->vk_meshes.clear ();
 	}

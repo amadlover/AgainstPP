@@ -62,6 +62,7 @@ namespace common_graphics
 		std::vector<vk::Image> swapchain_images;
 		std::vector<vk::ImageView> swapchain_imageviews;
 		vk::CommandPool command_pool;
+		vk::Sampler common_sampler;
 	};
 
 	void init (HINSTANCE hInstance, HWND hWnd, common_graphics* ptr);

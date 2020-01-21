@@ -500,6 +500,30 @@ namespace common_graphics
 		vk::CommandPoolCreateInfo command_pool_create_info ({}, common_graphics_obj_ptr->graphics_queue_family_indices[0]);
 		common_graphics_obj_ptr->command_pool = common_graphics_obj_ptr->graphics_device.createCommandPool (command_pool_create_info);
 	}
+	
+	void create_sampler ()
+	{
+		vk::SamplerCreateInfo sampler_create_info (
+			{},
+			vk::Filter::eLinear,
+			vk::Filter::eLinear,
+			vk::SamplerMipmapMode::eLinear,
+			vk::SamplerAddressMode::eClampToBorder,
+			vk::SamplerAddressMode::eClampToBorder,
+			vk::SamplerAddressMode::eClampToBorder,
+			0,
+			0,
+			0,
+			0,
+			{},
+			0,
+			0,
+			vk::BorderColor::eFloatOpaqueBlack,
+			0
+		);
+
+		common_graphics_obj_ptr->common_sampler = common_graphics_obj_ptr->graphics_device.createSampler (sampler_create_info);
+	}
 
 	void init (HINSTANCE hInstance, HWND hWnd, common_graphics* ptr)
 	{
@@ -525,11 +549,17 @@ namespace common_graphics
 		create_graphics_device_and_queue ();
 		create_swapchain ();
 		create_command_pool ();
+		create_sampler ();
 	}
 
 	void exit ()
 	{
 		OutputDebugString (L"common_graphics::exit\n");
+
+		if (common_graphics_obj_ptr->common_sampler != VK_NULL_HANDLE)
+		{
+			common_graphics_obj_ptr->graphics_device.destroySampler (common_graphics_obj_ptr->common_sampler);
+		}
 
 		if (common_graphics_obj_ptr->command_pool != VK_NULL_HANDLE)
 		{
