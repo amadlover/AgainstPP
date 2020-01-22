@@ -59,9 +59,6 @@ namespace splash_screen_graphics
 {
 	struct splash_screen_graphics
 	{
-		std::vector<asset::mesh::vk_mesh> vk_meshes;
-		std::vector<asset::image::vk_image> vk_images;
-
 		vk::DeviceMemory vertex_index_buffer_memory;
 		vk::Buffer vertex_index_buffer;
 

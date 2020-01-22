@@ -8,7 +8,7 @@
 
 #include <vector>
 
-#include "image.hpp"
+#include <vulkan.hpp>
 
 struct PrimitivePhysicsData
 {
@@ -40,57 +40,12 @@ namespace asset
 {
 	namespace mesh
 	{
-
-		struct vk_texture
-		{
-			uint32_t vk_image_view_index;
-			vk::ImageView image_view;
-			vk::DescriptorSet descriptor_set;
-		};
-
-		struct vk_material
-		{
-			vk_texture base_color_texture;
-		};
-
-		struct vk_graphics_primitive
-		{
-			vk::Buffer* buffer;
-			vk::DeviceMemory* buffer_memory;
-
-			vk::DeviceSize positions_offset;
-			vk::DeviceSize normals_offset;
-			vk::DeviceSize uv0s_offset;
-			vk::DeviceSize uv1s_offset;
-			vk::DeviceSize indices_offset;
-
-			std::vector<uint8_t> indices;
-			vk::IndexType indices_type;
-
-			vk_material material;
-		};
-
-		struct vk_physics_primitive
-		{
-			vk::Buffer* buffer;
-			vk::DeviceMemory* buffer_memory;
-
-			vk::DeviceSize positions_offset;
-			vk::DeviceSize indices_offset;
-
-			std::vector<uint32_t> indices;
-		};
-
-		struct vk_mesh
-		{
-			std::vector<vk_graphics_primitive> graphics_primitives;
-			std::vector<vk_physics_primitive> physics_primitives;
-		};
-
 		struct texture
 		{
 			std::string name;
 			uint32_t image_index;
+			vk::ImageView image_view;
+			vk::DescriptorSet descriptor_set;
 		};
 
 		struct material
@@ -150,14 +105,9 @@ namespace asset
 			std::vector<mesh>& meshes
 		);
 	}
+
 	namespace image
 	{
-		struct vk_image
-		{
-			vk::ImageView* image_view;
-			vk::DescriptorSet* descriptor_set;
-		};
-
 		struct image
 		{
 			std::string name;

@@ -2,7 +2,6 @@
 
 #include "common_graphics.hpp"
 #include "splash_screen_graphics.hpp"
-#include "image.hpp"
 #include "actor.hpp"
 #include "asset.hpp"
 #include "event.hpp"

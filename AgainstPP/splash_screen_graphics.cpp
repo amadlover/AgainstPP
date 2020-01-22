@@ -405,16 +405,16 @@ namespace splash_screen_graphics
 		}
 	}
 
-	void create_vk_images (const std::vector<asset::image::image>& images)
+	void create_vulkan_handles_for_images (const std::vector<asset::image::image>& images, std::vector<asset::mesh::mesh>& meshes)
 	{
-		std::map<vk::Image, std::vector<uint32_t>> vkimage_similarindices;
+		std::map<vk::Image, std::vector<uint32_t>> similar_indices;
 
 		for (uint32_t index = 0; index < images.size(); index++)
 		{
 			bool is_index_already_processed = false;
-			for (const auto& vk_image_similar_indices : vkimage_similarindices)
+			for (const auto& image_similar_indices : similar_indices)
 			{
-				for (const auto& processed_index : vk_image_similar_indices.second)
+				for (const auto& processed_index : image_similar_indices.second)
 				{
 					if (processed_index == index)
 					{
@@ -469,20 +469,20 @@ namespace splash_screen_graphics
 				vk::SharingMode::eExclusive
 			);
 
-			vkimage_similarindices.insert (std::make_pair (vkimage, similar_images_indices));
+			similar_indices.insert (std::make_pair (vkimage, similar_images_indices));
 		}
 		
 		std::vector<vk::Image> new_images;
 
-		for (auto vk_image_similar_indices : vkimage_similarindices)
+		for (auto image_similar_indices : similar_indices)
 		{
-			new_images.push_back (vk_image_similar_indices.first);
+			new_images.push_back (image_similar_indices.first);
 		}
 
 		splash_screen_graphics_obj_ptr->image_memory = graphics_utils::allocate_bind_image_memory (new_images, vk::MemoryPropertyFlagBits::eDeviceLocal);
 		splash_screen_graphics_obj_ptr->images = new_images;
 
-		for (const auto& vk_image_similar_indices : vkimage_similarindices)
+		for (const auto& image_similar_indices : similar_indices)
 		{
 			vk::ImageSubresourceRange image_subresource_range (
 				vk::ImageAspectFlagBits::eColor, 
@@ -494,7 +494,7 @@ namespace splash_screen_graphics
 
 			vk::ImageViewCreateInfo image_view_create_info (
 				{},
-				vk_image_similar_indices.first,
+				image_similar_indices.first,
 				vk::ImageViewType::e2D,
 				vk::Format::eR8G8B8A8Unorm,
 				{
@@ -507,18 +507,18 @@ namespace splash_screen_graphics
 			);
 
 			uint32_t similar_index_counter = 0;
-			for (const auto& similar_index : vk_image_similar_indices.second)
+			for (const auto& similar_index : image_similar_indices.second)
 			{
 				image_subresource_range.baseArrayLayer = similar_index_counter;
 				image_view_create_info.subresourceRange = image_subresource_range;
 
 				vk::ImageView image_view = graphics_device.createImageView (image_view_create_info);
 
-				for (auto& vk_mesh : splash_screen_graphics_obj_ptr->vk_meshes)
+				for (auto& mesh : meshes)
 				{
-					for (auto& graphics_primitive : vk_mesh.graphics_primitives)
+					for (auto& graphics_primitive : mesh.graphics_primitves)
 					{
-						if (graphics_primitive.material.base_color_texture.vk_image_view_index == similar_index)
+						if (graphics_primitive.material.base_color_texture.image_index == similar_index)
 						{
 							graphics_primitive.material.base_color_texture.image_view = image_view;
 						}
@@ -543,7 +543,7 @@ namespace splash_screen_graphics
 		offset += data.size ();
 	}
 
-	void create_vk_meshes (const std::vector<asset::mesh::mesh>& meshes)
+	void create_vulkan_handles_for_meshes (std::vector<asset::mesh::mesh>& meshes)
 	{
 		vk::DeviceSize total_size = 0;
 
@@ -562,24 +562,18 @@ namespace splash_screen_graphics
 		vk::Buffer staging_buffer = graphics_utils::create_buffer (total_size, vk::BufferUsageFlagBits::eTransferSrc, vk::SharingMode::eExclusive);
 		vk::DeviceMemory staging_buffer_memory = graphics_utils::allocate_bind_buffer_memory (staging_buffer, vk::MemoryPropertyFlagBits::eHostVisible);
 
-		splash_screen_graphics_obj_ptr->vk_meshes.reserve (meshes.size ());
 		vk::DeviceSize offset = 0;
 
-		for (const auto& asset : meshes)
+		for (auto& mesh : meshes)
 		{
-			asset::mesh::vk_mesh vk_mesh = {};
-			vk_mesh.graphics_primitives.reserve (asset.graphics_primitves.size ());
-			
-			for (const auto& graphics_primitive : asset.graphics_primitves)
+			for (auto& graphics_primitive : mesh.graphics_primitves)
 			{
-				asset::mesh::vk_graphics_primitive vk_graphics_primitive = {};
-			
 				if (graphics_primitive.positions.size () > 0)
 				{
 					map_mesh_data (
 						staging_buffer_memory, 
 						offset, 
-						vk_graphics_primitive.positions_offset, 
+						graphics_primitive.positions_offset, 
 						graphics_primitive.positions
 					);
 				}
@@ -589,7 +583,7 @@ namespace splash_screen_graphics
 					map_mesh_data (
 						staging_buffer_memory, 
 						offset, 
-						vk_graphics_primitive.normals_offset, 
+						graphics_primitive.normals_offset, 
 						graphics_primitive.normals
 					);
 				}
@@ -599,7 +593,7 @@ namespace splash_screen_graphics
 					map_mesh_data (
 						staging_buffer_memory, 
 						offset, 
-						vk_graphics_primitive.uv0s_offset, 
+						graphics_primitive.uv0s_offset, 
 						graphics_primitive.uv0s
 					);
 				}
@@ -609,7 +603,7 @@ namespace splash_screen_graphics
 					map_mesh_data (
 						staging_buffer_memory, 
 						offset, 
-						vk_graphics_primitive.uv1s_offset, 
+						graphics_primitive.uv1s_offset, 
 						graphics_primitive.uv1s
 					);
 				}
@@ -619,17 +613,11 @@ namespace splash_screen_graphics
 					map_mesh_data (
 						staging_buffer_memory, 
 						offset, 
-						vk_graphics_primitive.indices_offset, 
+						graphics_primitive.indices_offset, 
 						graphics_primitive.indices
 					);
 				}
-
-				vk_graphics_primitive.indices_type = graphics_primitive.indices_type;
-				vk_graphics_primitive.indices = graphics_primitive.indices;
-				vk_mesh.graphics_primitives.push_back (vk_graphics_primitive);
 			}
-
-			splash_screen_graphics_obj_ptr->vk_meshes.push_back (vk_mesh);
 		}
 
 		splash_screen_graphics_obj_ptr->vertex_index_buffer = graphics_utils::create_buffer (
@@ -650,27 +638,20 @@ namespace splash_screen_graphics
 			total_size
 		);
 
-		uint32_t mesh_counter = 0;
-		for (auto& vk_mesh : splash_screen_graphics_obj_ptr->vk_meshes)
+		for (auto& mesh : meshes)
 		{
-			uint32_t primitive_counter = 0;
-			for (auto& graphics_primitive : vk_mesh.graphics_primitives)
+			for (auto& graphics_primitive : mesh.graphics_primitves)
 			{
 				graphics_primitive.buffer = &splash_screen_graphics_obj_ptr->vertex_index_buffer;
 				graphics_primitive.buffer_memory = &splash_screen_graphics_obj_ptr->vertex_index_buffer_memory;
-
-				graphics_primitive.material.base_color_texture.vk_image_view_index = meshes.at (mesh_counter).graphics_primitves.at (primitive_counter).material.base_color_texture.image_index;
-			
-				++primitive_counter;
 			}
-			++mesh_counter;
 		}
 
 		graphics_device.destroyBuffer (staging_buffer);
 		graphics_device.freeMemory (staging_buffer_memory);
 	}
 
-	void create_descriptor_sets ()
+	void create_descriptor_sets (std::vector<asset::mesh::mesh>& meshes)
 	{
 		vk::DescriptorPoolSize pool_size (vk::DescriptorType::eCombinedImageSampler, 1);
 		vk::DescriptorPoolCreateInfo descriptor_pool_create_info (
@@ -687,9 +668,9 @@ namespace splash_screen_graphics
 
 		vk::DescriptorSetAllocateInfo descriptor_set_allocate_info (descriptor_pool, 1, &descriptor_set_layout);
 		
-		for (auto& asset : splash_screen_graphics_obj_ptr->vk_meshes)
+		for (auto& mesh : meshes)
 		{
-			for (auto& graphics_primitive : asset.graphics_primitives)
+			for (auto& graphics_primitive : mesh.graphics_primitves)
 			{
 				graphics_primitive.material.base_color_texture.descriptor_set = graphics_device.allocateDescriptorSets (descriptor_set_allocate_info).front ();
 				vk::DescriptorImageInfo descriptor_image_info (
@@ -904,10 +885,10 @@ namespace splash_screen_graphics
 		common_graphics_obj_ptr = ptr;
 		graphics_device = common_graphics_obj_ptr->graphics_device;
 
-		create_vk_meshes (meshes);
-		create_vk_images (images);
+		create_vulkan_handles_for_meshes (meshes);
+		create_vulkan_handles_for_images (images, meshes);
 
-		create_descriptor_sets ();
+		create_descriptor_sets (meshes);
 		create_renderpasses ();
 		create_framebuffers ();
 		create_shaders ();
@@ -1032,8 +1013,5 @@ namespace splash_screen_graphics
 		{
 			graphics_device.freeMemory (splash_screen_graphics_obj_ptr->image_memory);
 		}
-
-		splash_screen_graphics_obj_ptr->vk_images.clear ();
-		splash_screen_graphics_obj_ptr->vk_meshes.clear ();
 	}
 }
