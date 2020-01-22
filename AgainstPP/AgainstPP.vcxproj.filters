@@ -9,9 +9,6 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
-    <Filter Include="image">
-      <UniqueIdentifier>{fd7bd775-344c-49ba-8426-d6bdf84442ff}</UniqueIdentifier>
-    </Filter>
     <Filter Include="graphics">
       <UniqueIdentifier>{8c9bc19c-2486-4836-b48b-0f3813d73403}</UniqueIdentifier>
     </Filter>
@@ -24,9 +21,6 @@
     <Filter Include="utils">
       <UniqueIdentifier>{ae742e2c-2da7-40ad-b960-caf9b75c362f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="mesh">
-      <UniqueIdentifier>{c7c0b09c-de91-46ba-ba0b-c54fbf7a7c98}</UniqueIdentifier>
-    </Filter>
     <Filter Include="events">
       <UniqueIdentifier>{7f66e89d-fe78-496d-90f6-4a21b337f6ed}</UniqueIdentifier>
     </Filter>
@@ -35,6 +29,9 @@
     </Filter>
     <Filter Include="Shaders">
       <UniqueIdentifier>{55d66fa5-8463-47a3-a973-1db322c6ad60}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="asset">
+      <UniqueIdentifier>{c7c0b09c-de91-46ba-ba0b-c54fbf7a7c98}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -65,14 +62,11 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="image.cpp">
-      <Filter>image</Filter>
-    </ClCompile>
     <ClCompile Include="common_graphics.cpp">
       <Filter>graphics</Filter>
     </ClCompile>
-    <ClCompile Include="mesh.cpp">
-      <Filter>mesh</Filter>
+    <ClCompile Include="asset.cpp">
+      <Filter>asset</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -100,20 +94,17 @@
     <ClInclude Include="game.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="image.hpp">
-      <Filter>image</Filter>
-    </ClInclude>
     <ClInclude Include="common_graphics.hpp">
       <Filter>graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="mesh.hpp">
-      <Filter>mesh</Filter>
     </ClInclude>
     <ClInclude Include="event.hpp">
       <Filter>events</Filter>
     </ClInclude>
     <ClInclude Include="enums.hpp">
       <Filter>enums</Filter>
+    </ClInclude>
+    <ClInclude Include="asset.hpp">
+      <Filter>asset</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

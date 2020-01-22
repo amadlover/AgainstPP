@@ -4,7 +4,7 @@
 #include "splash_screen_graphics.hpp"
 #include "image.hpp"
 #include "actor.hpp"
-#include "mesh.hpp"
+#include "asset.hpp"
 #include "event.hpp"
 
 #include <memory>
@@ -15,8 +15,8 @@ namespace splash_screen
 	{
 		std::unique_ptr<splash_screen_graphics::splash_screen_graphics> graphics;
 
-		std::vector<mesh::gltf_mesh> gltf_meshes;
-		std::vector<image::gltf_image> gltf_images;
+		std::vector<asset::mesh::mesh> meshes;
+		std::vector<asset::image::image> images;
 
 		std::vector<actor::actor> actors;
 	};

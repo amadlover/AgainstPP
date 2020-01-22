@@ -1,7 +1,7 @@
 #pragma once
 
 #include "common_graphics.hpp"
-#include "mesh.hpp"
+#include "asset.hpp"
 #include "actor.hpp"
 
 #include <memory>
@@ -59,8 +59,8 @@ namespace splash_screen_graphics
 {
 	struct splash_screen_graphics
 	{
-		std::vector<mesh::vk_mesh> vk_meshes;
-		std::vector<image::vk_image> vk_images;
+		std::vector<asset::mesh::vk_mesh> vk_meshes;
+		std::vector<asset::image::vk_image> vk_images;
 
 		vk::DeviceMemory vertex_index_buffer_memory;
 		vk::Buffer vertex_index_buffer;
@@ -70,7 +70,7 @@ namespace splash_screen_graphics
 		std::vector<vk::Image> images;
 	};
 
-	void init (std::vector<mesh::gltf_mesh>& gltf_meshes, std::vector<image::gltf_image>& images, common_graphics::common_graphics* ptr);
+	void init (std::vector<asset::mesh::mesh>& meshes, std::vector<asset::image::image>& images, common_graphics::common_graphics* ptr);
 	void draw ();
 	void exit ();
 }

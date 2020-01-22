@@ -388,15 +388,15 @@ namespace splash_screen_graphics
 
 	void check_for_similar_image_indices (
 		uint32_t from_index, 
-		const image::gltf_image& current_image, 
-		const std::vector<image::gltf_image>& gltf_images, 
+		const asset::image::image& current_image, 
+		const std::vector<asset::image::image>& images, 
 		std::vector<uint32_t>& similar_image_indices
 	)
 	{
-		while (from_index < gltf_images.size ())
+		while (from_index < images.size ())
 		{
-			if (current_image.width == gltf_images.at (from_index).width &&
-				current_image.height == gltf_images.at (from_index).height)
+			if (current_image.width == images.at (from_index).width &&
+				current_image.height == images.at (from_index).height)
 			{
 				similar_image_indices.push_back (from_index);
 			}
@@ -405,11 +405,11 @@ namespace splash_screen_graphics
 		}
 	}
 
-	void create_vk_images (const std::vector<image::gltf_image>& gltf_images)
+	void create_vk_images (const std::vector<asset::image::image>& images)
 	{
 		std::map<vk::Image, std::vector<uint32_t>> vkimage_similarindices;
 
-		for (uint32_t index = 0; index < gltf_images.size(); index++)
+		for (uint32_t index = 0; index < images.size(); index++)
 		{
 			bool is_index_already_processed = false;
 			for (const auto& vk_image_similar_indices : vkimage_similarindices)
@@ -433,16 +433,16 @@ namespace splash_screen_graphics
 				continue;
 			}
 
-			image::gltf_image image = gltf_images.at (index);
+			asset::image::image image = images.at (index);
 			std::vector<uint32_t> similar_images_indices;
-			similar_images_indices.reserve (gltf_images.size ());
+			similar_images_indices.reserve (images.size ());
 			similar_images_indices.push_back (index);
 			
 			uint32_t start_index = index + 1;
 			check_for_similar_image_indices (
 				start_index,
 				image,
-				gltf_images,
+				images,
 				similar_images_indices
 			);
 
@@ -450,13 +450,13 @@ namespace splash_screen_graphics
 
 			for (const auto& similar_index : similar_images_indices)
 			{
-				const image::gltf_image similar_image = gltf_images.at (similar_index);
+				const asset::image::image similar_image = images.at (similar_index);
 				similar_image_size += similar_image.pixels.size ();
 			}
 
 			vk::Extent3D image_extent{
-				(uint32_t)gltf_images.at (similar_images_indices.at (0)).width,
-				(uint32_t)gltf_images.at (similar_images_indices.at (0)).height,
+				(uint32_t)images.at (similar_images_indices.at (0)).width,
+				(uint32_t)images.at (similar_images_indices.at (0)).height,
 				(uint32_t)1
 			};
 
@@ -472,15 +472,15 @@ namespace splash_screen_graphics
 			vkimage_similarindices.insert (std::make_pair (vkimage, similar_images_indices));
 		}
 		
-		std::vector<vk::Image> images;
+		std::vector<vk::Image> new_images;
 
 		for (auto vk_image_similar_indices : vkimage_similarindices)
 		{
-			images.push_back (vk_image_similar_indices.first);
+			new_images.push_back (vk_image_similar_indices.first);
 		}
 
-		splash_screen_graphics_obj_ptr->image_memory = graphics_utils::allocate_bind_image_memory (images, vk::MemoryPropertyFlagBits::eDeviceLocal);
-		splash_screen_graphics_obj_ptr->images = images;
+		splash_screen_graphics_obj_ptr->image_memory = graphics_utils::allocate_bind_image_memory (new_images, vk::MemoryPropertyFlagBits::eDeviceLocal);
+		splash_screen_graphics_obj_ptr->images = new_images;
 
 		for (const auto& vk_image_similar_indices : vkimage_similarindices)
 		{
@@ -543,13 +543,13 @@ namespace splash_screen_graphics
 		offset += data.size ();
 	}
 
-	void create_vk_meshes (const std::vector<mesh::gltf_mesh>& gltf_meshes)
+	void create_vk_meshes (const std::vector<asset::mesh::mesh>& meshes)
 	{
 		vk::DeviceSize total_size = 0;
 
-		for (const auto& mesh : gltf_meshes)
+		for (const auto& asset : meshes)
 		{
-			for (const auto& graphics_primitive : mesh.graphics_primitves)
+			for (const auto& graphics_primitive : asset.graphics_primitves)
 			{
 				total_size += (vk::DeviceSize)graphics_primitive.positions.size () + 
 							(vk::DeviceSize)graphics_primitive.normals.size () + 
@@ -562,17 +562,17 @@ namespace splash_screen_graphics
 		vk::Buffer staging_buffer = graphics_utils::create_buffer (total_size, vk::BufferUsageFlagBits::eTransferSrc, vk::SharingMode::eExclusive);
 		vk::DeviceMemory staging_buffer_memory = graphics_utils::allocate_bind_buffer_memory (staging_buffer, vk::MemoryPropertyFlagBits::eHostVisible);
 
-		splash_screen_graphics_obj_ptr->vk_meshes.reserve (gltf_meshes.size ());
+		splash_screen_graphics_obj_ptr->vk_meshes.reserve (meshes.size ());
 		vk::DeviceSize offset = 0;
 
-		for (const auto& mesh : gltf_meshes)
+		for (const auto& asset : meshes)
 		{
-			mesh::vk_mesh vk_mesh = {};
-			vk_mesh.graphics_primitives.reserve (mesh.graphics_primitves.size ());
+			asset::mesh::vk_mesh vk_mesh = {};
+			vk_mesh.graphics_primitives.reserve (asset.graphics_primitves.size ());
 			
-			for (const auto& graphics_primitive : mesh.graphics_primitves)
+			for (const auto& graphics_primitive : asset.graphics_primitves)
 			{
-				mesh::vk_graphics_primitive vk_graphics_primitive = {};
+				asset::mesh::vk_graphics_primitive vk_graphics_primitive = {};
 			
 				if (graphics_primitive.positions.size () > 0)
 				{
@@ -659,7 +659,7 @@ namespace splash_screen_graphics
 				graphics_primitive.buffer = &splash_screen_graphics_obj_ptr->vertex_index_buffer;
 				graphics_primitive.buffer_memory = &splash_screen_graphics_obj_ptr->vertex_index_buffer_memory;
 
-				graphics_primitive.material.base_color_texture.vk_image_view_index = gltf_meshes.at (mesh_counter).graphics_primitves.at (primitive_counter).material.base_color_texture.gltf_image_index;
+				graphics_primitive.material.base_color_texture.vk_image_view_index = meshes.at (mesh_counter).graphics_primitves.at (primitive_counter).material.base_color_texture.image_index;
 			
 				++primitive_counter;
 			}
@@ -687,9 +687,9 @@ namespace splash_screen_graphics
 
 		vk::DescriptorSetAllocateInfo descriptor_set_allocate_info (descriptor_pool, 1, &descriptor_set_layout);
 		
-		for (auto& mesh : splash_screen_graphics_obj_ptr->vk_meshes)
+		for (auto& asset : splash_screen_graphics_obj_ptr->vk_meshes)
 		{
-			for (auto& graphics_primitive : mesh.graphics_primitives)
+			for (auto& graphics_primitive : asset.graphics_primitives)
 			{
 				graphics_primitive.material.base_color_texture.descriptor_set = graphics_device.allocateDescriptorSets (descriptor_set_allocate_info).front ();
 				vk::DescriptorImageInfo descriptor_image_info (
@@ -895,8 +895,8 @@ namespace splash_screen_graphics
 	}
 
 	void init (
-		std::vector<mesh::gltf_mesh>& gltf_meshes, 
-		std::vector<image::gltf_image>& gltf_images, 
+		std::vector<asset::mesh::mesh>& meshes, 
+		std::vector<asset::image::image>& images, 
 		common_graphics::common_graphics* ptr
 	)
 	{
@@ -904,8 +904,8 @@ namespace splash_screen_graphics
 		common_graphics_obj_ptr = ptr;
 		graphics_device = common_graphics_obj_ptr->graphics_device;
 
-		create_vk_meshes (gltf_meshes);
-		create_vk_images (gltf_images);
+		create_vk_meshes (meshes);
+		create_vk_images (images);
 
 		create_descriptor_sets ();
 		create_renderpasses ();

@@ -179,12 +179,11 @@ xcopy "$(ProjectDir)UIElements" "$(SolutionDir)$(Platform)\$(Configuration)\UIEl
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="actor.cpp" />
-    <ClCompile Include="mesh.cpp" />
+    <ClCompile Include="asset.cpp" />
     <ClCompile Include="error.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="common_graphics.cpp" />
     <ClCompile Include="graphics_utils.cpp" />
-    <ClCompile Include="image.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="main_menu.cpp" />
     <ClCompile Include="splash_screen.cpp" />
@@ -195,12 +194,11 @@ xcopy "$(ProjectDir)UIElements" "$(SolutionDir)$(Platform)\$(Configuration)\UIEl
     <ClInclude Include="actor.hpp" />
     <ClInclude Include="enums.hpp" />
     <ClInclude Include="event.hpp" />
-    <ClInclude Include="mesh.hpp" />
+    <ClInclude Include="asset.hpp" />
     <ClInclude Include="error.hpp" />
     <ClInclude Include="game.hpp" />
     <ClInclude Include="common_graphics.hpp" />
     <ClInclude Include="graphics_utils.hpp" />
-    <ClInclude Include="image.hpp" />
     <ClInclude Include="main_menu.hpp" />
     <ClInclude Include="splash_screen.hpp" />
     <ClInclude Include="splash_screen_graphics.hpp" />
