@@ -71,6 +71,6 @@ namespace splash_screen_graphics
 	};
 
 	void init (std::vector<mesh::gltf_mesh>& gltf_meshes, std::vector<image::gltf_image>& images, common_graphics::common_graphics* ptr);
-	void run ();
+	void draw ();
 	void exit ();
 }

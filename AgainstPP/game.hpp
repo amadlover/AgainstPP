@@ -10,7 +10,7 @@
 namespace game
 {
 	void init (HINSTANCE HInstance, HWND HWnd);
-	void run ();
+	void draw ();
 	void exit ();
 
 	void process_keyboard_input (WPARAM wParam, LPARAM lParam);

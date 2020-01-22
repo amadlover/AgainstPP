@@ -23,6 +23,6 @@ namespace splash_screen
 
 	void init (common_graphics::common_graphics* common_graphics_obj_ptr, event::event* ptr);
 	void process_keyboard_input (WPARAM wParam, LPARAM lParam);
-	void run ();
+	void draw ();
 	void exit ();
 }

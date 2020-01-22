@@ -907,9 +907,6 @@ namespace splash_screen_graphics
 		create_vk_meshes (gltf_meshes);
 		create_vk_images (gltf_images);
 
-		gltf_images.clear ();
-		gltf_meshes.clear ();
-
 		create_descriptor_sets ();
 		create_renderpasses ();
 		create_framebuffers ();
@@ -919,7 +916,11 @@ namespace splash_screen_graphics
 		create_sync_objects ();
 	}
 
-	void run ()
+	void create_command_buffers ()
+	{
+	}
+
+	void draw ()
 	{
 	}
 

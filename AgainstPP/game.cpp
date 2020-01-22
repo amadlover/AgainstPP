@@ -20,25 +20,12 @@ namespace game
 	std::unique_ptr<common_graphics::common_graphics> common_graphics_obj_ptr (new common_graphics::common_graphics ());
 	std::unique_ptr<event::event> event_obj_ptr (new event::event ());
 
-	void(*current_scene_run)();
+	void(*current_scene_draw)();
+	void(*current_scene_process_keyboard_input)(WPARAM, LPARAM);
 
 	void process_keyboard_input (WPARAM wParam, LPARAM lParam)
 	{
-		switch (current_scene)
-		{
-		case e_scene_type::splash_screen:
-			splash_screen::process_keyboard_input (wParam, lParam);
-
-			break;
-
-		case e_scene_type::main_menu:
-			main_menu::process_keyboard_input (wParam, lParam);
-
-			break;
-
-		default:
-			break;
-		}
+		current_scene_process_keyboard_input (wParam, lParam);
 	}
 
 	void process_left_mouse_click ()
@@ -89,13 +76,15 @@ namespace game
 		case e_scene_type::splash_screen:
 			splash_screen::init (common_graphics_obj_ptr.get (), event_obj_ptr.get ());
 			splash_screen_state = e_scene_state::inited;
-			current_scene_run = splash_screen::run;
+			current_scene_draw = splash_screen::draw;
+			current_scene_process_keyboard_input = splash_screen::process_keyboard_input;
 			break;
 
 		case e_scene_type::main_menu:
 			main_menu::init (event_obj_ptr.get ());
 			main_menu_state = e_scene_state::inited;
-			current_scene_run = main_menu::run;
+			current_scene_draw = main_menu::draw;
+			current_scene_process_keyboard_input = main_menu::process_keyboard_input;
 			break;
 		}
 	}
@@ -109,12 +98,13 @@ namespace game
 		common_graphics::init (hInstance, hWnd, common_graphics_obj_ptr.get ());
 		graphics_utils::init (common_graphics_obj_ptr.get ());
 		splash_screen::init (common_graphics_obj_ptr.get (), event_obj_ptr.get ());
-		current_scene_run = splash_screen::run;
+		current_scene_draw = splash_screen::draw;
+		current_scene_process_keyboard_input = splash_screen::process_keyboard_input;
 	}
 
-	void run ()
+	void draw ()
 	{
-		current_scene_run ();
+		current_scene_draw ();
 	}
 
 	void exit ()

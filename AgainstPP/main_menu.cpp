@@ -14,6 +14,7 @@ namespace main_menu
 
 	void process_keyboard_input (WPARAM wParam, LPARAM lParam)
 	{
+		OutputDebugString (L"main_menu::process_keyboard_input\n");
 		switch (wParam)
 		{
 		case VK_ESCAPE:
@@ -24,7 +25,7 @@ namespace main_menu
 		}
 	}
 
-	void run ()
+	void draw ()
 	{
 	}
 

@@ -206,6 +206,10 @@ xcopy "$(ProjectDir)UIElements" "$(SolutionDir)$(Platform)\$(Configuration)\UIEl
     <ClInclude Include="splash_screen_graphics.hpp" />
     <ClInclude Include="utils.hpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\SplashScreen\frag.frag" />
+    <None Include="Shaders\SplashScreen\vert.vert" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

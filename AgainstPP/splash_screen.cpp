@@ -21,10 +21,14 @@ namespace splash_screen
 
 	void process_keyboard_input (WPARAM wParam, LPARAM lParam)
 	{
+		OutputDebugString (L"splash_screen::process_keyboard_input\n");
 		switch (wParam)
 		{
 		case VK_ESCAPE:
 			event_obj_ptr->go_to_scene (e_scene_type::main_menu);
+			break;
+
+		case 0x53:
 			break;
 
 		default:
@@ -32,9 +36,9 @@ namespace splash_screen
 		}
 	}
 
-	void run ()
+	void draw ()
 	{
-		splash_screen_graphics::run ();
+		splash_screen_graphics::draw ();
 	}
 
 	void exit ()

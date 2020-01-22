@@ -9,10 +9,6 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
     <Filter Include="image">
       <UniqueIdentifier>{fd7bd775-344c-49ba-8426-d6bdf84442ff}</UniqueIdentifier>
     </Filter>
@@ -36,6 +32,9 @@
     </Filter>
     <Filter Include="enums">
       <UniqueIdentifier>{656d37ba-5eca-44fa-b8d3-717ba19a4812}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{55d66fa5-8463-47a3-a973-1db322c6ad60}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -116,5 +115,13 @@
     <ClInclude Include="enums.hpp">
       <Filter>enums</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\SplashScreen\frag.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\SplashScreen\vert.vert">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

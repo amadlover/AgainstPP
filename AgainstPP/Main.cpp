@@ -100,7 +100,7 @@ int WINAPI wWinMain (
 				DispatchMessage (&Msg);
 			}
 
-			game::run ();
+			game::draw ();
 		}
 	}
 	catch (egraphics_error Err)
