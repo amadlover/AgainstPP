@@ -541,6 +541,29 @@ namespace splash_screen_graphics
 
 	void draw ()
 	{
+		vk::ResultValue<uint32_t> swapchain_image_index = graphics_device.acquireNextImageKHR (common_graphics_obj_ptr->swapchain, UINT64_MAX, wait_semaphore, VK_NULL_HANDLE);
+
+		if (swapchain_image_index.result == vk::Result::eSuboptimalKHR || swapchain_image_index.result == vk::Result::eErrorOutOfDateKHR)
+		{
+			return;
+		}
+
+		graphics_device.waitForFences (1, &swapchain_fences.at (swapchain_image_index.value), VK_TRUE, UINT64_MAX);
+
+		vk::PipelineStageFlags wait_dst_stage_mask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+
+		/*vk::SubmitInfo submit_info (
+			1,
+			&wait_semaphore	,
+			&wait_dst_stage_mask,
+			1,
+			&swapchain_commandbuffers.at(swapchain_image_index),
+			1,
+			signal_semaphore
+		);
+
+		common_graphics_obj_ptr->graphics_queue.submit (1, &submit_info, swapchain_fences.at (swapchain_image_index.value));*/
+
 	}
 
 	void exit ()

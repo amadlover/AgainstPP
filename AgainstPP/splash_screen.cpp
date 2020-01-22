@@ -21,7 +21,6 @@ namespace splash_screen
 
 	void process_keyboard_input (WPARAM wParam, LPARAM lParam)
 	{
-		OutputDebugString (L"splash_screen::process_keyboard_input\n");
 		switch (wParam)
 		{
 		case VK_ESCAPE:

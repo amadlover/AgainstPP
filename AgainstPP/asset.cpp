@@ -103,41 +103,24 @@ namespace asset
 			auto accessor = model.accessors[primitive.indices];
 			auto buffer_view = model.bufferViews[accessor.bufferView];
 
-			if (accessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE)
-			{
-				physics_primitive.indices_type = vk::IndexType::eUint8EXT;
-				/*const uint8_t* data_start = reinterpret_cast<const uint8_t*>(&(model.buffers[buffer_view.buffer].data[accessor.byteOffset + buffer_view.byteOffset]));
-
-				for (uint32_t i = 0; i < accessor.count; i++)
-				{
-					graphics_primitive.indices.push_back (data_start[i]);
-				}*/
-			}
-			else if (accessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT)
-			{
-				physics_primitive.indices_type = vk::IndexType::eUint16;
-				/*const uint16_t* data_start = reinterpret_cast<const uint16_t*>(&(model.buffers[buffer_view.buffer].data[accessor.byteOffset + buffer_view.byteOffset]));
-
-				for (uint32_t i = 0; i < accessor.count; i++)
-				{
-					graphics_primitive.indices.push_back (data_start[i]);
-				}*/
-			}
-			else if (accessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT)
-			{
-				physics_primitive.indices_type = vk::IndexType::eUint32;
-				/*const uint32_t* data_start = reinterpret_cast<const uint32_t*>(&(model.buffers[buffer_view.buffer].data[accessor.byteOffset + buffer_view.byteOffset]));
-
-				for (uint32_t i = 0; i < accessor.count; i++)
-				{
-					graphics_primitive.indices.push_back (data_start[i]);
-				}*/
-			}
-
+			physics_primitive.indices.reserve (buffer_view.byteLength);
 			for (uint32_t i = 0; i < buffer_view.byteLength; i++)
 			{
 				uint32_t offset_index = accessor.byteOffset + buffer_view.byteOffset + i;
 				physics_primitive.indices.push_back (model.buffers[buffer_view.buffer].data[offset_index]);
+			}
+
+			if (accessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE)
+			{
+				physics_primitive.indices_type = vk::IndexType::eUint8EXT;
+			}
+			else if (accessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT)
+			{
+				physics_primitive.indices_type = vk::IndexType::eUint16;
+			}
+			else if (accessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT)
+			{
+				physics_primitive.indices_type = vk::IndexType::eUint32;
 			}
 		}
 
@@ -149,6 +132,13 @@ namespace asset
 		{
 			auto accessor = model.accessors[primitive.indices];
 			auto buffer_view = model.bufferViews[accessor.bufferView];
+
+			graphics_primitive.indices.reserve (buffer_view.byteLength);
+			for (uint32_t i = 0; i < buffer_view.byteLength; i++)
+			{
+				uint32_t offset_index = accessor.byteOffset + buffer_view.byteOffset + i;
+				graphics_primitive.indices.push_back (model.buffers[buffer_view.buffer].data[offset_index]);
+			}
 
 			if (accessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE)
 			{
@@ -163,28 +153,10 @@ namespace asset
 			else if (accessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT)
 			{
 				graphics_primitive.indices_type = vk::IndexType::eUint16;
-				/*const uint16_t* data_start = reinterpret_cast<const uint16_t*>(&(model.buffers[buffer_view.buffer].data[accessor.byteOffset + buffer_view.byteOffset]));
-
-				for (uint32_t i = 0; i < accessor.count; i++)
-				{
-					graphics_primitive.indices.push_back (data_start[i]);
-				}*/
 			}
 			else if (accessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT)
 			{
 				graphics_primitive.indices_type = vk::IndexType::eUint32;
-				/*const uint32_t* data_start = reinterpret_cast<const uint32_t*>(&(model.buffers[buffer_view.buffer].data[accessor.byteOffset + buffer_view.byteOffset]));
-
-				for (uint32_t i = 0; i < accessor.count; i++)
-				{
-					graphics_primitive.indices.push_back (data_start[i]);
-				}*/
-			}
-
-			for (uint32_t i = 0; i < buffer_view.byteLength; i++)
-			{
-				uint32_t offset_index = accessor.byteOffset + buffer_view.byteOffset + i;
-				graphics_primitive.indices.push_back (model.buffers[buffer_view.buffer].data[offset_index]);
 			}
 		}
 
