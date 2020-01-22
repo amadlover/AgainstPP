@@ -10,32 +10,6 @@
 
 #include <vulkan.hpp>
 
-struct PrimitivePhysicsData
-{
-};
-
-struct PrimitiveGraphicsData
-{
-};
-
-class Asset
-{
-public:
-	Asset ();
-	~Asset ();
-	
-	std::vector<PrimitiveGraphicsData> PrimitiveGraphicsDatas;
-	std::vector<PrimitivePhysicsData> PrimitivePhysicsDatas;
-
-	glm::mat4 TransformationMatrix;
-
-	glm::vec3 Translation;
-	glm::quat Rotation;
-	glm::vec3 Scale;
-
-	std::string Name;
-};
-
 namespace asset
 {
 	namespace mesh
