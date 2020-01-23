@@ -46,7 +46,6 @@ namespace game
 
 	void process_window_destroy ()
 	{
-
 	}
 
 	void go_to_scene (e_scene_type new_scene)

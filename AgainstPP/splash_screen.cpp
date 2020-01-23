@@ -43,10 +43,10 @@ namespace splash_screen
 	void exit ()
 	{
 		OutputDebugString (L"splash_screen::exit\n");
+	
+		splash_screen_graphics::exit ();
 
 		asset::mesh::destroy_meshes (splash_screen_obj_ptr->meshes);
 		asset::image::destroy_images (splash_screen_obj_ptr->images);
-
-		splash_screen_graphics::exit ();
 	}
 }

@@ -12,8 +12,6 @@ namespace splash_screen
 {
 	struct splash_screen
 	{
-		std::unique_ptr<splash_screen_graphics::splash_screen_graphics> graphics;
-
 		std::vector<asset::mesh::mesh> meshes;
 		std::vector<asset::image::image> images;
 
