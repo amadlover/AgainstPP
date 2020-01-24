@@ -10,7 +10,7 @@
 
 #include "enums.hpp"
 
-namespace game 
+namespace game
 {
 	e_scene_type current_scene = e_scene_type::splash_screen;
 
@@ -55,7 +55,7 @@ namespace game
 		case e_scene_type::splash_screen:
 			splash_screen::exit ();
 			splash_screen_state = e_scene_state::exited;
-			
+
 			break;
 
 		case e_scene_type::main_menu:
@@ -115,7 +115,7 @@ namespace game
 			splash_screen::exit ();
 			splash_screen_state = e_scene_state::exited;
 		}
-		
+
 		if (main_menu_state != e_scene_state::exited)
 		{
 			main_menu::exit ();

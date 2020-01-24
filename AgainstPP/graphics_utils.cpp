@@ -44,12 +44,12 @@ namespace graphics_utils
 			sharing_mode, common_graphics_obj_ptr->graphics_queue_family_indices.size (),
 			common_graphics_obj_ptr->graphics_queue_family_indices.data ()
 		);
-		
+
 		return common_graphics_obj_ptr->graphics_device.createBuffer (buffer_create_info);
 	}
 
 	vk::DeviceMemory allocate_bind_buffer_memory (
-		const vk::Buffer& buffer, 
+		const vk::Buffer& buffer,
 		vk::MemoryPropertyFlags required_types
 	)
 	{
@@ -75,9 +75,9 @@ namespace graphics_utils
 	}
 
 	void copy_buffer_to_buffer (
-		vk::CommandPool& command_pool, 
-		const vk::Buffer& src_buffer, 
-		const vk::Buffer& dst_buffer, 
+		vk::CommandPool& command_pool,
+		const vk::Buffer& src_buffer,
+		const vk::Buffer& dst_buffer,
 		vk::DeviceSize size
 	)
 	{
@@ -106,18 +106,18 @@ namespace graphics_utils
 	)
 	{
 		vk::ImageCreateInfo image_create_info (
-			{}, 
-			vk::ImageType::e2D, 
-			format, 
-			extent, 
-			1, 
-			array_layers, 
-			vk::SampleCountFlagBits::e1, 
-			vk::ImageTiling::eOptimal, 
-			usage, 
-			sharing_mode, 
-			common_graphics_obj_ptr->graphics_queue_family_indices.size (), 
-			common_graphics_obj_ptr->graphics_queue_family_indices.data (), 
+			{},
+			vk::ImageType::e2D,
+			format,
+			extent,
+			1,
+			array_layers,
+			vk::SampleCountFlagBits::e1,
+			vk::ImageTiling::eOptimal,
+			usage,
+			sharing_mode,
+			common_graphics_obj_ptr->graphics_queue_family_indices.size (),
+			common_graphics_obj_ptr->graphics_queue_family_indices.data (),
 			initial_layout
 		);
 

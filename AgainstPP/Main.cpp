@@ -5,9 +5,9 @@
 #include "Error.hpp"
 
 LRESULT CALLBACK WindowProc (
-	HWND WindowHandle, 
-	UINT Msg, 
-	WPARAM wParam, 
+	HWND WindowHandle,
+	UINT Msg,
+	WPARAM wParam,
 	LPARAM lParam
 )
 {
@@ -30,17 +30,17 @@ LRESULT CALLBACK WindowProc (
 	}
 
 	return DefWindowProc (
-		WindowHandle, 
-		Msg, 
-		wParam, 
+		WindowHandle,
+		Msg,
+		wParam,
 		lParam
 	);
 }
 
 int WINAPI wWinMain (
-	_In_ HINSTANCE hInstance, 
-	_In_opt_ HINSTANCE previous_hInstance, 
-	_In_ PWSTR cmd_line, 
+	_In_ HINSTANCE hInstance,
+	_In_opt_ HINSTANCE previous_hInstance,
+	_In_ PWSTR cmd_line,
 	_In_ int CmdShow
 )
 {
@@ -58,16 +58,16 @@ int WINAPI wWinMain (
 	}
 
 	HWND hWnd = CreateWindow (
-		L"Against", 
-		L"Against", 
-		WS_OVERLAPPEDWINDOW, 
-		CW_USEDEFAULT, 
-		CW_USEDEFAULT, 
-		1280, 
-		720, 
-		NULL, 
-		NULL, 
-		hInstance, 
+		L"Against",
+		L"Against",
+		WS_OVERLAPPEDWINDOW,
+		CW_USEDEFAULT,
+		CW_USEDEFAULT,
+		1280,
+		720,
+		NULL,
+		NULL,
+		hInstance,
 		NULL
 	);
 
@@ -81,14 +81,14 @@ int WINAPI wWinMain (
 
 	MSG Msg;
 	ZeroMemory (
-		&Msg, 
+		&Msg,
 		sizeof (Msg)
 	);
 
 	try
 	{
 		game::init (
-			hInstance, 
+			hInstance,
 			hWnd
 		);
 

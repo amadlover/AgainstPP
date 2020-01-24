@@ -254,7 +254,7 @@ namespace common_graphics
 			surface_capabilities.supportedUsageFlags,
 			vk::SharingMode::eExclusive,
 			1,
-			& common_graphics_obj_ptr->graphics_queue_family_indices[0],
+			&common_graphics_obj_ptr->graphics_queue_family_indices[0],
 			surface_capabilities.currentTransform,
 			vk::CompositeAlphaFlagBitsKHR::eOpaque,
 			chosen_present_mode,
@@ -289,7 +289,7 @@ namespace common_graphics
 		vk::CommandPoolCreateInfo command_pool_create_info ({}, common_graphics_obj_ptr->graphics_queue_family_indices[0]);
 		common_graphics_obj_ptr->command_pool = common_graphics_obj_ptr->graphics_device.createCommandPool (command_pool_create_info);
 	}
-	
+
 	void create_sampler ()
 	{
 		vk::SamplerCreateInfo sampler_create_info (

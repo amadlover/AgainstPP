@@ -9,8 +9,8 @@
 namespace splash_screen_graphics
 {
 	void init (
-		std::vector<asset::mesh::mesh>& meshes, 
-		std::vector<asset::image::image>& images, 
+		std::vector<asset::mesh::mesh>& meshes,
+		std::vector<asset::image::image>& images,
 		common_graphics::common_graphics* ptr
 	);
 	void update_command_buffers (
