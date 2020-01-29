@@ -3,10 +3,8 @@ Debug
 Release
 
 # CMake
-build
+build*
 
 # Visual Studio
 .vs
 
-# Automation
-*.bat
