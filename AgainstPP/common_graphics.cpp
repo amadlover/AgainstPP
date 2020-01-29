@@ -258,8 +258,7 @@ namespace common_graphics
 			surface_capabilities.currentTransform,
 			vk::CompositeAlphaFlagBitsKHR::eOpaque,
 			chosen_present_mode,
-			VK_TRUE,
-			VK_NULL_HANDLE
+			VK_TRUE
 		);
 
 		common_graphics_obj_ptr->swapchain = common_graphics_obj_ptr->graphics_device.createSwapchainKHR (swapchain_create_info);
