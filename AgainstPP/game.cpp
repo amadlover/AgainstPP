@@ -9,7 +9,7 @@
 #include "event.hpp"
 
 #include "enums.hpp"
-
+/*
 namespace game
 {
 	e_scene_type current_scene = e_scene_type::splash_screen;
@@ -123,5 +123,120 @@ namespace game
 		}
 
 		common_graphics::exit ();
+	}
+}
+*/
+
+game* game::ptr = nullptr;
+
+game::game (HINSTANCE hInstance, int cmd_show)
+{
+	OutputDebugString (L"game::game\n");
+	WNDCLASS WC = { 0 };
+
+	WC.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
+	WC.lpfnWndProc = window_proc;
+	WC.hInstance = hInstance;
+	WC.lpszClassName = L"Against";
+	WC.hCursor = LoadCursor (hInstance, IDC_ARROW);
+
+	if (!RegisterClass (&WC))
+	{
+		throw std::runtime_error ("Could not register window class");
+	}
+
+	hWnd = CreateWindow (
+		L"Against",
+		L"Against",
+		WS_OVERLAPPEDWINDOW,
+		CW_USEDEFAULT,
+		CW_USEDEFAULT,
+		1280,
+		720,
+		NULL,
+		NULL,
+		hInstance,
+		NULL
+	);
+
+	if (!hWnd)
+	{
+		throw std::runtime_error ("Could not create Window");
+	}
+
+	ShowWindow (hWnd, cmd_show);
+}
+
+game::~game ()
+{
+	OutputDebugString (L"game::~game\n");
+}
+
+game* game::get_instance (HINSTANCE hInstance, int cmd_show)
+{
+	if (ptr != nullptr)
+	{
+		delete ptr;
+	}
+	
+	ptr = new game (hInstance, cmd_show);
+
+	return ptr;
+}
+
+LRESULT game::window_proc (HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch (msg)
+	{
+	case WM_KEYDOWN:
+		OutputDebugString (L"Some key down\n");
+		switch (wParam)
+		{
+		case VK_ESCAPE:
+			OutputDebugString (L"VK_ESCAPE\n");
+			PostQuitMessage (0);
+			break;
+		default:
+			break;
+		}
+
+		break;
+
+	case WM_CLOSE:
+		OutputDebugString (L"WM_CLOSE\n");
+		PostQuitMessage (0);
+		break;
+
+	case WM_DESTROY:
+		OutputDebugString (L"WM_DESTROY\n");
+		PostQuitMessage (0);
+		break;
+
+	case WM_QUIT:
+		OutputDebugString (L"WM_QUIT\n");
+		PostQuitMessage (0);
+		break;
+
+	default:
+		break;
+	}
+
+	return DefWindowProc (hWnd, msg, wParam, lParam);
+}
+
+void game::main_loop ()
+{
+	UpdateWindow (hWnd);
+
+	MSG msg;
+	ZeroMemory (&msg, sizeof (msg));
+
+	while (msg.message != WM_QUIT)
+	{
+		if (PeekMessage (&msg, nullptr, 0, 0, PM_REMOVE))
+		{
+			TranslateMessage (&msg);
+			DispatchMessage (&msg);
+		}
 	}
 }

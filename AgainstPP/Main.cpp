@@ -4,7 +4,7 @@
 #include "Game.hpp"
 #include "Error.hpp"
 
-LRESULT CALLBACK WindowProc (
+/*LRESULT CALLBACK window_proc (
 	HWND WindowHandle,
 	UINT Msg,
 	WPARAM wParam,
@@ -35,19 +35,19 @@ LRESULT CALLBACK WindowProc (
 		wParam,
 		lParam
 	);
-}
+}*/
 
 int WINAPI wWinMain (
 	_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE previous_hInstance,
 	_In_ PWSTR cmd_line,
-	_In_ int CmdShow
+	_In_ int cmd_show
 )
 {
-	WNDCLASS WC = { 0 };
+	/*WNDCLASS WC = { 0 };
 
 	WC.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
-	WC.lpfnWndProc = WindowProc;
+	WC.lpfnWndProc = window_proc;
 	WC.hInstance = hInstance;
 	WC.lpszClassName = L"Against";
 	WC.hCursor = LoadCursor (hInstance, IDC_ARROW);
@@ -76,7 +76,7 @@ int WINAPI wWinMain (
 		return 1;
 	}
 
-	ShowWindow (hWnd, CmdShow);
+	ShowWindow (hWnd, cmd_show);
 	UpdateWindow (hWnd);
 
 	MSG Msg;
@@ -116,7 +116,29 @@ int WINAPI wWinMain (
 
 	game::exit ();
 
-	DestroyWindow (hWnd);
+	DestroyWindow (hWnd);*/
+
+	try
+	{
+		std::unique_ptr<game> g (game::get_instance (hInstance, cmd_show));
+		g->main_loop ();
+	}
+	catch (const char* s)
+	{
+		wchar_t Buff[64];
+		swprintf (Buff, 64, L"%hs\n", s);
+		OutputDebugString (Buff);
+	}
+	catch (egraphics_error e)
+	{
+		log_error (e);
+	}
+	catch (std::runtime_error e)
+	{
+		wchar_t Buff[64];
+		swprintf (Buff, 64, L"%hs\n", e.what ());
+		OutputDebugString (Buff);
+	}
 
 	return 0;
 }

@@ -7,7 +7,7 @@
 #include "splash_screen.hpp"
 #include "main_menu.hpp"
 
-namespace game
+/*namespace game
 {
 	void init (HINSTANCE HInstance, HWND HWnd);
 	void draw ();
@@ -20,4 +20,26 @@ namespace game
 	void process_mouse_movement (WPARAM wParam, LPARAM lParam);
 
 	void process_window_destroy ();
+};*/
+
+class game
+{
+public:
+	static game* get_instance (HINSTANCE hInstance, int cmd_show);
+	
+	static LRESULT CALLBACK window_proc (
+		HWND hWnd,
+		UINT msg,
+		WPARAM wParam,
+		LPARAM lParam
+	);
+
+	void main_loop ();
+	~game ();
+
+private:
+	game (HINSTANCE hInstance, int cmd_show);
+	
+	HWND hWnd;
+	static game* ptr;
 };
