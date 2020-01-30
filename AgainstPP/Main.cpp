@@ -1,20 +1,20 @@
 #include <Windows.h>
 #include <string>
 
-#include "Game.hpp"
-#include "Error.hpp"
+#include "game.hpp"
+#include "error.hpp"
 
-/*LRESULT CALLBACK window_proc (
+std::unique_ptr<game> g (game::get_instance ());
+
+LRESULT CALLBACK window_proc (
 	HWND WindowHandle,
 	UINT Msg,
 	WPARAM wParam,
-	LPARAM lParam
-)
+	LPARAM lParam)
 {
 	switch (Msg)
 	{
 	case WM_DESTROY:
-		game::process_window_destroy ();
 		break;
 
 	case WM_CLOSE:
@@ -22,7 +22,7 @@
 		break;
 
 	case WM_KEYDOWN:
-		game::process_keyboard_input (wParam, lParam);
+		g->process_keyboard_input (wParam, lParam);
 		break;
 
 	default:
@@ -35,7 +35,7 @@
 		wParam,
 		lParam
 	);
-}*/
+}
 
 int WINAPI wWinMain (
 	_In_ HINSTANCE hInstance,
@@ -44,7 +44,11 @@ int WINAPI wWinMain (
 	_In_ int cmd_show
 )
 {
-	/*WNDCLASS WC = { 0 };
+	g->scene_change_event.add_bindings (std::string ("Hola"));
+	g->scene_change_event.add_bindings (std::string ("Bola"));
+	g->scene_change_event.add_bindings (std::string ("Shola"));
+
+	WNDCLASS WC = { 0 };
 
 	WC.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
 	WC.lpfnWndProc = window_proc;
@@ -87,11 +91,7 @@ int WINAPI wWinMain (
 
 	try
 	{
-		game::init (
-			hInstance,
-			hWnd
-		);
-
+		g->init (hInstance, hWnd);
 		while (Msg.message != WM_QUIT)
 		{
 			if (PeekMessage (&Msg, NULL, 0, 0, PM_REMOVE))
@@ -99,8 +99,7 @@ int WINAPI wWinMain (
 				TranslateMessage (&Msg);
 				DispatchMessage (&Msg);
 			}
-
-			game::draw ();
+			g->main_loop ();
 		}
 	}
 	catch (egraphics_error Err)
@@ -114,11 +113,9 @@ int WINAPI wWinMain (
 		OutputDebugString (Buff);
 	}
 
-	game::exit ();
+	DestroyWindow (hWnd);
 
-	DestroyWindow (hWnd);*/
-
-	try
+	/*try
 	{
 		std::unique_ptr<game> g (game::get_instance (hInstance, cmd_show));
 		g->main_loop ();
@@ -138,7 +135,7 @@ int WINAPI wWinMain (
 		wchar_t Buff[64];
 		swprintf (Buff, 64, L"%hs\n", e.what ());
 		OutputDebugString (Buff);
-	}
+	}*/
 
 	return 0;
 }

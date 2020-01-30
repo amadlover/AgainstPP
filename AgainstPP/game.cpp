@@ -129,42 +129,41 @@ namespace game
 
 game* game::ptr = nullptr;
 
-game::game (HINSTANCE hInstance, int cmd_show)
+game::game ()
 {
 	OutputDebugString (L"game::game\n");
-	WNDCLASS WC = { 0 };
 
-	WC.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
-	WC.lpfnWndProc = window_proc;
-	WC.hInstance = hInstance;
-	WC.lpszClassName = L"Against";
-	WC.hCursor = LoadCursor (hInstance, IDC_ARROW);
+	event_ptr = std::make_unique<event> ();
+	event_ptr->go_to_scene = std::bind (&game::go_to_scene, this, std::placeholders::_1);
 
-	if (!RegisterClass (&WC))
+	splash_screen_ptr = std::make_shared<splash_screen> (event_ptr.get ());
+	main_menu_ptr = std::make_shared<main_menu> (event_ptr.get ());
+
+	current_scene = splash_screen_ptr;
+}
+
+void game::go_to_scene (e_scene_type new_scene)
+{
+	switch (new_scene)
 	{
-		throw std::runtime_error ("Could not register window class");
+	case e_scene_type::splash_screen:
+		OutputDebugString (L"New scene splash screen\n");
+		current_scene = splash_screen_ptr;
+		break;
+	case e_scene_type::main_menu:
+		OutputDebugString (L"New scene main menu\n");
+		current_scene = main_menu_ptr;
+		break;
+	default:
+		break;
 	}
 
-	hWnd = CreateWindow (
-		L"Against",
-		L"Against",
-		WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT,
-		CW_USEDEFAULT,
-		1280,
-		720,
-		NULL,
-		NULL,
-		hInstance,
-		NULL
-	);
+	scene_change_event.broadcast ();
+}
 
-	if (!hWnd)
-	{
-		throw std::runtime_error ("Could not create Window");
-	}
-
-	ShowWindow (hWnd, cmd_show);
+void game::process_keyboard_input (WPARAM wParam, LPARAM lParam)
+{
+	current_scene->process_keyboard_input (wParam, lParam);
 }
 
 game::~game ()
@@ -172,71 +171,23 @@ game::~game ()
 	OutputDebugString (L"game::~game\n");
 }
 
-game* game::get_instance (HINSTANCE hInstance, int cmd_show)
+game* game::get_instance ()
 {
 	if (ptr != nullptr)
 	{
 		delete ptr;
 	}
 	
-	ptr = new game (hInstance, cmd_show);
+	ptr = new game ();
 
 	return ptr;
 }
 
-LRESULT game::window_proc (HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+void game::init (HINSTANCE hInstance, HWND hWnd)
 {
-	switch (msg)
-	{
-	case WM_KEYDOWN:
-		OutputDebugString (L"Some key down\n");
-		switch (wParam)
-		{
-		case VK_ESCAPE:
-			OutputDebugString (L"VK_ESCAPE\n");
-			PostQuitMessage (0);
-			break;
-		default:
-			break;
-		}
-
-		break;
-
-	case WM_CLOSE:
-		OutputDebugString (L"WM_CLOSE\n");
-		PostQuitMessage (0);
-		break;
-
-	case WM_DESTROY:
-		OutputDebugString (L"WM_DESTROY\n");
-		PostQuitMessage (0);
-		break;
-
-	case WM_QUIT:
-		OutputDebugString (L"WM_QUIT\n");
-		PostQuitMessage (0);
-		break;
-
-	default:
-		break;
-	}
-
-	return DefWindowProc (hWnd, msg, wParam, lParam);
 }
 
 void game::main_loop ()
 {
-	UpdateWindow (hWnd);
-
-	MSG msg;
-	ZeroMemory (&msg, sizeof (msg));
-
-	while (msg.message != WM_QUIT)
-	{
-		if (PeekMessage (&msg, nullptr, 0, 0, PM_REMOVE))
-		{
-			TranslateMessage (&msg);
-			DispatchMessage (&msg);
-		}
-	}
+	current_scene->main_loop ();
 }

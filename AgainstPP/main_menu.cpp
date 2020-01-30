@@ -1,8 +1,6 @@
 #include "main_menu.hpp"
 
-#include <Windows.h>
-
-namespace main_menu
+/*namespace main_menu
 {
 	event::event* event_obj_ptr;
 
@@ -34,4 +32,20 @@ namespace main_menu
 		OutputDebugString (L"main_menu::exit\n");
 	}
 }
+*/
 
+void main_menu::process_keyboard_input (WPARAM wParam, LPARAM lParam)
+{
+	switch (wParam)
+	{
+	case VK_ESCAPE:
+		event_ptr->go_to_scene (e_scene_type::splash_screen);
+		break;
+
+	case 0x53:
+		break;
+
+	default:
+		break;
+	}
+}

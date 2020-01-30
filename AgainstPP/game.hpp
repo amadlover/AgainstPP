@@ -6,6 +6,7 @@
 #include "common_graphics.hpp"
 #include "splash_screen.hpp"
 #include "main_menu.hpp"
+#include "template_event.hpp"
 
 /*namespace game
 {
@@ -25,21 +26,26 @@
 class game
 {
 public:
-	static game* get_instance (HINSTANCE hInstance, int cmd_show);
+	static game* get_instance ();
 	
-	static LRESULT CALLBACK window_proc (
-		HWND hWnd,
-		UINT msg,
-		WPARAM wParam,
-		LPARAM lParam
-	);
-
+	void init (HINSTANCE hInstance, HWND hWnd);
+	void process_keyboard_input (WPARAM wParam, LPARAM lParam);
 	void main_loop ();
+
 	~game ();
 
+	template_event<std::string> scene_change_event;
+
 private:
-	game (HINSTANCE hInstance, int cmd_show);
-	
+	game ();
+	void go_to_scene (e_scene_type new_scene);
+
+	std::shared_ptr<splash_screen> splash_screen_ptr;
+	std::shared_ptr<main_menu> main_menu_ptr;
+	std::shared_ptr<scene> current_scene;
+
+	std::unique_ptr<event> event_ptr;
+
 	HWND hWnd;
 	static game* ptr;
 };

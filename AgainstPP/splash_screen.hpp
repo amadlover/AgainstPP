@@ -5,10 +5,11 @@
 #include "actor.hpp"
 #include "asset.hpp"
 #include "event.hpp"
+#include "scene.hpp"
 
 #include <memory>
 
-namespace splash_screen
+/*namespace splash_screen
 {
 	struct splash_screen
 	{
@@ -22,4 +23,21 @@ namespace splash_screen
 	void process_keyboard_input (WPARAM wParam, LPARAM lParam);
 	void draw ();
 	void exit ();
-}
+}*/
+
+class splash_screen : public scene
+{
+public:
+	splash_screen () { OutputDebugString (L"splash_screen::splash_screen\n"); }
+	splash_screen (event* event_ptr) { this->event_ptr = event_ptr; }
+	~splash_screen () { OutputDebugString (L"splash_screen::~splash_screen\n"); }
+
+	void init () override { OutputDebugString (L"splash_screen::init\n"); };
+	void process_keyboard_input (WPARAM wParam, LPARAM lParam) override;
+
+	void main_loop () override
+	{
+	}
+
+	void exit () override { OutputDebugString (L"splash_screen::exit\n"); }
+};

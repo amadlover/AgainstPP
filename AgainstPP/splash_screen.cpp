@@ -2,7 +2,7 @@
 #include "utils.hpp"
 #include "enums.hpp"
 
-namespace splash_screen
+/*namespace splash_screen
 {
 	std::unique_ptr<splash_screen> splash_screen_obj_ptr (new splash_screen ());
 
@@ -48,5 +48,22 @@ namespace splash_screen
 
 		asset::mesh::destroy_meshes (splash_screen_obj_ptr->meshes);
 		asset::image::destroy_images (splash_screen_obj_ptr->images);
+	}
+}
+*/
+
+void splash_screen::process_keyboard_input (WPARAM wParam, LPARAM lParam)
+{
+	switch (wParam)
+	{
+	case VK_ESCAPE:
+		event_ptr->go_to_scene (e_scene_type::main_menu);
+		break;
+
+	case 0x53:
+		break;
+
+	default:
+		break;
 	}
 }
