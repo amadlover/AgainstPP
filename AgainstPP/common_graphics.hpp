@@ -29,10 +29,10 @@
 class common_graphics
 {
 public:
-	common_graphics (HINSTANCE hInstance, HWND hWnd);
+	common_graphics ();
 	~common_graphics ();
 
-	void init ();
+	void init (HINSTANCE hInstance, HWND hWnd);
 	void exit ();
 
 	VkDevice graphics_device;

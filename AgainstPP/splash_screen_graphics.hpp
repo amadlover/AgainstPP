@@ -25,7 +25,7 @@ namespace splash_screen_graphics
 class splash_screen_graphics
 {
 public:
-	splash_screen_graphics (common_graphics* common_graphics_ptr);
+	splash_screen_graphics ();
 	~splash_screen_graphics ();
 
 	void init (common_graphics* common_graphics_ptr);

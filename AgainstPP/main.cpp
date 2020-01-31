@@ -5,7 +5,7 @@
 #include "game.hpp"
 #include "error.hpp"
 
-std::unique_ptr<game> g;
+std::unique_ptr<game> g (new game ());
 
 LRESULT CALLBACK window_proc (
 	HWND WindowHandle,
@@ -81,14 +81,11 @@ int WINAPI wWinMain (
 	UpdateWindow (hWnd);
 
 	MSG Msg;
-	ZeroMemory (
-		&Msg,
-		sizeof (Msg)
-	);
+	ZeroMemory (&Msg, sizeof (Msg));
 
 	try
 	{
-		g = std::make_unique <game> (hInstance, hWnd);
+		g->init (hInstance, hWnd);
 		while (Msg.message != WM_QUIT)
 		{
 			if (PeekMessage (&Msg, NULL, 0, 0, PM_REMOVE))
@@ -109,6 +106,7 @@ int WINAPI wWinMain (
 		swprintf (Buff, 64, L"%hs\n", Err.what ());
 		OutputDebugString (Buff);
 	}
+	g->exit ();
 
 	DestroyWindow (hWnd);
 

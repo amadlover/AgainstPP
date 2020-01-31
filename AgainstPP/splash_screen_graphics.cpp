@@ -839,10 +839,18 @@ void splash_screen_graphics::allocate_command_buffers ()
 
 }
 
-splash_screen_graphics::splash_screen_graphics (common_graphics* common_graphics_ptr)
+splash_screen_graphics::splash_screen_graphics ()
 {
 	OutputDebugString (L"splash_screen_graphics::splash_screen_graphics\n");
-	
+}
+
+splash_screen_graphics::~splash_screen_graphics ()
+{
+	OutputDebugString (L"splash_screen_graphics::~splash_screen_graphics\n");
+}
+
+void splash_screen_graphics::init (common_graphics* common_graphics_ptr)
+{
 	this->common_graphics_ptr = common_graphics_ptr;
 
 	create_renderpasses ();
@@ -854,9 +862,14 @@ splash_screen_graphics::splash_screen_graphics (common_graphics* common_graphics
 	allocate_command_buffers ();
 }
 
-splash_screen_graphics::~splash_screen_graphics ()
+void splash_screen_graphics::draw ()
 {
-	OutputDebugString (L"splash_screen_graphics::~splash_screen_graphics\n");
+
+}
+
+void splash_screen_graphics::exit ()
+{
+	OutputDebugString (L"splash_screen_graphics::exit\n");
 	if (render_pass != VK_NULL_HANDLE)
 	{
 		vkDestroyRenderPass (common_graphics_ptr->graphics_device, render_pass, nullptr);
@@ -870,20 +883,4 @@ splash_screen_graphics::~splash_screen_graphics ()
 		}
 	}
 	swapchain_framebuffers.clear ();
-}
-
-void splash_screen_graphics::init (common_graphics* common_graphics_ptr)
-{
-
-}
-
-void splash_screen_graphics::draw ()
-{
-
-}
-
-void splash_screen_graphics::exit ()
-{
-	OutputDebugString (L"splash_screen_graphics::exit\n");
-
 }

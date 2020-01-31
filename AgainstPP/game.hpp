@@ -26,7 +26,7 @@
 class game
 {
 public:
-	game (HINSTANCE hInstance, HWND hWnd);
+	game ();
 	~game ();
 	
 	void init (HINSTANCE hInstance, HWND hWnd);
@@ -44,6 +44,4 @@ private:
 	std::shared_ptr<main_menu> main_menu_ptr;
 	std::shared_ptr<scene> current_scene;
 	std::unique_ptr<event> event_ptr;
-
-	static game* ptr;
 };

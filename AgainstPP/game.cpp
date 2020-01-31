@@ -127,18 +127,17 @@ namespace game
 }
 */
 
-game* game::ptr = nullptr;
-
-game::game (HINSTANCE hInstance, HWND hWnd)
+game::game ()
 {
 	OutputDebugString (L"game::game\n");
 
 	event_ptr = std::make_unique<event> ();
 	event_ptr->go_to_scene = std::bind (&game::go_to_scene, this, std::placeholders::_1);
 
-	common_graphics_ptr = std::make_unique<common_graphics> (hInstance, hWnd);
+	common_graphics_ptr = std::make_unique<common_graphics> ();
 
-	splash_screen_ptr = std::make_shared<splash_screen> (common_graphics_ptr.get (), event_ptr.get ());
+	splash_screen_ptr = std::make_shared<splash_screen> ();
+	main_menu_ptr = std::make_shared <main_menu> ();
 
 	current_scene = splash_screen_ptr;
 }
@@ -149,15 +148,18 @@ void game::go_to_scene (e_scene_type new_scene)
 	{
 	case e_scene_type::splash_screen:
 		OutputDebugString (L"New scene splash screen\n");
-		main_menu_ptr.reset ();
-		current_scene = std::make_shared<splash_screen> (common_graphics_ptr.get (), event_ptr.get ());
-
+		main_menu_ptr->exit ();
+		splash_screen_ptr->init (common_graphics_ptr.get (), event_ptr.get ());
+		current_scene = splash_screen_ptr;
 		break;
+
 	case e_scene_type::main_menu:
 		OutputDebugString (L"New scene main menu\n");
-		splash_screen_ptr.reset ();
-		current_scene = std::make_shared<main_menu> (event_ptr.get ());
+		splash_screen_ptr->exit ();
+		main_menu_ptr->init (common_graphics_ptr.get (), event_ptr.get ());
+		current_scene = main_menu_ptr;
 		break;
+
 	default:
 		break;
 	}
@@ -177,7 +179,9 @@ game::~game ()
 
 void game::init (HINSTANCE hInstance, HWND hWnd)
 {
-
+	OutputDebugString (L"game::init\n");
+	common_graphics_ptr->init (hInstance, hWnd);
+	splash_screen_ptr->init (common_graphics_ptr.get (), event_ptr.get ());
 }
 
 void game::main_loop ()
@@ -188,6 +192,8 @@ void game::main_loop ()
 void game::exit ()
 {
 	OutputDebugString (L"game::exit\n");
-	//splash_screen_ptr->exit ();
-	//main_menu_ptr->exit ();
+
+	splash_screen_ptr->exit ();
+	main_menu_ptr->exit ();
+	common_graphics_ptr->exit ();
 }

@@ -436,32 +436,9 @@ VKAPI_ATTR VkBool32 VKAPI_CALL debug_messenger_callback (
 	return 0;
 }
 
-common_graphics::common_graphics (HINSTANCE hInstance, HWND hWnd)
+common_graphics::common_graphics ()
 {
 	OutputDebugString (L"common_graphics::common_graphics\n");
-#ifdef DEBUG
-	is_validation_needed = true;
-#elif _DEBUG
-	is_validation_needed = true;
-#else
-	is_validation_needed = false;
-#endif
-
-	populate_instance_layers_and_extensions ();
-	create_instance ();
-	if (is_validation_needed)
-	{
-		setup_debug_utils_messenger ();
-	}
-
-	get_physical_device ();
-	create_surface (hInstance, hWnd);
-	populate_graphics_device_extensions ();
-	create_graphics_device ();
-	create_swapchain ();
-	create_swapchain_imageviews ();
-	create_command_pool ();
-	create_sampler ();
 }
 
 void common_graphics::populate_instance_layers_and_extensions ()
@@ -804,6 +781,37 @@ void common_graphics::create_sampler ()
 common_graphics::~common_graphics ()
 {
 	OutputDebugString (L"common_graphics::~common_graphics\n");
+}
+
+void common_graphics::init (HINSTANCE hInstance, HWND hWnd)
+{
+	#ifdef DEBUG
+	is_validation_needed = true;
+#elif _DEBUG
+	is_validation_needed = true;
+#else
+	is_validation_needed = false;
+#endif
+
+	populate_instance_layers_and_extensions ();
+	create_instance ();
+	if (is_validation_needed)
+	{
+		setup_debug_utils_messenger ();
+	}
+
+	get_physical_device ();
+	create_surface (hInstance, hWnd);
+	populate_graphics_device_extensions ();
+	create_graphics_device ();
+	create_swapchain ();
+	create_swapchain_imageviews ();
+	create_command_pool ();
+	create_sampler ();
+}
+
+void common_graphics::exit ()
+{
 
 	if (common_sampler != VK_NULL_HANDLE)
 	{
@@ -849,14 +857,5 @@ common_graphics::~common_graphics ()
 	if (instance != VK_NULL_HANDLE)
 	{
 		vkDestroyInstance (instance, nullptr);
-	}
-}
-
-void common_graphics::init ()
-{
-}
-
-void common_graphics::exit ()
-{
-	
+	}	
 }

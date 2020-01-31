@@ -28,10 +28,10 @@
 class splash_screen : public scene
 {
 public:
-	splash_screen (common_graphics* common_graphics_ptr, event* event_ptr);
+	splash_screen ();
 	~splash_screen ();
 
-	void init (common_graphics* common_graphics_ptr) override;
+	void init (common_graphics* common_graphics_ptr, event* event_ptr) override;
 	void process_keyboard_input (WPARAM wParam, LPARAM lParam) override;
 	void main_loop () override;
 	void exit () override;

@@ -5,9 +5,7 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "${env:VULKAN_SDK}/Include",
-                "${workspaceFolder}/External/**",
-                "E:/Projects/Vulkan-Hpp",
-                "E:/Projects/Vulkan-Hpp/Vulkan-Headers/include"
+                "${workspaceFolder}/External/**"
             ],
             "defines": [
                 "_DEBUG",

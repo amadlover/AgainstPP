@@ -52,11 +52,10 @@
 }
 */
 
-splash_screen::splash_screen (common_graphics* common_graphics_ptr, event* event_ptr)
+splash_screen::splash_screen ()
 {
 	OutputDebugString (L"splash_screen::splash_screen\n");
-	this->event_ptr = event_ptr;
-	graphics = std::make_unique <splash_screen_graphics> (common_graphics_ptr);
+	graphics = std::make_unique <splash_screen_graphics> ();
 }
 
 splash_screen::~splash_screen ()
@@ -64,9 +63,11 @@ splash_screen::~splash_screen ()
 	OutputDebugString (L"splash_screen::~splash_screen\n");
 }
 
-void splash_screen::init (common_graphics* common_graphics_ptr)
+void splash_screen::init (common_graphics* common_graphics_ptr, event* event_ptr)
 {
 	OutputDebugString (L"splash_screen::init\n");
+	this->event_ptr = event_ptr;
+	graphics->init (common_graphics_ptr);
 }
 
 void splash_screen::process_keyboard_input (WPARAM wParam, LPARAM lParam)
@@ -93,4 +94,6 @@ void splash_screen::main_loop ()
 void splash_screen::exit ()
 {
 	OutputDebugString (L"splash_screen::exit\n");
+
+	graphics->exit ();
 }
