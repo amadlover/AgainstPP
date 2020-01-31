@@ -18,7 +18,7 @@ public:
 	main_menu ();
 	~main_menu ();
 
-	void init (common_graphics* common_graphics_ptr, event* event_ptr) override;
+	void init (event* event_ptr) override;
 	void process_keyboard_input (WPARAM wParam, LPARAM lParam);
 	void main_loop () override {}
 	void exit () override;

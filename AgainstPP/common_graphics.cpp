@@ -387,6 +387,32 @@ namespace common_graphics
 	}
 }*/
 
+VkDevice common_graphics::graphics_device;
+uint32_t common_graphics::graphics_queue_family_index;
+VkQueue common_graphics::graphics_queue;
+VkPhysicalDeviceMemoryProperties common_graphics::physical_device_memory_properties;
+VkPhysicalDeviceLimits common_graphics::physical_device_limits;
+VkSurfaceFormatKHR common_graphics::chosen_surface_format;
+VkExtent2D common_graphics::surface_extent;
+VkSwapchainKHR common_graphics::swapchain;
+uint32_t common_graphics::swapchain_image_count;
+std::vector<VkImage> common_graphics::swapchain_images;
+std::vector<VkImageView> common_graphics::swapchain_imageviews;
+VkCommandPool common_graphics::command_pool;
+VkSampler common_graphics::common_sampler;
+
+std::vector<const char*> requested_instance_layers;
+std::vector<const char*> requested_instance_extensions;
+std::vector<const char*> requested_device_extensions;
+
+bool is_validation_needed;
+
+VkInstance instance;
+VkDebugUtilsMessengerEXT debug_utils_messenger;
+VkPhysicalDevice physical_device;
+VkSurfaceKHR surface;
+VkPresentModeKHR chosen_present_mode;
+
 VkResult create_debug_utils_messenger (VkInstance instance,
 	const VkDebugUtilsMessengerCreateInfoEXT* debug_utils_messenger_create_info,
 	const VkAllocationCallbacks* allocation_callbacks,
@@ -436,12 +462,7 @@ VKAPI_ATTR VkBool32 VKAPI_CALL debug_messenger_callback (
 	return 0;
 }
 
-common_graphics::common_graphics ()
-{
-	OutputDebugString (L"common_graphics::common_graphics\n");
-}
-
-void common_graphics::populate_instance_layers_and_extensions ()
+void populate_instance_layers_and_extensions ()
 {
 	if (is_validation_needed)
 	{
@@ -486,7 +507,7 @@ void common_graphics::populate_instance_layers_and_extensions ()
 	}
 }
 
-void common_graphics::create_instance ()
+void create_instance ()
 {
 	VkApplicationInfo application_info = { 0 };
 
@@ -513,7 +534,7 @@ void common_graphics::create_instance ()
 	}
 }
 
-void common_graphics::setup_debug_utils_messenger ()
+void setup_debug_utils_messenger ()
 {
 	VkDebugUtilsMessengerCreateInfoEXT create_info = { 0 };
 
@@ -532,7 +553,7 @@ void common_graphics::setup_debug_utils_messenger ()
 	}
 }
 
-void common_graphics::get_physical_device ()
+void get_physical_device ()
 {
 	uint32_t physical_device_count = 0;
 	vkEnumeratePhysicalDevices (instance, &physical_device_count, nullptr);
@@ -558,19 +579,19 @@ void common_graphics::get_physical_device ()
 	{
 		if ((queue_family_properties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) && (queue_family_properties[i].queueCount > 1))
 		{
-			graphics_queue_family_index = i;
+			common_graphics::graphics_queue_family_index = i;
 			break;
 		}
 	}
 
-	vkGetPhysicalDeviceMemoryProperties (physical_device, &physical_device_memory_properties);
+	vkGetPhysicalDeviceMemoryProperties (physical_device, &common_graphics::physical_device_memory_properties);
 
 	VkPhysicalDeviceProperties device_properties;
 	vkGetPhysicalDeviceProperties (physical_device, &device_properties);
-	physical_device_limits = device_properties.limits;
+	common_graphics::physical_device_limits = device_properties.limits;
 }
 
-void common_graphics::create_surface (HINSTANCE HInstance, HWND HWnd)
+void create_surface (HINSTANCE HInstance, HWND HWnd)
 {
 	VkWin32SurfaceCreateInfoKHR create_info = { 0 };
 
@@ -584,7 +605,7 @@ void common_graphics::create_surface (HINSTANCE HInstance, HWND HWnd)
 	}
 }
 
-void common_graphics::populate_graphics_device_extensions ()
+void populate_graphics_device_extensions ()
 {
 	uint32_t extension_count = 0;
 	vkEnumerateDeviceExtensionProperties (physical_device, nullptr, &extension_count, nullptr);
@@ -602,7 +623,7 @@ void common_graphics::populate_graphics_device_extensions ()
 	}
 }
 
-void common_graphics::create_graphics_device ()
+void create_graphics_device ()
 {
 	float priorities = 1.f;
 
@@ -612,7 +633,7 @@ void common_graphics::create_graphics_device ()
 	queue_create_info.pNext = NULL;
 	queue_create_info.pQueuePriorities = &priorities;
 	queue_create_info.queueCount = 1;
-	queue_create_info.queueFamilyIndex = graphics_queue_family_index;
+	queue_create_info.queueFamilyIndex = common_graphics::graphics_queue_family_index;
 	queue_create_info.flags = 0;
 
 	VkDeviceCreateInfo create_info = { 0 };
@@ -627,18 +648,18 @@ void common_graphics::create_graphics_device ()
 	create_info.pQueueCreateInfos = &queue_create_info;
 	create_info.flags = 0;
 
-	if (vkCreateDevice (physical_device, &create_info, nullptr, &graphics_device) != VK_SUCCESS)
+	if (vkCreateDevice (physical_device, &create_info, nullptr, &common_graphics::graphics_device) != VK_SUCCESS)
 	{
 		throw egraphics_error::create_graphics_device;
 	}
 
-	vkGetDeviceQueue (graphics_device, graphics_queue_family_index, 0, &graphics_queue);
+	vkGetDeviceQueue (common_graphics::graphics_device, common_graphics::graphics_queue_family_index, 0, &common_graphics::graphics_queue);
 }
 
-void common_graphics::create_swapchain ()
+void create_swapchain ()
 {
 	VkBool32 is_surface_supported = false;
-	vkGetPhysicalDeviceSurfaceSupportKHR (physical_device, graphics_queue_family_index, surface, &is_surface_supported);
+	vkGetPhysicalDeviceSurfaceSupportKHR (physical_device, common_graphics::graphics_queue_family_index, surface, &is_surface_supported);
 
 	if (!is_surface_supported)
 	{
@@ -658,7 +679,7 @@ void common_graphics::create_swapchain ()
 	{
 		if (surface_format.format == VK_FORMAT_B8G8R8A8_UNORM)
 		{
-			chosen_surface_format = surface_format;
+			common_graphics::chosen_surface_format = surface_format;
 			break;
 		}
 	}
@@ -678,7 +699,7 @@ void common_graphics::create_swapchain ()
 		}
 	}
 
-	surface_extent = surface_capabilites.currentExtent;
+	common_graphics::surface_extent = surface_capabilites.currentExtent;
 
 	VkSwapchainCreateInfoKHR create_info = { 0 };
 
@@ -688,9 +709,9 @@ void common_graphics::create_swapchain ()
 	create_info.clipped = 1;
 	create_info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
 	create_info.imageArrayLayers = 1;
-	create_info.imageColorSpace = chosen_surface_format.colorSpace;
+	create_info.imageColorSpace = common_graphics::chosen_surface_format.colorSpace;
 	create_info.imageExtent = surface_capabilites.currentExtent;
-	create_info.imageFormat = chosen_surface_format.format;
+	create_info.imageFormat = common_graphics::chosen_surface_format.format;
 	create_info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
 	create_info.imageUsage = surface_capabilites.supportedUsageFlags;
 	create_info.minImageCount = surface_capabilites.minImageCount + 1;
@@ -698,19 +719,19 @@ void common_graphics::create_swapchain ()
 	create_info.presentMode = chosen_present_mode;
 	create_info.preTransform = surface_capabilites.currentTransform;
 
-	if (vkCreateSwapchainKHR (graphics_device, &create_info, nullptr, &swapchain) != VK_SUCCESS)
+	if (vkCreateSwapchainKHR (common_graphics::graphics_device, &create_info, nullptr, &common_graphics::swapchain) != VK_SUCCESS)
 	{
 		throw egraphics_error::create_swapchain;
 	}
 
-	vkGetSwapchainImagesKHR (graphics_device, swapchain, &swapchain_image_count, nullptr);
-	swapchain_images.resize (swapchain_image_count);
-	vkGetSwapchainImagesKHR (graphics_device, swapchain, &swapchain_image_count, swapchain_images.data ());
+	vkGetSwapchainImagesKHR (common_graphics::graphics_device, common_graphics::swapchain, &common_graphics::swapchain_image_count, nullptr);
+	common_graphics::swapchain_images.resize (common_graphics::swapchain_image_count);
+	vkGetSwapchainImagesKHR (common_graphics::graphics_device, common_graphics::swapchain, &common_graphics::swapchain_image_count, common_graphics::swapchain_images.data ());
 	
-	swapchain_imageviews.resize (swapchain_image_count);
+	common_graphics::swapchain_imageviews.resize (common_graphics::swapchain_image_count);
 }
 
-void common_graphics::create_swapchain_imageviews ()
+void create_swapchain_imageviews ()
 {
 	VkComponentMapping components;
 
@@ -731,35 +752,35 @@ void common_graphics::create_swapchain_imageviews ()
 	VkImageViewCreateInfo create_info = { 0 };
 
 	create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-	create_info.format = chosen_surface_format.format;
+	create_info.format = common_graphics::chosen_surface_format.format;
 	create_info.components = components;
 	create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
 	create_info.subresourceRange = subresource_range;
 
-	for (uint32_t i = 0; i < swapchain_image_count; i++)
+	for (uint32_t i = 0; i < common_graphics::swapchain_image_count; i++)
 	{
-		create_info.image = swapchain_images[i];
-		if (vkCreateImageView (graphics_device, &create_info, nullptr, &swapchain_imageviews[i]) != VK_SUCCESS)
+		create_info.image = common_graphics::swapchain_images[i];
+		if (vkCreateImageView (common_graphics::graphics_device, &create_info, nullptr, &common_graphics::swapchain_imageviews[i]) != VK_SUCCESS)
 		{
 			throw egraphics_error::create_image_view;
 		}
 	}
 }
 
-void common_graphics::create_command_pool ()
+void create_command_pool ()
 {
 	VkCommandPoolCreateInfo command_pool_create_info = { 0 };
 	command_pool_create_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-	command_pool_create_info.queueFamilyIndex = graphics_queue_family_index;
+	command_pool_create_info.queueFamilyIndex = common_graphics::graphics_queue_family_index;
 	command_pool_create_info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 
-	if (vkCreateCommandPool (graphics_device, &command_pool_create_info, nullptr, &command_pool) != VK_SUCCESS)
+	if (vkCreateCommandPool (common_graphics::graphics_device, &command_pool_create_info, nullptr, &common_graphics::command_pool) != VK_SUCCESS)
 	{
 		throw egraphics_error::create_command_pool;
 	}
 }
 
-void common_graphics::create_sampler ()
+void create_sampler ()
 {
 	VkSamplerCreateInfo create_info = { 0 };
 	
@@ -772,15 +793,10 @@ void common_graphics::create_sampler ()
 	create_info.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
 	create_info.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
 
-	if (vkCreateSampler (graphics_device, &create_info, nullptr, &common_sampler) != VK_SUCCESS)
+	if (vkCreateSampler (common_graphics::graphics_device, &create_info, nullptr, &common_graphics::common_sampler) != VK_SUCCESS)
 	{
 		throw egraphics_error::create_sampler;
 	}
-}
-
-common_graphics::~common_graphics ()
-{
-	OutputDebugString (L"common_graphics::~common_graphics\n");
 }
 
 void common_graphics::init (HINSTANCE hInstance, HWND hWnd)

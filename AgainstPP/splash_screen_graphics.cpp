@@ -3,6 +3,7 @@
 #include "Utils.hpp"
 #include "graphics_utils.hpp"
 #include "glm/vec2.hpp"
+#include "common_graphics.hpp"
 
 #include <map>
 
@@ -733,7 +734,7 @@ void splash_screen_graphics::create_renderpasses ()
 {
 	VkAttachmentDescription attachment_description = { 0 };
 
-	attachment_description.format = common_graphics_ptr->chosen_surface_format.format;
+	attachment_description.format = common_graphics::chosen_surface_format.format;
 	attachment_description.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 	attachment_description.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 	attachment_description.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
@@ -782,7 +783,7 @@ void splash_screen_graphics::create_renderpasses ()
 	create_info.dependencyCount = 2;
 	create_info.pDependencies = subpass_dependencies;
 
-	if (vkCreateRenderPass (common_graphics_ptr->graphics_device, &create_info, NULL, &render_pass) != VK_SUCCESS)
+	if (vkCreateRenderPass (common_graphics::graphics_device, &create_info, NULL, &render_pass) != VK_SUCCESS)
 	{
 		throw egraphics_error::create_render_pass;
 	}
@@ -795,19 +796,19 @@ void splash_screen_graphics::create_framebuffers ()
 	create_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 	create_info.renderPass = render_pass;
 	create_info.attachmentCount = 1;
-	create_info.width = common_graphics_ptr->surface_extent.width;
-	create_info.height = common_graphics_ptr->surface_extent.height;
+	create_info.width = common_graphics::surface_extent.width;
+	create_info.height = common_graphics::surface_extent.height;
 	create_info.layers = 1;
 
-	swapchain_framebuffers.resize(common_graphics_ptr->swapchain_image_count);
+	swapchain_framebuffers.resize (common_graphics::swapchain_image_count);
 
 	VkImageView attachment;
-	for (uint32_t i = 0; i < common_graphics_ptr->swapchain_image_count; i++)
+	for (uint32_t i = 0; i < common_graphics::swapchain_image_count; i++)
 	{
-		attachment = common_graphics_ptr->swapchain_imageviews[i];
+		attachment = common_graphics::swapchain_imageviews[i];
 		create_info.pAttachments = &attachment;
 
-		if (vkCreateFramebuffer (common_graphics_ptr->graphics_device, &create_info, NULL, &swapchain_framebuffers[i]) != VK_SUCCESS)
+		if (vkCreateFramebuffer (common_graphics::graphics_device, &create_info, NULL, &swapchain_framebuffers[i]) != VK_SUCCESS)
 		{
 			throw egraphics_error::create_framebuffers;
 		}
@@ -849,10 +850,8 @@ splash_screen_graphics::~splash_screen_graphics ()
 	OutputDebugString (L"splash_screen_graphics::~splash_screen_graphics\n");
 }
 
-void splash_screen_graphics::init (common_graphics* common_graphics_ptr)
+void splash_screen_graphics::init ()
 {
-	this->common_graphics_ptr = common_graphics_ptr;
-
 	create_renderpasses ();
 	create_framebuffers ();
 	create_shaders ();
@@ -872,14 +871,14 @@ void splash_screen_graphics::exit ()
 	OutputDebugString (L"splash_screen_graphics::exit\n");
 	if (render_pass != VK_NULL_HANDLE)
 	{
-		vkDestroyRenderPass (common_graphics_ptr->graphics_device, render_pass, nullptr);
+		vkDestroyRenderPass (common_graphics::graphics_device, render_pass, nullptr);
 	}
 
 	for (auto& swapchain_framebuffer : swapchain_framebuffers)
 	{
 		if (swapchain_framebuffer != VK_NULL_HANDLE)
 		{
-			vkDestroyFramebuffer (common_graphics_ptr->graphics_device, swapchain_framebuffer, nullptr);
+			vkDestroyFramebuffer (common_graphics::graphics_device, swapchain_framebuffer, nullptr);
 		}
 	}
 	swapchain_framebuffers.clear ();

@@ -82,30 +82,19 @@ int WINAPI wWinMain (
 
 	MSG Msg;
 	ZeroMemory (&Msg, sizeof (Msg));
-
-	try
+	
+	g->init (hInstance, hWnd);
+	while (Msg.message != WM_QUIT)
 	{
-		g->init (hInstance, hWnd);
-		while (Msg.message != WM_QUIT)
+		if (PeekMessage (&Msg, NULL, 0, 0, PM_REMOVE))
 		{
-			if (PeekMessage (&Msg, NULL, 0, 0, PM_REMOVE))
-			{
-				TranslateMessage (&Msg);
-				DispatchMessage (&Msg);
-			}
-			g->main_loop ();
+			TranslateMessage (&Msg);
+			DispatchMessage (&Msg);
 		}
+		g->main_loop ();
 	}
-	catch (egraphics_error Err)
-	{
-		log_error (Err);
-	}
-	catch (std::runtime_error Err)
-	{
-		wchar_t Buff[64];
-		swprintf (Buff, 64, L"%hs\n", Err.what ());
-		OutputDebugString (Buff);
-	}
+
+
 	g->exit ();
 
 	DestroyWindow (hWnd);

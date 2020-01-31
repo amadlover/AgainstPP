@@ -6,7 +6,6 @@
         "type": "shell",
         "command": "cl.exe",
         "args": [
-          "/EHsc",
           "/GR-",
           "/DDEBUG",
           "/D_DEBUG",
@@ -70,7 +69,6 @@
         "type": "shell",
         "command": "cl.exe",
         "args": [
-          "/EHsc",
           "/GR-",
           "/DNDEBUG",
           "/DUNICODE",

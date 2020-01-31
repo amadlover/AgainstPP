@@ -10,3 +10,6 @@
 	path = External/glm
 	url = git@github.com:g-truc/glm.git
 	ignore = all 
+[submodule "External/cgltf"]
+	path = External/cgltf
+	url = git@github.com:jkuhlmann/cgltf.git

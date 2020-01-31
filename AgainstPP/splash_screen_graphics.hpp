@@ -1,6 +1,5 @@
 #pragma once
 
-#include "common_graphics.hpp"
 #include "asset.hpp"
 #include "actor.hpp"
 
@@ -28,7 +27,7 @@ public:
 	splash_screen_graphics ();
 	~splash_screen_graphics ();
 
-	void init (common_graphics* common_graphics_ptr);
+	void init ();
 	void draw ();
 	void exit ();
 
@@ -40,8 +39,6 @@ private:
 	void create_graphics_pipeline ();
 	void create_sync_objects ();
 	void allocate_command_buffers ();
-
-	common_graphics* common_graphics_ptr;
 
 	VkRenderPass render_pass;
 	std::vector<VkFramebuffer> swapchain_framebuffers;

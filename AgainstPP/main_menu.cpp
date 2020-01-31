@@ -37,7 +37,6 @@
 main_menu::main_menu ()
 {
 	OutputDebugString (L"main_menu::main_menu\n");
-	
 }
 
 main_menu::~main_menu ()
@@ -45,10 +44,11 @@ main_menu::~main_menu ()
 	OutputDebugString (L"main_menu::~main_menu\n");
 }
 
-void main_menu::init (common_graphics* common_graphics_ptr, event* event_ptr)
+void main_menu::init (event* event_ptr)
 {
 	OutputDebugString (L"main_menu::init\n");
 	this->event_ptr = event_ptr;
+	state = e_scene_state::inited;
 }
 
 void main_menu::process_keyboard_input (WPARAM wParam, LPARAM lParam)
@@ -70,4 +70,5 @@ void main_menu::process_keyboard_input (WPARAM wParam, LPARAM lParam)
 void main_menu::exit ()
 {
 	OutputDebugString (L"main_menu::exit\n");
+	state = e_scene_state::exited;
 }
