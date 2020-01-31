@@ -8,7 +8,7 @@
 
 #include <vector>
 
-#include <vulkan.hpp>
+#include <vulkan/vulkan.hpp>
 
 namespace asset
 {

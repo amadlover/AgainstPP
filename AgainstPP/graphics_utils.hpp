@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include <vulkan.hpp>
+#include <vulkan/vulkan.hpp>
 
 #include "common_graphics.hpp"
 
