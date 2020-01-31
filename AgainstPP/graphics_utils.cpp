@@ -1,7 +1,7 @@
 #include "graphics_utils.hpp"
 
 #include <fstream>
-
+/*
 namespace graphics_utils
 {
 	common_graphics::common_graphics* common_graphics_obj_ptr;
@@ -193,4 +193,4 @@ namespace graphics_utils
 		vk::PipelineShaderStageCreateInfo shader_stage_c_i ({}, shader_stage, shader_module, "main");
 		shader_shader_create_info = shader_stage_c_i;
 	}
-}
+}*/

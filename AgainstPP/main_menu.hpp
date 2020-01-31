@@ -15,12 +15,11 @@
 class main_menu : public scene
 {
 public:
-	main_menu () { OutputDebugString (L"main_menu::main_menu\n"); }
-	main_menu (event* event_ptr) { this->event_ptr = event_ptr; }
-	~main_menu () { OutputDebugString (L"main_menu::~main_menu\n"); }
+	main_menu (event* event_ptr);
+	~main_menu ();
 
-	void init () override { OutputDebugString (L"main_menu::init\n"); };
+	void init (common_graphics* common_graphics_ptr) override;
 	void process_keyboard_input (WPARAM wParam, LPARAM lParam);
 	void main_loop () override {}
-	void exit () override { OutputDebugString (L"main_menu::exit\n"); }
+	void exit () override;
 };

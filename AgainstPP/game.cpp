@@ -129,15 +129,16 @@ namespace game
 
 game* game::ptr = nullptr;
 
-game::game ()
+game::game (HINSTANCE hInstance, HWND hWnd)
 {
 	OutputDebugString (L"game::game\n");
 
 	event_ptr = std::make_unique<event> ();
 	event_ptr->go_to_scene = std::bind (&game::go_to_scene, this, std::placeholders::_1);
 
-	splash_screen_ptr = std::make_shared<splash_screen> (event_ptr.get ());
-	main_menu_ptr = std::make_shared<main_menu> (event_ptr.get ());
+	common_graphics_ptr = std::make_unique<common_graphics> (hInstance, hWnd);
+
+	splash_screen_ptr = std::make_shared<splash_screen> (common_graphics_ptr.get (), event_ptr.get ());
 
 	current_scene = splash_screen_ptr;
 }
@@ -148,11 +149,14 @@ void game::go_to_scene (e_scene_type new_scene)
 	{
 	case e_scene_type::splash_screen:
 		OutputDebugString (L"New scene splash screen\n");
-		current_scene = splash_screen_ptr;
+		main_menu_ptr.reset ();
+		current_scene = std::make_shared<splash_screen> (common_graphics_ptr.get (), event_ptr.get ());
+
 		break;
 	case e_scene_type::main_menu:
 		OutputDebugString (L"New scene main menu\n");
-		current_scene = main_menu_ptr;
+		splash_screen_ptr.reset ();
+		current_scene = std::make_shared<main_menu> (event_ptr.get ());
 		break;
 	default:
 		break;
@@ -171,23 +175,19 @@ game::~game ()
 	OutputDebugString (L"game::~game\n");
 }
 
-game* game::get_instance ()
-{
-	if (ptr != nullptr)
-	{
-		delete ptr;
-	}
-	
-	ptr = new game ();
-
-	return ptr;
-}
-
 void game::init (HINSTANCE hInstance, HWND hWnd)
 {
+
 }
 
 void game::main_loop ()
 {
 	current_scene->main_loop ();
+}
+
+void game::exit ()
+{
+	OutputDebugString (L"game::exit\n");
+	//splash_screen_ptr->exit ();
+	//main_menu_ptr->exit ();
 }

@@ -2,11 +2,11 @@
 
 #include <string>
 
-#include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan.h>
 
 #include "common_graphics.hpp"
 
-namespace graphics_utils
+/*namespace graphics_utils
 {
 	void init (common_graphics::common_graphics* ptr);
 
@@ -57,4 +57,4 @@ namespace graphics_utils
 		vk::ShaderModule& shader_module,
 		vk::PipelineShaderStageCreateInfo& shader_stage_create_info
 	);
-}
+}*/

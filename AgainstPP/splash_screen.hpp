@@ -28,16 +28,14 @@
 class splash_screen : public scene
 {
 public:
-	splash_screen () { OutputDebugString (L"splash_screen::splash_screen\n"); }
-	splash_screen (event* event_ptr) { this->event_ptr = event_ptr; }
-	~splash_screen () { OutputDebugString (L"splash_screen::~splash_screen\n"); }
+	splash_screen (common_graphics* common_graphics_ptr, event* event_ptr);
+	~splash_screen ();
 
-	void init () override { OutputDebugString (L"splash_screen::init\n"); };
+	void init (common_graphics* common_graphics_ptr) override;
 	void process_keyboard_input (WPARAM wParam, LPARAM lParam) override;
+	void main_loop () override;
+	void exit () override;
 
-	void main_loop () override
-	{
-	}
-
-	void exit () override { OutputDebugString (L"splash_screen::exit\n"); }
+private:
+	std::unique_ptr<splash_screen_graphics> graphics;
 };

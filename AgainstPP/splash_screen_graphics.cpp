@@ -6,6 +6,7 @@
 
 #include <map>
 
+/*
 namespace splash_screen_graphics
 {
 	common_graphics::common_graphics* common_graphics_obj_ptr;
@@ -726,4 +727,163 @@ namespace splash_screen_graphics
 			graphics_device.freeMemory (image_memory);
 		}
 	}
+}*/
+
+void splash_screen_graphics::create_renderpasses ()
+{
+	VkAttachmentDescription attachment_description = { 0 };
+
+	attachment_description.format = common_graphics_ptr->chosen_surface_format.format;
+	attachment_description.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+	attachment_description.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+	attachment_description.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+	attachment_description.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	attachment_description.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	attachment_description.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+	attachment_description.samples = VK_SAMPLE_COUNT_1_BIT;
+
+	VkAttachmentReference color_reference;
+	color_reference.attachment = 0;
+	color_reference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+	VkSubpassDescription subpass_description = { 0 };
+
+	subpass_description.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+	subpass_description.inputAttachmentCount = 0;
+	subpass_description.preserveAttachmentCount = 0;
+	subpass_description.colorAttachmentCount = 1;
+	subpass_description.pColorAttachments = &color_reference;
+
+	VkSubpassDependency subpass_dependencies[2] = { 0 };
+
+	subpass_dependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
+	subpass_dependencies[0].dstSubpass = 0;
+	subpass_dependencies[0].srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+	subpass_dependencies[0].dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	subpass_dependencies[0].srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+	subpass_dependencies[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_MEMORY_WRITE_BIT;
+	subpass_dependencies[0].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+
+	subpass_dependencies[1].srcSubpass = 0;
+	subpass_dependencies[1].dstSubpass = VK_SUBPASS_EXTERNAL;
+	subpass_dependencies[1].dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	subpass_dependencies[1].srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+	subpass_dependencies[1].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_MEMORY_WRITE_BIT;
+	subpass_dependencies[1].srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+	subpass_dependencies[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+
+	VkRenderPassCreateInfo create_info = { 0 };
+
+	create_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+	create_info.subpassCount = 1;
+	create_info.pSubpasses = &subpass_description;
+	create_info.attachmentCount = 1;
+	create_info.pAttachments = &attachment_description;
+	create_info.dependencyCount = 2;
+	create_info.pDependencies = subpass_dependencies;
+
+	if (vkCreateRenderPass (common_graphics_ptr->graphics_device, &create_info, NULL, &render_pass) != VK_SUCCESS)
+	{
+		throw egraphics_error::create_render_pass;
+	}
+}
+
+void splash_screen_graphics::create_framebuffers ()
+{
+	VkFramebufferCreateInfo create_info = { 0 };
+
+	create_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+	create_info.renderPass = render_pass;
+	create_info.attachmentCount = 1;
+	create_info.width = common_graphics_ptr->surface_extent.width;
+	create_info.height = common_graphics_ptr->surface_extent.height;
+	create_info.layers = 1;
+
+	swapchain_framebuffers.resize(common_graphics_ptr->swapchain_image_count);
+
+	VkImageView attachment;
+	for (uint32_t i = 0; i < common_graphics_ptr->swapchain_image_count; i++)
+	{
+		attachment = common_graphics_ptr->swapchain_imageviews[i];
+		create_info.pAttachments = &attachment;
+
+		if (vkCreateFramebuffer (common_graphics_ptr->graphics_device, &create_info, NULL, &swapchain_framebuffers[i]) != VK_SUCCESS)
+		{
+			throw egraphics_error::create_framebuffers;
+		}
+	}
+}
+
+void splash_screen_graphics::create_shaders ()
+{
+
+}
+
+void splash_screen_graphics::create_graphics_pipeline_layout ()
+{
+
+}
+
+void splash_screen_graphics::create_graphics_pipeline ()
+{
+
+}
+
+void splash_screen_graphics::create_sync_objects ()
+{
+
+}
+
+void splash_screen_graphics::allocate_command_buffers ()
+{
+
+}
+
+splash_screen_graphics::splash_screen_graphics (common_graphics* common_graphics_ptr)
+{
+	OutputDebugString (L"splash_screen_graphics::splash_screen_graphics\n");
+	
+	this->common_graphics_ptr = common_graphics_ptr;
+
+	create_renderpasses ();
+	create_framebuffers ();
+	create_shaders ();
+	create_graphics_pipeline_layout ();
+	create_graphics_pipeline ();
+	create_sync_objects ();
+	allocate_command_buffers ();
+}
+
+splash_screen_graphics::~splash_screen_graphics ()
+{
+	OutputDebugString (L"splash_screen_graphics::~splash_screen_graphics\n");
+	if (render_pass != VK_NULL_HANDLE)
+	{
+		vkDestroyRenderPass (common_graphics_ptr->graphics_device, render_pass, nullptr);
+	}
+
+	for (auto& swapchain_framebuffer : swapchain_framebuffers)
+	{
+		if (swapchain_framebuffer != VK_NULL_HANDLE)
+		{
+			vkDestroyFramebuffer (common_graphics_ptr->graphics_device, swapchain_framebuffer, nullptr);
+		}
+	}
+	swapchain_framebuffers.clear ();
+}
+
+void splash_screen_graphics::init (common_graphics* common_graphics_ptr)
+{
+
+}
+
+void splash_screen_graphics::draw ()
+{
+
+}
+
+void splash_screen_graphics::exit ()
+{
+	OutputDebugString (L"splash_screen_graphics::exit\n");
+
 }

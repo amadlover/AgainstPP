@@ -112,15 +112,15 @@ namespace asset
 
 			if (accessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE)
 			{
-				physics_primitive.indices_type = vk::IndexType::eUint8EXT;
+				physics_primitive.indices_type = VK_INDEX_TYPE_UINT8_EXT;
 			}
 			else if (accessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT)
 			{
-				physics_primitive.indices_type = vk::IndexType::eUint16;
+				physics_primitive.indices_type = VK_INDEX_TYPE_UINT16;
 			}
 			else if (accessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT)
 			{
-				physics_primitive.indices_type = vk::IndexType::eUint32;
+				physics_primitive.indices_type = VK_INDEX_TYPE_UINT32;
 			}
 		}
 
@@ -142,7 +142,7 @@ namespace asset
 
 			if (accessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE)
 			{
-				graphics_primitive.indices_type = vk::IndexType::eUint8EXT;
+				graphics_primitive.indices_type = VK_INDEX_TYPE_UINT8_EXT;
 				/*const uint8_t* data_start = reinterpret_cast<const uint8_t*>(&(model.buffers[buffer_view.buffer].data[accessor.byteOffset + buffer_view.byteOffset]));
 
 				for (uint32_t i = 0; i < accessor.count; i++)
@@ -152,11 +152,11 @@ namespace asset
 			}
 			else if (accessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT)
 			{
-				graphics_primitive.indices_type = vk::IndexType::eUint16;
+				graphics_primitive.indices_type = VK_INDEX_TYPE_UINT16;
 			}
 			else if (accessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT)
 			{
-				graphics_primitive.indices_type = vk::IndexType::eUint32;
+				graphics_primitive.indices_type = VK_INDEX_TYPE_UINT32;
 			}
 		}
 

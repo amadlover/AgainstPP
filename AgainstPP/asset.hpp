@@ -8,7 +8,7 @@
 
 #include <vector>
 
-#include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan.h>
 
 namespace asset
 {
@@ -18,8 +18,8 @@ namespace asset
 		{
 			std::string name;
 			uint32_t image_index;
-			vk::ImageView image_view;
-			vk::DescriptorSet descriptor_set;
+			VkImageView image_view;
+			VkDescriptorSet descriptor_set;
 		};
 
 		struct material
@@ -35,30 +35,30 @@ namespace asset
 			std::vector<uint8_t> uv0s;
 			std::vector<uint8_t> uv1s;
 			std::vector<uint8_t> indices;
-			vk::IndexType indices_type;
+			VkIndexType indices_type;
 			material material;
 
-			vk::Buffer* buffer;
-			vk::DeviceMemory* buffer_memory;
+			VkBuffer* buffer;
+			VkDeviceMemory* buffer_memory;
 
-			vk::DeviceSize positions_offset;
-			vk::DeviceSize normals_offset;
-			vk::DeviceSize uv0s_offset;
-			vk::DeviceSize uv1s_offset;
-			vk::DeviceSize indices_offset;
+			VkDeviceSize positions_offset;
+			VkDeviceSize normals_offset;
+			VkDeviceSize uv0s_offset;
+			VkDeviceSize uv1s_offset;
+			VkDeviceSize indices_offset;
 		};
 
 		struct physics_primitive
 		{
 			std::vector<uint8_t> positions;
 			std::vector<uint8_t> indices;
-			vk::IndexType indices_type;
+			VkIndexType indices_type;
 
-			vk::Buffer* buffer;
-			vk::DeviceMemory* buffer_memory;
+			VkBuffer* buffer;
+			VkDeviceMemory* buffer_memory;
 
-			vk::DeviceSize positions_offset;
-			vk::DeviceSize indices_offset;
+			VkDeviceSize positions_offset;
+			VkDeviceSize indices_offset;
 		};
 
 		struct mesh
@@ -86,9 +86,9 @@ namespace asset
 		{
 			std::string name;
 
-			vk::DeviceSize width;
-			vk::DeviceSize height;
-			vk::DeviceSize bpp;
+			VkDeviceSize width;
+			VkDeviceSize height;
+			VkDeviceSize bpp;
 
 			std::vector<uint8_t> pixels;
 		};

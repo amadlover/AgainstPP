@@ -1,10 +1,11 @@
 #include <Windows.h>
 #include <string>
+#include <stdexcept>
 
 #include "game.hpp"
 #include "error.hpp"
 
-std::unique_ptr<game> g (game::get_instance ());
+std::unique_ptr<game> g;
 
 LRESULT CALLBACK window_proc (
 	HWND WindowHandle,
@@ -44,10 +45,6 @@ int WINAPI wWinMain (
 	_In_ int cmd_show
 )
 {
-	g->scene_change_event.add_bindings (std::string ("Hola"));
-	g->scene_change_event.add_bindings (std::string ("Bola"));
-	g->scene_change_event.add_bindings (std::string ("Shola"));
-
 	WNDCLASS WC = { 0 };
 
 	WC.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
@@ -91,7 +88,7 @@ int WINAPI wWinMain (
 
 	try
 	{
-		g->init (hInstance, hWnd);
+		g = std::make_unique <game> (hInstance, hWnd);
 		while (Msg.message != WM_QUIT)
 		{
 			if (PeekMessage (&Msg, NULL, 0, 0, PM_REMOVE))
