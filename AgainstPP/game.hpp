@@ -5,7 +5,6 @@
 #include "common_graphics.hpp"
 #include "splash_screen.hpp"
 #include "main_menu.hpp"
-#include "template_event.hpp"
 
 /*namespace game
 {
@@ -32,8 +31,6 @@ public:
 	void process_keyboard_input (WPARAM wParam, LPARAM lParam);
 	egraphics_result main_loop ();
 	void exit ();
-
-	template_event<std::string> scene_change_event;
 
 private:
 	void go_to_scene (e_scene_type new_scene);

@@ -152,8 +152,6 @@ void game::go_to_scene (e_scene_type new_scene)
 	default:
 		break;
 	}
-
-	scene_change_event.broadcast ();
 }
 
 void game::process_keyboard_input (WPARAM wParam, LPARAM lParam)

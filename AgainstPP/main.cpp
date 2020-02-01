@@ -4,7 +4,7 @@
 #include "game.hpp"
 #include "error.hpp"
 
-std::unique_ptr<game> g (new game ());
+game* g = nullptr;
 
 LRESULT CALLBACK window_proc (
 	HWND WindowHandle,
@@ -37,6 +37,66 @@ LRESULT CALLBACK window_proc (
 	);
 }
 
+template <typename T>
+struct list_node
+{
+	T data;
+	list_node* previous_node;
+	list_node* next_node;
+};
+
+template <typename T>
+class list 
+{
+public:
+	list () {}
+	~list () {}
+
+	void insert (const T& data)
+	{
+
+	}
+	size_t num_elements;
+private:
+	list_node* root_node;
+	list_node* begin_node;
+	list_node* end_node;
+};
+
+template <typename T, size_t N>
+class array
+{
+public:
+	array () 
+	{
+		memset (elements, 0, sizeof (T) * N);
+	}
+	~array () {}
+
+	T& operator[](size_t i)
+	{
+		return elements[i];
+	}
+
+	T* data ()
+	{
+		return elements;
+	}
+
+	T* begin ()
+	{
+		return N > 0 ? elements : nullptr;
+	}
+
+	T* end ()
+	{
+		return N > 0 ? elements + (N - 1) : nullptr;
+	}
+
+private:
+	T elements[N];
+};
+
 int WINAPI wWinMain (
 	_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE previous_hInstance,
@@ -44,6 +104,13 @@ int WINAPI wWinMain (
 	_In_ int cmd_show
 )
 {
+	array <asset::mesh::mesh, 5> a;
+
+	for (auto& arr : a)
+	{
+		arr.id = std::rand () % 100;
+	}
+
 	WNDCLASS WC = { 0 };
 
 	WC.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
@@ -81,6 +148,14 @@ int WINAPI wWinMain (
 
 	MSG Msg;
 	ZeroMemory (&Msg, sizeof (Msg));
+
+	g = new game ();
+
+	if (g == nullptr)
+	{
+		DestroyWindow (hWnd);
+		return 1;
+	}
 	
 	egraphics_result result = g->init (hInstance, hWnd);
 
@@ -89,6 +164,7 @@ int WINAPI wWinMain (
 		log_error (result);
 		g->exit ();
 		DestroyWindow (hWnd);
+		delete g;
 
 		return 1;
 	}
@@ -108,13 +184,14 @@ int WINAPI wWinMain (
 			log_error (result);
 			g->exit ();
 			DestroyWindow (hWnd);
+			delete g;
 			return 1;
 		}
 	}
 
 	g->exit ();
-
 	DestroyWindow (hWnd);
+	delete g;
 
 	/*try
 	{

@@ -165,6 +165,10 @@ void log_error (egraphics_result err)
 		OutputDebugString (L"system error: allocate memory\n");
 		break;
 
+	case egraphics_result::e_against_error_system_create_file:
+		OutputDebugString (L"system error: create file\n");
+		break;
+
 	default:
 		break;
 	}
