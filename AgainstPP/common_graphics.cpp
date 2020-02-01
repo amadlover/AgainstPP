@@ -2,7 +2,7 @@
 
 #include "graphics_utils.hpp"
 #include "common_graphics.hpp"
-#include "Error.hpp"
+#include "error.hpp"
 
 #include <vulkan/vulkan_win32.h>
 
@@ -220,7 +220,7 @@ namespace common_graphics
 	{
 		if (!physical_device.getSurfaceSupportKHR (common_graphics_obj_ptr->graphics_queue_family_indices[0], surface))
 		{
-			throw egraphics_error::surface_support;
+			return egraphics_error::e_against_error_surface_support;
 		}
 
 		for (auto SurfaceFormat : physical_device.getSurfaceFormatsKHR (surface))
@@ -462,7 +462,7 @@ VKAPI_ATTR VkBool32 VKAPI_CALL debug_messenger_callback (
 	return 0;
 }
 
-void populate_instance_layers_and_extensions ()
+egraphics_result populate_instance_layers_and_extensions ()
 {
 	if (is_validation_needed)
 	{
@@ -505,9 +505,11 @@ void populate_instance_layers_and_extensions ()
 			}
 		}
 	}
+
+	return egraphics_result::e_success;
 }
 
-void create_instance ()
+egraphics_result create_instance ()
 {
 	VkApplicationInfo application_info = { 0 };
 
@@ -530,11 +532,13 @@ void create_instance ()
 
 	if (vkCreateInstance (&create_info, nullptr, &instance) != VK_SUCCESS)
 	{
-		throw egraphics_error::create_instance;
+		return egraphics_result::e_against_error_create_instance;
 	}
+
+	return egraphics_result::e_success;
 }
 
-void setup_debug_utils_messenger ()
+egraphics_result setup_debug_utils_messenger ()
 {
 	VkDebugUtilsMessengerCreateInfoEXT create_info = { 0 };
 
@@ -549,11 +553,13 @@ void setup_debug_utils_messenger ()
 
 	if (create_debug_utils_messenger (instance, &create_info, nullptr, &debug_utils_messenger) != VK_SUCCESS)
 	{
-		throw egraphics_error::setup_debug_utils_messenger;
+		return egraphics_result::e_against_error_setup_debug_utils_messenger;
 	}
+
+	return egraphics_result::e_success;
 }
 
-void get_physical_device ()
+egraphics_result get_physical_device ()
 {
 	uint32_t physical_device_count = 0;
 	vkEnumeratePhysicalDevices (instance, &physical_device_count, nullptr);
@@ -562,7 +568,7 @@ void get_physical_device ()
 
 	if (physical_device_count == 0)
 	{
-		throw egraphics_error::get_physical_device;
+		return egraphics_result::e_against_error_get_physical_device;
 	}
 
 	physical_device = physical_devices[0];
@@ -589,9 +595,11 @@ void get_physical_device ()
 	VkPhysicalDeviceProperties device_properties;
 	vkGetPhysicalDeviceProperties (physical_device, &device_properties);
 	common_graphics::physical_device_limits = device_properties.limits;
+
+	return egraphics_result::e_success;
 }
 
-void create_surface (HINSTANCE HInstance, HWND HWnd)
+egraphics_result create_surface (HINSTANCE HInstance, HWND HWnd)
 {
 	VkWin32SurfaceCreateInfoKHR create_info = { 0 };
 
@@ -601,11 +609,13 @@ void create_surface (HINSTANCE HInstance, HWND HWnd)
 
 	if (vkCreateWin32SurfaceKHR (instance, &create_info, nullptr, &surface) != VK_SUCCESS)
 	{
-		throw egraphics_error::create_surface;
+		return egraphics_result::e_against_error_create_surface;
 	}
+
+	return egraphics_result::e_success;
 }
 
-void populate_graphics_device_extensions ()
+egraphics_result populate_graphics_device_extensions ()
 {
 	uint32_t extension_count = 0;
 	vkEnumerateDeviceExtensionProperties (physical_device, nullptr, &extension_count, nullptr);
@@ -621,9 +631,11 @@ void populate_graphics_device_extensions ()
 			break;
 		}
 	}
+
+	return egraphics_result::e_success;
 }
 
-void create_graphics_device ()
+egraphics_result create_graphics_device ()
 {
 	float priorities = 1.f;
 
@@ -650,20 +662,22 @@ void create_graphics_device ()
 
 	if (vkCreateDevice (physical_device, &create_info, nullptr, &common_graphics::graphics_device) != VK_SUCCESS)
 	{
-		throw egraphics_error::create_graphics_device;
+		return egraphics_result::e_against_error_create_graphics_device;
 	}
 
 	vkGetDeviceQueue (common_graphics::graphics_device, common_graphics::graphics_queue_family_index, 0, &common_graphics::graphics_queue);
+
+	return egraphics_result::e_success;
 }
 
-void create_swapchain ()
+egraphics_result create_swapchain ()
 {
 	VkBool32 is_surface_supported = false;
 	vkGetPhysicalDeviceSurfaceSupportKHR (physical_device, common_graphics::graphics_queue_family_index, surface, &is_surface_supported);
 
 	if (!is_surface_supported)
 	{
-		throw egraphics_error::surface_support;
+		return egraphics_result::e_against_error_surface_support;
 	}
 
 	VkSurfaceCapabilitiesKHR surface_capabilites;
@@ -721,7 +735,7 @@ void create_swapchain ()
 
 	if (vkCreateSwapchainKHR (common_graphics::graphics_device, &create_info, nullptr, &common_graphics::swapchain) != VK_SUCCESS)
 	{
-		throw egraphics_error::create_swapchain;
+		return egraphics_result::e_against_error_create_swapchain;
 	}
 
 	vkGetSwapchainImagesKHR (common_graphics::graphics_device, common_graphics::swapchain, &common_graphics::swapchain_image_count, nullptr);
@@ -729,9 +743,11 @@ void create_swapchain ()
 	vkGetSwapchainImagesKHR (common_graphics::graphics_device, common_graphics::swapchain, &common_graphics::swapchain_image_count, common_graphics::swapchain_images.data ());
 	
 	common_graphics::swapchain_imageviews.resize (common_graphics::swapchain_image_count);
+
+	return egraphics_result::e_success;
 }
 
-void create_swapchain_imageviews ()
+egraphics_result create_swapchain_imageviews ()
 {
 	VkComponentMapping components;
 
@@ -762,12 +778,14 @@ void create_swapchain_imageviews ()
 		create_info.image = common_graphics::swapchain_images[i];
 		if (vkCreateImageView (common_graphics::graphics_device, &create_info, nullptr, &common_graphics::swapchain_imageviews[i]) != VK_SUCCESS)
 		{
-			throw egraphics_error::create_image_view;
+			return egraphics_result::e_against_error_create_image_view;
 		}
 	}
+
+	return egraphics_result::e_success;
 }
 
-void create_command_pool ()
+egraphics_result create_command_pool ()
 {
 	VkCommandPoolCreateInfo command_pool_create_info = { 0 };
 	command_pool_create_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -776,11 +794,13 @@ void create_command_pool ()
 
 	if (vkCreateCommandPool (common_graphics::graphics_device, &command_pool_create_info, nullptr, &common_graphics::command_pool) != VK_SUCCESS)
 	{
-		throw egraphics_error::create_command_pool;
+		return egraphics_result::e_against_error_create_command_pool;
 	}
+
+	return egraphics_result::e_success;
 }
 
-void create_sampler ()
+egraphics_result create_sampler ()
 {
 	VkSamplerCreateInfo create_info = { 0 };
 	
@@ -795,11 +815,13 @@ void create_sampler ()
 
 	if (vkCreateSampler (common_graphics::graphics_device, &create_info, nullptr, &common_graphics::common_sampler) != VK_SUCCESS)
 	{
-		throw egraphics_error::create_sampler;
+		return egraphics_result::e_against_error_create_sampler;
 	}
+
+	return egraphics_result::e_success;
 }
 
-void common_graphics::init (HINSTANCE hInstance, HWND hWnd)
+egraphics_result common_graphics::init (HINSTANCE hInstance, HWND hWnd)
 {
 	#ifdef DEBUG
 	is_validation_needed = true;
@@ -809,21 +831,23 @@ void common_graphics::init (HINSTANCE hInstance, HWND hWnd)
 	is_validation_needed = false;
 #endif
 
-	populate_instance_layers_and_extensions ();
-	create_instance ();
+	CHECK_AGAINST_RESULT (populate_instance_layers_and_extensions ());
+	CHECK_AGAINST_RESULT (create_instance ());
 	if (is_validation_needed)
 	{
-		setup_debug_utils_messenger ();
+		CHECK_AGAINST_RESULT (setup_debug_utils_messenger ());
 	}
 
-	get_physical_device ();
-	create_surface (hInstance, hWnd);
-	populate_graphics_device_extensions ();
-	create_graphics_device ();
-	create_swapchain ();
-	create_swapchain_imageviews ();
-	create_command_pool ();
-	create_sampler ();
+	CHECK_AGAINST_RESULT (get_physical_device ());
+	CHECK_AGAINST_RESULT (create_surface (hInstance, hWnd));
+	CHECK_AGAINST_RESULT (populate_graphics_device_extensions ());
+	CHECK_AGAINST_RESULT (create_graphics_device ());
+	CHECK_AGAINST_RESULT (create_swapchain ());
+	CHECK_AGAINST_RESULT (create_swapchain_imageviews ());
+	CHECK_AGAINST_RESULT (create_command_pool ());
+	CHECK_AGAINST_RESULT (create_sampler ());
+
+	return egraphics_result::e_success;
 }
 
 void common_graphics::exit ()

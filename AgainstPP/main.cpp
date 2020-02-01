@@ -1,6 +1,5 @@
 #include <Windows.h>
 #include <string>
-#include <stdexcept>
 
 #include "game.hpp"
 #include "error.hpp"
@@ -83,7 +82,17 @@ int WINAPI wWinMain (
 	MSG Msg;
 	ZeroMemory (&Msg, sizeof (Msg));
 	
-	g->init (hInstance, hWnd);
+	egraphics_result result = g->init (hInstance, hWnd);
+
+	if (result != egraphics_result::e_success)
+	{
+		log_error (result);
+		g->exit ();
+		DestroyWindow (hWnd);
+
+		return 1;
+	}
+
 	while (Msg.message != WM_QUIT)
 	{
 		if (PeekMessage (&Msg, NULL, 0, 0, PM_REMOVE))
@@ -91,9 +100,17 @@ int WINAPI wWinMain (
 			TranslateMessage (&Msg);
 			DispatchMessage (&Msg);
 		}
-		g->main_loop ();
-	}
 
+		result = g->main_loop ();
+
+		if (result != egraphics_result::e_success)
+		{
+			log_error (result);
+			g->exit ();
+			DestroyWindow (hWnd);
+			return 1;
+		}
+	}
 
 	g->exit ();
 

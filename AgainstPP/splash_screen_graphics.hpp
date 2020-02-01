@@ -2,8 +2,7 @@
 
 #include "asset.hpp"
 #include "actor.hpp"
-
-#include <memory>
+#include "error.hpp"
 
 /*
 namespace splash_screen_graphics
@@ -27,18 +26,18 @@ public:
 	splash_screen_graphics ();
 	~splash_screen_graphics ();
 
-	void init ();
-	void draw ();
+	egraphics_result init ();
+	egraphics_result draw ();
 	void exit ();
 
 private:
-	void create_renderpasses ();
-	void create_framebuffers ();
-	void create_shaders ();
-	void create_graphics_pipeline_layout ();
-	void create_graphics_pipeline ();
-	void create_sync_objects ();
-	void allocate_command_buffers ();
+	egraphics_result create_renderpasses ();
+	egraphics_result create_framebuffers ();
+	egraphics_result create_shaders ();
+	egraphics_result create_graphics_pipeline_layout ();
+	egraphics_result create_graphics_pipeline ();
+	egraphics_result create_sync_objects ();
+	egraphics_result allocate_command_buffers ();
 
 	VkRenderPass render_pass;
 	std::vector<VkFramebuffer> swapchain_framebuffers;

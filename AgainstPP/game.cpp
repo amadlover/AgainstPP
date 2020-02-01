@@ -7,8 +7,8 @@
 #include "main_menu.hpp"
 #include "graphics_utils.hpp"
 #include "event.hpp"
-
 #include "enums.hpp"
+
 /*
 namespace game
 {
@@ -131,11 +131,11 @@ game::game ()
 {
 	OutputDebugString (L"game::game\n");
 
-	event_ptr = std::make_unique<event> ();
+	event_ptr = new event ();
 	event_ptr->go_to_scene = std::bind (&game::go_to_scene, this, std::placeholders::_1);
 
-	splash_screen_ptr = std::make_shared<splash_screen> ();
-	main_menu_ptr = std::make_shared <main_menu> ();
+	splash_screen_ptr = new splash_screen ();
+	main_menu_ptr = new main_menu ();
 
 	current_scene = splash_screen_ptr;
 	current_scene_type = e_scene_type::splash_screen;
@@ -148,14 +148,14 @@ void game::go_to_scene (e_scene_type new_scene)
 	case e_scene_type::splash_screen:
 		OutputDebugString (L"New scene splash screen\n");
 		main_menu_ptr->exit ();
-		splash_screen_ptr->init (event_ptr.get ());
+		splash_screen_ptr->init (event_ptr);
 		current_scene = splash_screen_ptr;
 		break;
 
 	case e_scene_type::main_menu:
 		OutputDebugString (L"New scene main menu\n");
 		splash_screen_ptr->exit ();
-		main_menu_ptr->init (event_ptr.get ());
+		main_menu_ptr->init (event_ptr);
 		current_scene = main_menu_ptr;
 		break;
 
@@ -176,16 +176,20 @@ game::~game ()
 	OutputDebugString (L"game::~game\n");
 }
 
-void game::init (HINSTANCE hInstance, HWND hWnd)
+egraphics_result game::init (HINSTANCE hInstance, HWND hWnd)
 {
 	OutputDebugString (L"game::init\n");
-	common_graphics::init (hInstance, hWnd);
-	splash_screen_ptr->init (event_ptr.get ());
+	CHECK_AGAINST_RESULT (common_graphics::init (hInstance, hWnd));
+	CHECK_AGAINST_RESULT (splash_screen_ptr->init (event_ptr));
+
+	return egraphics_result::e_success;
 }
 
-void game::main_loop ()
+egraphics_result game::main_loop ()
 {
 	current_scene->main_loop ();
+
+	return egraphics_result::e_success;
 }
 
 void game::exit ()
@@ -203,4 +207,8 @@ void game::exit ()
 	}
 	
 	common_graphics::exit ();
+
+	delete event_ptr;
+	delete splash_screen_ptr;
+	delete main_menu_ptr;
 }

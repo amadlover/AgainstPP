@@ -29,9 +29,9 @@ public:
 	game ();
 	~game ();
 	
-	void init (HINSTANCE hInstance, HWND hWnd);
+	egraphics_result init (HINSTANCE hInstance, HWND hWnd);
 	void process_keyboard_input (WPARAM wParam, LPARAM lParam);
-	void main_loop ();
+	egraphics_result main_loop ();
 	void exit ();
 
 	template_event<std::string> scene_change_event;
@@ -39,11 +39,10 @@ public:
 private:
 	void go_to_scene (e_scene_type new_scene);
 
-	//std::unique_ptr<common_graphics> common_graphics_ptr;
-	std::shared_ptr<splash_screen> splash_screen_ptr;
-	std::shared_ptr<main_menu> main_menu_ptr;
-	std::shared_ptr<scene> current_scene;
-	std::unique_ptr<event> event_ptr;
+	splash_screen* splash_screen_ptr;
+	main_menu* main_menu_ptr;
+	scene* current_scene;
+	event* event_ptr;
 
 	e_scene_type current_scene_type;
 };

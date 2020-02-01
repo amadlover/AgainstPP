@@ -730,7 +730,7 @@ namespace splash_screen_graphics
 	}
 }*/
 
-void splash_screen_graphics::create_renderpasses ()
+egraphics_result splash_screen_graphics::create_renderpasses ()
 {
 	VkAttachmentDescription attachment_description = { 0 };
 
@@ -785,11 +785,13 @@ void splash_screen_graphics::create_renderpasses ()
 
 	if (vkCreateRenderPass (common_graphics::graphics_device, &create_info, NULL, &render_pass) != VK_SUCCESS)
 	{
-		throw egraphics_error::create_render_pass;
+		return egraphics_result::e_against_error_create_render_pass;
 	}
+
+	return egraphics_result::e_success;
 }
 
-void splash_screen_graphics::create_framebuffers ()
+egraphics_result splash_screen_graphics::create_framebuffers ()
 {
 	VkFramebufferCreateInfo create_info = { 0 };
 
@@ -810,34 +812,36 @@ void splash_screen_graphics::create_framebuffers ()
 
 		if (vkCreateFramebuffer (common_graphics::graphics_device, &create_info, NULL, &swapchain_framebuffers[i]) != VK_SUCCESS)
 		{
-			throw egraphics_error::create_framebuffers;
+			return egraphics_result::e_against_error_create_framebuffers;
 		}
 	}
+
+	return egraphics_result::e_success;
 }
 
-void splash_screen_graphics::create_shaders ()
+egraphics_result splash_screen_graphics::create_shaders ()
 {
-
+	return egraphics_result::e_success;
 }
 
-void splash_screen_graphics::create_graphics_pipeline_layout ()
+egraphics_result splash_screen_graphics::create_graphics_pipeline_layout ()
 {
-
+	return egraphics_result::e_success;
 }
 
-void splash_screen_graphics::create_graphics_pipeline ()
+egraphics_result splash_screen_graphics::create_graphics_pipeline ()
 {
-
+	return egraphics_result::e_success;
 }
 
-void splash_screen_graphics::create_sync_objects ()
+egraphics_result splash_screen_graphics::create_sync_objects ()
 {
-
+	return egraphics_result::e_success;
 }
 
-void splash_screen_graphics::allocate_command_buffers ()
+egraphics_result splash_screen_graphics::allocate_command_buffers ()
 {
-
+	return egraphics_result::e_success;
 }
 
 splash_screen_graphics::splash_screen_graphics ()
@@ -850,20 +854,22 @@ splash_screen_graphics::~splash_screen_graphics ()
 	OutputDebugString (L"splash_screen_graphics::~splash_screen_graphics\n");
 }
 
-void splash_screen_graphics::init ()
+egraphics_result splash_screen_graphics::init ()
 {
-	create_renderpasses ();
-	create_framebuffers ();
-	create_shaders ();
-	create_graphics_pipeline_layout ();
-	create_graphics_pipeline ();
-	create_sync_objects ();
-	allocate_command_buffers ();
+	CHECK_AGAINST_RESULT (create_renderpasses ());
+	CHECK_AGAINST_RESULT (create_framebuffers ());
+	CHECK_AGAINST_RESULT (create_shaders ());
+	CHECK_AGAINST_RESULT (create_graphics_pipeline_layout ());
+	CHECK_AGAINST_RESULT (create_graphics_pipeline ());
+	CHECK_AGAINST_RESULT (create_sync_objects ());
+	CHECK_AGAINST_RESULT (allocate_command_buffers ());
+
+	return egraphics_result::e_success;
 }
 
-void splash_screen_graphics::draw ()
+egraphics_result splash_screen_graphics::draw ()
 {
-
+	return egraphics_result::e_success;
 }
 
 void splash_screen_graphics::exit ()

@@ -1,164 +1,164 @@
-#include "Error.hpp"
-#include <Windows.h>
+#include "error.hpp"
+#include <windows.h>
 
-void log_error (egraphics_error Err)
+void log_error (egraphics_result err)
 {
-	switch (Err)
+	switch (err)
 	{
-	case egraphics_error::populate_instance_layers_and_extensions:
-		OutputDebugString (L"BaseGraphics Error: Populating Instance Layers and Extensions\n");
+	case egraphics_result::e_against_error_populate_instance_layers_and_extensions:
+		OutputDebugString (L"graphics error: populating instance layers and extensions\n");
 		break;
 
-	case egraphics_error::create_instance:
-		OutputDebugString (L"BaseGraphics Error: Create Instance\n");
+	case egraphics_result::e_against_error_create_instance:
+		OutputDebugString (L"graphics error: create instance\n");
 		break;
 
-	case egraphics_error::setup_debug_utils_messenger:
-		OutputDebugString (L"BaseGraphics Error: Setup Debug Utils Messenger\n");
+	case egraphics_result::e_against_error_setup_debug_utils_messenger:
+		OutputDebugString (L"graphics error: setup debug utils messenger\n");
 		break;
 
-	case egraphics_error::create_debug_utils_messenger:
-		OutputDebugString (L"BaseGraphics Error: Create Debug Utils Messenger\n");
+	case egraphics_result::e_against_error_create_debug_utils_messenger:
+		OutputDebugString (L"graphics error: create debug utils messenger\n");
 		break;
 
-	case egraphics_error::destroy_debug_utils_messenger:
-		OutputDebugString (L"BaseGraphics Error: Destroy Debud Utils Messenger\n");
+	case egraphics_result::e_against_error_destroy_debug_utils_messenger:
+		OutputDebugString (L"graphics error: destroy debud utils messenger\n");
 		break;
 
-	case egraphics_error::create_surface:
-		OutputDebugString (L"BaseGraphics Error: Create Surface\n");
+	case egraphics_result::e_against_error_create_surface:
+		OutputDebugString (L"graphics error: create surface\n");
 		break;
 
-	case egraphics_error::get_physical_device:
-		OutputDebugString (L"BaseGraphics Error: Get Physical Device\n");
+	case egraphics_result::e_against_error_get_physical_device:
+		OutputDebugString (L"graphics error: get physical device\n");
 		break;
 
-	case egraphics_error::populate_device_layers_and_extensions:
-		OutputDebugString (L"BaseGraphics Error: Populate Device Layers and Extensions\n");
+	case egraphics_result::e_against_error_populate_device_layers_and_extensions:
+		OutputDebugString (L"graphics error: populate device layers and extensions\n");
 		break;
 
-	case egraphics_error::create_graphics_device:
-		OutputDebugString (L"BaseGraphics Error: Create BaseGraphics Device\n");
+	case egraphics_result::e_against_error_create_graphics_device:
+		OutputDebugString (L"graphics error: create basegraphics device\n");
 		break;
 
-	case egraphics_error::surface_support:
-		OutputDebugString (L"BaseGraphics Error: Surface Support\n");
+	case egraphics_result::e_against_error_surface_support:
+		OutputDebugString (L"graphics error: surface support\n");
 		break;
 
-	case egraphics_error::create_swapchain:
-		OutputDebugString (L"BaseGraphics Error: Create Swapchain\n");
+	case egraphics_result::e_against_error_create_swapchain:
+		OutputDebugString (L"graphics error: create swapchain\n");
 		break;
 
-	case egraphics_error::create_image_view:
-		OutputDebugString (L"BaseGraphics Error: Create Image View\n");
+	case egraphics_result::e_against_error_create_image_view:
+		OutputDebugString (L"graphics error: create image view\n");
 		break;
 
-	case egraphics_error::create_buffer:
-		OutputDebugString (L"BaseGraphics Error: Create Buffer\n");
+	case egraphics_result::e_against_error_create_buffer:
+		OutputDebugString (L"graphics error: create buffer\n");
 		break;
 
-	case egraphics_error::allocate_memory:
-		OutputDebugString (L"BaseGraphics Error: Allocate Buffer Memory\n");
+	case egraphics_result::e_against_error_allocate_memory:
+		OutputDebugString (L"graphics error: allocate buffer memory\n");
 		break;
 
-	case egraphics_error::bind_buffer_memory:
-		OutputDebugString (L"BaseGraphics Error: Bind Buffer Memory\n");
+	case egraphics_result::e_against_error_bind_buffer_memory:
+		OutputDebugString (L"graphics error: bind buffer memory\n");
 		break;
 
-	case egraphics_error::create_image:
-		OutputDebugString (L"BaseGraphics Error: Create Image\n");
+	case egraphics_result::e_against_error_create_image:
+		OutputDebugString (L"graphics error: create image\n");
 		break;
 
-	case egraphics_error::bind_image_memory:
-		OutputDebugString (L"BaseGraphics Error: Bind Image Memory\n");
+	case egraphics_result::e_against_error_bind_image_memory:
+		OutputDebugString (L"graphics error: bind image memory\n");
 		break;
 
-	case egraphics_error::map_memory:
-		OutputDebugString (L"BaseGraphics Error: Map Image Memory\n");
+	case egraphics_result::e_against_error_map_memory:
+		OutputDebugString (L"graphics error: map image memory\n");
 		break;
 
-	case egraphics_error::create_descriptor_set_layout:
-		OutputDebugString (L"BaseGraphics Error: Create Descriptor Set Layout\n");
+	case egraphics_result::e_against_error_create_descriptor_set_layout:
+		OutputDebugString (L"graphics error: create descriptor set layout\n");
 		break;
 
-	case egraphics_error::create_pipeline_layout:
-		OutputDebugString (L"BaseGraphics Error: Create Pipeline Layout\n");
+	case egraphics_result::e_against_error_create_pipeline_layout:
+		OutputDebugString (L"graphics error: create pipeline layout\n");
 		break;
 
-	case egraphics_error::create_descriptor_pool:
-		OutputDebugString (L"BaseGraphics Error: Create Descriptor Pool\n");
+	case egraphics_result::e_against_error_create_descriptor_pool:
+		OutputDebugString (L"graphics error: create descriptor pool\n");
 		break;
 
-	case egraphics_error::allocate_descriptor_set:
-		OutputDebugString (L"BaseGraphics Error: Allocate Descriptor Set\n");
+	case egraphics_result::e_against_error_allocate_descriptor_set:
+		OutputDebugString (L"graphics error: allocate descriptor set\n");
 		break;
 
-	case egraphics_error::create_render_pass:
-		OutputDebugString (L"BaseGraphics Error: Create Render Pass\n");
+	case egraphics_result::e_against_error_create_render_pass:
+		OutputDebugString (L"graphics error: create render pass\n");
 		break;
 
-	case egraphics_error::create_shader_module:
-		OutputDebugString (L"BaseGraphics Error: Create Shader Module\n");
+	case egraphics_result::e_against_error_create_shader_module:
+		OutputDebugString (L"graphics error: create shader module\n");
 		break;
 
-	case egraphics_error::create_framebuffers:
-		OutputDebugString (L"BaseGraphics Error: Create Framebuffer\n");
+	case egraphics_result::e_against_error_create_framebuffers:
+		OutputDebugString (L"graphics error: create framebuffer\n");
 		break;
 
-	case egraphics_error::begin_command_buffer:
-		OutputDebugString (L"BaseGraphics Error: Begin Command Buffer\n");
+	case egraphics_result::e_against_error_begin_command_buffer:
+		OutputDebugString (L"graphics error: begin command buffer\n");
 		break;
 
-	case egraphics_error::end_command_buffer:
-		OutputDebugString (L"BaseGraphics Error: End Command Buffer\n");
+	case egraphics_result::e_against_error_end_command_buffer:
+		OutputDebugString (L"graphics error: end command buffer\n");
 		break;
 
-	case egraphics_error::create_command_pool:
-		OutputDebugString (L"BaseGraphics Error: Create Command Pool\n");
+	case egraphics_result::e_against_error_create_command_pool:
+		OutputDebugString (L"graphics error: create command pool\n");
 		break;
 
-	case egraphics_error::allocate_command_buffer:
-		OutputDebugString (L"BaseGraphics Error: Allocate Command Buffer\n");
+	case egraphics_result::e_against_error_allocate_command_buffer:
+		OutputDebugString (L"graphics error: allocate command buffer\n");
 		break;
 
-	case egraphics_error::create_graphics_pipeline:
-		OutputDebugString (L"BaseGraphics Error: Create BaseGraphics Pipeline\n");
+	case egraphics_result::e_against_error_create_graphics_pipeline:
+		OutputDebugString (L"graphics error: create basegraphics pipeline\n");
 		break;
 
-	case egraphics_error::create_semaphore:
-		OutputDebugString (L"BaseGraphics Error: Create Semaphore\n");
+	case egraphics_result::e_against_error_create_semaphore:
+		OutputDebugString (L"graphics error: create semaphore\n");
 		break;
 
-	case egraphics_error::acquire_next_image:
-		OutputDebugString (L"BaseGraphics Error: Acquire Next Image\n");
+	case egraphics_result::e_against_error_acquire_next_image:
+		OutputDebugString (L"graphics error: acquire next image\n");
 		break;
 
-	case egraphics_error::wait_for_fences:
-		OutputDebugString (L"BaseGraphics Error: Wait for Fence\n");
+	case egraphics_result::e_against_error_wait_for_fences:
+		OutputDebugString (L"graphics error: wait for fence\n");
 		break;
 
-	case egraphics_error::create_fence:
-		OutputDebugString (L"BaseGraphics Error: Create Fence\n");
+	case egraphics_result::e_against_error_create_fence:
+		OutputDebugString (L"graphics error: create fence\n");
 		break;
 
-	case egraphics_error::reset_fence:
-		OutputDebugString (L"BaseGraphics Error: Reset Fence\n");
+	case egraphics_result::e_against_error_reset_fence:
+		OutputDebugString (L"graphics error: reset fence\n");
 		break;
 
-	case egraphics_error::queue_submit:
-		OutputDebugString (L"BaseGraphics Error: Queue Submit\n");
+	case egraphics_result::e_against_error_queue_submit:
+		OutputDebugString (L"graphics error: queue submit\n");
 		break;
 
-	case egraphics_error::queue_present:
-		OutputDebugString (L"BaseGraphics Error: Queue Present\n");
+	case egraphics_result::e_against_error_queue_present:
+		OutputDebugString (L"graphics error: queue present\n");
 		break;
 
-	case egraphics_error::update_uniform_buffer:
-		OutputDebugString (L"BaseGraphics Error: Update Uniform Buffer\n");
+	case egraphics_result::e_against_error_update_uniform_buffer:
+		OutputDebugString (L"graphics error: update uniform buffer\n");
 		break;
 
-	case egraphics_error::create_sampler:
-		OutputDebugString (L"BaseGraphics Error: Create Texture SplashScreenSampler\n");
+	case egraphics_result::e_against_error_create_sampler:
+		OutputDebugString (L"graphics error: create texture splashscreensampler\n");
 		break;
 
 	default:

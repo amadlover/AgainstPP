@@ -4,6 +4,8 @@
 #include <vector>
 #include <Windows.h>
 
+#include "error.hpp"
+
 /*namespace common_graphics
 {
 	struct common_graphics
@@ -29,7 +31,7 @@
 class common_graphics
 {
 public:
-	static void init (HINSTANCE hInstance, HWND hWnd);
+	static egraphics_result init (HINSTANCE hInstance, HWND hWnd);
 	static void exit ();
 
 	static VkDevice graphics_device;
