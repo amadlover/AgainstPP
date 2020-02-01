@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/build32/vscode/debug/AgainstPP.exe",
             "args": [],
-            "stopAtEntry": true,
+            "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false

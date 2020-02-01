@@ -55,17 +55,18 @@
 splash_screen::splash_screen ()
 {
 	OutputDebugString (L"splash_screen::splash_screen\n");
-	graphics = std::make_unique <splash_screen_graphics> ();
-}
-
-splash_screen::~splash_screen ()
-{
-	OutputDebugString (L"splash_screen::~splash_screen\n");
+	
 }
 
 egraphics_result splash_screen::init (event* event_ptr)
 {
 	OutputDebugString (L"splash_screen::init\n");
+	graphics = new splash_screen_graphics ();
+	if (graphics == nullptr)
+	{
+		return egraphics_result::e_against_error_system_allocate_memory;
+	}
+
 	this->event_ptr = event_ptr;
 	CHECK_AGAINST_RESULT (graphics->init ());
 	state = e_scene_state::inited;
@@ -99,4 +100,10 @@ void splash_screen::exit ()
 	OutputDebugString (L"splash_screen::exit\n");
 	graphics->exit ();
 	state = e_scene_state::exited;
+	delete graphics;
+}
+
+splash_screen::~splash_screen ()
+{
+	OutputDebugString (L"splash_screen::~splash_screen\n");
 }

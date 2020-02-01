@@ -7,8 +7,6 @@
 #include "event.hpp"
 #include "scene.hpp"
 
-#include <memory>
-
 /*namespace splash_screen
 {
 	struct splash_screen
@@ -37,5 +35,5 @@ public:
 	void exit () override;
 
 private:
-	std::unique_ptr<splash_screen_graphics> graphics;
+	splash_screen_graphics* graphics;
 };

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <Windows.h>
-#include <memory>
 
 #include "common_graphics.hpp"
 #include "splash_screen.hpp"

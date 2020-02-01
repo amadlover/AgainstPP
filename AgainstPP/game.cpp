@@ -1,7 +1,6 @@
 #include "game.hpp"
 
 #include <Windows.h>
-#include <memory>
 
 #include "splash_screen.hpp"
 #include "main_menu.hpp"
@@ -130,15 +129,6 @@ namespace game
 game::game ()
 {
 	OutputDebugString (L"game::game\n");
-
-	event_ptr = new event ();
-	event_ptr->go_to_scene = std::bind (&game::go_to_scene, this, std::placeholders::_1);
-
-	splash_screen_ptr = new splash_screen ();
-	main_menu_ptr = new main_menu ();
-
-	current_scene = splash_screen_ptr;
-	current_scene_type = e_scene_type::splash_screen;
 }
 
 void game::go_to_scene (e_scene_type new_scene)
@@ -171,16 +161,34 @@ void game::process_keyboard_input (WPARAM wParam, LPARAM lParam)
 	current_scene->process_keyboard_input (wParam, lParam);
 }
 
-game::~game ()
-{
-	OutputDebugString (L"game::~game\n");
-}
-
 egraphics_result game::init (HINSTANCE hInstance, HWND hWnd)
 {
 	OutputDebugString (L"game::init\n");
+	event_ptr = new event ();
+	if (event_ptr == nullptr)
+	{
+		return egraphics_result::e_against_error_system_allocate_memory;
+	}
+
+	event_ptr->go_to_scene = std::bind (&game::go_to_scene, this, std::placeholders::_1);
+
+	splash_screen_ptr = new splash_screen ();
+	if (splash_screen_ptr == nullptr)
+	{
+		return egraphics_result::e_against_error_system_allocate_memory;
+	}
+
+	main_menu_ptr = new main_menu ();
+	if (main_menu_ptr == nullptr)
+	{
+		return egraphics_result::e_against_error_system_allocate_memory;
+	}
+
 	CHECK_AGAINST_RESULT (common_graphics::init (hInstance, hWnd));
 	CHECK_AGAINST_RESULT (splash_screen_ptr->init (event_ptr));
+
+	current_scene = splash_screen_ptr;
+	current_scene_type = e_scene_type::splash_screen;
 
 	return egraphics_result::e_success;
 }
@@ -207,7 +215,12 @@ void game::exit ()
 	}
 	
 	common_graphics::exit ();
+}
 
+game::~game ()
+{
+	OutputDebugString (L"game::~game\n");
+	
 	delete event_ptr;
 	delete splash_screen_ptr;
 	delete main_menu_ptr;

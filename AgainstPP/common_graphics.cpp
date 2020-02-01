@@ -220,7 +220,7 @@ namespace common_graphics
 	{
 		if (!physical_device.getSurfaceSupportKHR (common_graphics_obj_ptr->graphics_queue_family_indices[0], surface))
 		{
-			return egraphics_error::e_against_error_surface_support;
+			return egraphics_error::e_against_error_graphics_surface_support;
 		}
 
 		for (auto SurfaceFormat : physical_device.getSurfaceFormatsKHR (surface))
@@ -532,7 +532,7 @@ egraphics_result create_instance ()
 
 	if (vkCreateInstance (&create_info, nullptr, &instance) != VK_SUCCESS)
 	{
-		return egraphics_result::e_against_error_create_instance;
+		return egraphics_result::e_against_error_graphics_create_instance;
 	}
 
 	return egraphics_result::e_success;
@@ -553,7 +553,7 @@ egraphics_result setup_debug_utils_messenger ()
 
 	if (create_debug_utils_messenger (instance, &create_info, nullptr, &debug_utils_messenger) != VK_SUCCESS)
 	{
-		return egraphics_result::e_against_error_setup_debug_utils_messenger;
+		return egraphics_result::e_against_error_graphics_setup_debug_utils_messenger;
 	}
 
 	return egraphics_result::e_success;
@@ -568,7 +568,7 @@ egraphics_result get_physical_device ()
 
 	if (physical_device_count == 0)
 	{
-		return egraphics_result::e_against_error_get_physical_device;
+		return egraphics_result::e_against_error_graphics_get_physical_device;
 	}
 
 	physical_device = physical_devices[0];
@@ -609,7 +609,7 @@ egraphics_result create_surface (HINSTANCE HInstance, HWND HWnd)
 
 	if (vkCreateWin32SurfaceKHR (instance, &create_info, nullptr, &surface) != VK_SUCCESS)
 	{
-		return egraphics_result::e_against_error_create_surface;
+		return egraphics_result::e_against_error_graphics_create_surface;
 	}
 
 	return egraphics_result::e_success;
@@ -662,7 +662,7 @@ egraphics_result create_graphics_device ()
 
 	if (vkCreateDevice (physical_device, &create_info, nullptr, &common_graphics::graphics_device) != VK_SUCCESS)
 	{
-		return egraphics_result::e_against_error_create_graphics_device;
+		return egraphics_result::e_against_error_graphics_create_graphics_device;
 	}
 
 	vkGetDeviceQueue (common_graphics::graphics_device, common_graphics::graphics_queue_family_index, 0, &common_graphics::graphics_queue);
@@ -677,7 +677,7 @@ egraphics_result create_swapchain ()
 
 	if (!is_surface_supported)
 	{
-		return egraphics_result::e_against_error_surface_support;
+		return egraphics_result::e_against_error_graphics_surface_support;
 	}
 
 	VkSurfaceCapabilitiesKHR surface_capabilites;
@@ -735,7 +735,7 @@ egraphics_result create_swapchain ()
 
 	if (vkCreateSwapchainKHR (common_graphics::graphics_device, &create_info, nullptr, &common_graphics::swapchain) != VK_SUCCESS)
 	{
-		return egraphics_result::e_against_error_create_swapchain;
+		return egraphics_result::e_against_error_graphics_create_swapchain;
 	}
 
 	vkGetSwapchainImagesKHR (common_graphics::graphics_device, common_graphics::swapchain, &common_graphics::swapchain_image_count, nullptr);
@@ -778,7 +778,7 @@ egraphics_result create_swapchain_imageviews ()
 		create_info.image = common_graphics::swapchain_images[i];
 		if (vkCreateImageView (common_graphics::graphics_device, &create_info, nullptr, &common_graphics::swapchain_imageviews[i]) != VK_SUCCESS)
 		{
-			return egraphics_result::e_against_error_create_image_view;
+			return egraphics_result::e_against_error_graphics_create_image_view;
 		}
 	}
 
@@ -794,7 +794,7 @@ egraphics_result create_command_pool ()
 
 	if (vkCreateCommandPool (common_graphics::graphics_device, &command_pool_create_info, nullptr, &common_graphics::command_pool) != VK_SUCCESS)
 	{
-		return egraphics_result::e_against_error_create_command_pool;
+		return egraphics_result::e_against_error_graphics_create_command_pool;
 	}
 
 	return egraphics_result::e_success;
@@ -815,7 +815,7 @@ egraphics_result create_sampler ()
 
 	if (vkCreateSampler (common_graphics::graphics_device, &create_info, nullptr, &common_graphics::common_sampler) != VK_SUCCESS)
 	{
-		return egraphics_result::e_against_error_create_sampler;
+		return egraphics_result::e_against_error_graphics_create_sampler;
 	}
 
 	return egraphics_result::e_success;

@@ -785,7 +785,7 @@ egraphics_result splash_screen_graphics::create_renderpasses ()
 
 	if (vkCreateRenderPass (common_graphics::graphics_device, &create_info, NULL, &render_pass) != VK_SUCCESS)
 	{
-		return egraphics_result::e_against_error_create_render_pass;
+		return egraphics_result::e_against_error_graphics_create_render_pass;
 	}
 
 	return egraphics_result::e_success;
@@ -812,7 +812,7 @@ egraphics_result splash_screen_graphics::create_framebuffers ()
 
 		if (vkCreateFramebuffer (common_graphics::graphics_device, &create_info, NULL, &swapchain_framebuffers[i]) != VK_SUCCESS)
 		{
-			return egraphics_result::e_against_error_create_framebuffers;
+			return egraphics_result::e_against_error_graphics_create_framebuffers;
 		}
 	}
 

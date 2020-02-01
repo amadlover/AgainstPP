@@ -47,7 +47,4 @@ public:
 	static std::vector<VkImageView> swapchain_imageviews;
 	static VkCommandPool command_pool;
 	static VkSampler common_sampler;
-
-private:
-
 };
