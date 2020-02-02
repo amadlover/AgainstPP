@@ -44,10 +44,9 @@ main_menu::~main_menu ()
 	OutputDebugString (L"main_menu::~main_menu\n");
 }
 
-egraphics_result main_menu::init (event* event_ptr)
+egraphics_result main_menu::init ()
 {
 	OutputDebugString (L"main_menu::init\n");
-	this->event_ptr = event_ptr;
 	state = e_scene_state::inited;
 
 	return egraphics_result::success;
@@ -58,7 +57,7 @@ void main_menu::process_keyboard_input (WPARAM wParam, LPARAM lParam)
 	switch (wParam)
 	{
 	case VK_ESCAPE:
-		event_ptr->go_to_scene (e_scene_type::splash_screen);
+		event::go_to_scene (e_scene_type::splash_screen);
 		break;
 
 	case 0x53:

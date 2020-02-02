@@ -2,6 +2,7 @@
 
 #include "enums.hpp"
 #include <functional>
+#include <Windows.h>
 
 /*namespace event
 {
@@ -20,5 +21,5 @@ public:
 	event () { OutputDebugString (L"event::event\n"); }
 	~event () { OutputDebugString (L"event::~event\n"); }
 
-	std::function<void (e_scene_type)> go_to_scene;
+	static std::function<void (e_scene_type)> go_to_scene;
 };

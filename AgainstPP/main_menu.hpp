@@ -18,7 +18,7 @@ public:
 	main_menu ();
 	~main_menu ();
 
-	egraphics_result init (event* event_ptr) override;
+	egraphics_result init () override;
 	void process_keyboard_input (WPARAM wParam, LPARAM lParam);
 	egraphics_result main_loop () override;
 	void exit () override;

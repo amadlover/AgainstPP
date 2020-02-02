@@ -741,51 +741,51 @@ egraphics_result splash_screen_graphics::create_renderpasses ()
 	attachment_description.samples = VK_SAMPLE_COUNT_1_BIT;
 
 	VkAttachmentReference color_reference;
-color_reference.attachment = 0;
-color_reference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+	color_reference.attachment = 0;
+	color_reference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
-VkSubpassDescription subpass_description = { 0 };
+	VkSubpassDescription subpass_description = { 0 };
 
-subpass_description.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-subpass_description.inputAttachmentCount = 0;
-subpass_description.preserveAttachmentCount = 0;
-subpass_description.colorAttachmentCount = 1;
-subpass_description.pColorAttachments = &color_reference;
+	subpass_description.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+	subpass_description.inputAttachmentCount = 0;
+	subpass_description.preserveAttachmentCount = 0;
+	subpass_description.colorAttachmentCount = 1;
+	subpass_description.pColorAttachments = &color_reference;
 
-VkSubpassDependency subpass_dependencies[2] = { 0 };
+	VkSubpassDependency subpass_dependencies[2] = { 0 };
 
-subpass_dependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
-subpass_dependencies[0].dstSubpass = 0;
-subpass_dependencies[0].srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-subpass_dependencies[0].dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-subpass_dependencies[0].srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
-subpass_dependencies[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_MEMORY_WRITE_BIT;
-subpass_dependencies[0].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+	subpass_dependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
+	subpass_dependencies[0].dstSubpass = 0;
+	subpass_dependencies[0].srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+	subpass_dependencies[0].dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	subpass_dependencies[0].srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+	subpass_dependencies[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_MEMORY_WRITE_BIT;
+	subpass_dependencies[0].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
 
-subpass_dependencies[1].srcSubpass = 0;
-subpass_dependencies[1].dstSubpass = VK_SUBPASS_EXTERNAL;
-subpass_dependencies[1].dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-subpass_dependencies[1].srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-subpass_dependencies[1].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_MEMORY_WRITE_BIT;
-subpass_dependencies[1].srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
-subpass_dependencies[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+	subpass_dependencies[1].srcSubpass = 0;
+	subpass_dependencies[1].dstSubpass = VK_SUBPASS_EXTERNAL;
+	subpass_dependencies[1].dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	subpass_dependencies[1].srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+	subpass_dependencies[1].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_MEMORY_WRITE_BIT;
+	subpass_dependencies[1].srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+	subpass_dependencies[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
 
-VkRenderPassCreateInfo create_info = { 0 };
+	VkRenderPassCreateInfo create_info = { 0 };
 
-create_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-create_info.subpassCount = 1;
-create_info.pSubpasses = &subpass_description;
-create_info.attachmentCount = 1;
-create_info.pAttachments = &attachment_description;
-create_info.dependencyCount = 2;
-create_info.pDependencies = subpass_dependencies;
+	create_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+	create_info.subpassCount = 1;
+	create_info.pSubpasses = &subpass_description;
+	create_info.attachmentCount = 1;
+	create_info.pAttachments = &attachment_description;
+	create_info.dependencyCount = 2;
+	create_info.pDependencies = subpass_dependencies;
 
-if (vkCreateRenderPass (common_graphics::graphics_device, &create_info, NULL, &render_pass) != VK_SUCCESS)
-{
-	return egraphics_result::e_against_error_graphics_create_render_pass;
-}
+	if (vkCreateRenderPass (common_graphics::graphics_device, &create_info, NULL, &render_pass) != VK_SUCCESS)
+	{
+		return egraphics_result::e_against_error_graphics_create_render_pass;
+	}
 
-return egraphics_result::success;
+	return egraphics_result::success;
 }
 
 egraphics_result splash_screen_graphics::create_framebuffers ()
@@ -889,6 +889,15 @@ egraphics_result splash_screen_graphics::allocate_command_buffers ()
 splash_screen_graphics::splash_screen_graphics ()
 {
 	OutputDebugString (L"splash_screen_graphics::splash_screen_graphics\n");
+	
+	render_pass = VK_NULL_HANDLE;
+	graphics_pipeline_layout = VK_NULL_HANDLE;
+	graphics_pipeline = VK_NULL_HANDLE;
+	vertex_shader_module = VK_NULL_HANDLE;
+	fragment_shader_module = VK_NULL_HANDLE;
+	descriptor_pool = VK_NULL_HANDLE;
+	signal_semaphore = VK_NULL_HANDLE;
+	wait_semaphore = VK_NULL_HANDLE;
 }
 
 splash_screen_graphics::~splash_screen_graphics ()
@@ -898,13 +907,14 @@ splash_screen_graphics::~splash_screen_graphics ()
 
 egraphics_result splash_screen_graphics::init ()
 {
-	CHECK_AGAINST_RESULT (create_renderpasses ());
+	OutputDebugString (L"splash_screen_graphics::init\n");
+	/*CHECK_AGAINST_RESULT (create_renderpasses ());
 	CHECK_AGAINST_RESULT (create_framebuffers ());
 	CHECK_AGAINST_RESULT (create_shaders ());
 	CHECK_AGAINST_RESULT (create_graphics_pipeline_layout ());
 	CHECK_AGAINST_RESULT (create_graphics_pipeline ());
 	CHECK_AGAINST_RESULT (create_sync_objects ());
-	CHECK_AGAINST_RESULT (allocate_command_buffers ());
+	CHECK_AGAINST_RESULT (allocate_command_buffers ());*/
 
 	swapchain_framebuffers.shrink_to_fit ();
 	swapchain_fences.shrink_to_fit ();

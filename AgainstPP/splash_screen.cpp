@@ -58,7 +58,7 @@ splash_screen::splash_screen ()
 	
 }
 
-egraphics_result splash_screen::init (event* event_ptr)
+egraphics_result splash_screen::init ()
 {
 	OutputDebugString (L"splash_screen::init\n");
 	graphics = new splash_screen_graphics ();
@@ -67,7 +67,6 @@ egraphics_result splash_screen::init (event* event_ptr)
 		return egraphics_result::e_against_error_system_allocate_memory;
 	}
 
-	this->event_ptr = event_ptr;
 	CHECK_AGAINST_RESULT (graphics->init ());
 	state = e_scene_state::inited;
 
@@ -79,7 +78,7 @@ void splash_screen::process_keyboard_input (WPARAM wParam, LPARAM lParam)
 	switch (wParam)
 	{
 	case VK_ESCAPE:
-		event_ptr->go_to_scene (e_scene_type::main_menu);
+		event::go_to_scene (e_scene_type::main_menu);
 		break;
 
 	case 0x53:

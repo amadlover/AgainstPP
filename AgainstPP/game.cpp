@@ -138,14 +138,14 @@ void game::go_to_scene (e_scene_type new_scene)
 	case e_scene_type::splash_screen:
 		OutputDebugString (L"New scene splash screen\n");
 		main_menu_ptr->exit ();
-		splash_screen_ptr->init (event_ptr);
+		splash_screen_ptr->init ();
 		current_scene = splash_screen_ptr;
 		break;
 
 	case e_scene_type::main_menu:
 		OutputDebugString (L"New scene main menu\n");
 		splash_screen_ptr->exit ();
-		main_menu_ptr->init (event_ptr);
+		main_menu_ptr->init ();
 		current_scene = main_menu_ptr;
 		break;
 
@@ -162,13 +162,8 @@ void game::process_keyboard_input (WPARAM wParam, LPARAM lParam)
 egraphics_result game::init (HINSTANCE hInstance, HWND hWnd)
 {
 	OutputDebugString (L"game::init\n");
-	event_ptr = new event ();
-	if (event_ptr == nullptr)
-	{
-		return egraphics_result::e_against_error_system_allocate_memory;
-	}
 
-	event_ptr->go_to_scene = std::bind (&game::go_to_scene, this, std::placeholders::_1);
+	event::go_to_scene = std::bind (&game::go_to_scene, this, std::placeholders::_1);
 
 	splash_screen_ptr = new splash_screen ();
 	if (splash_screen_ptr == nullptr)
@@ -183,7 +178,7 @@ egraphics_result game::init (HINSTANCE hInstance, HWND hWnd)
 	}
 
 	CHECK_AGAINST_RESULT (common_graphics::init (hInstance, hWnd));
-	CHECK_AGAINST_RESULT (splash_screen_ptr->init (event_ptr));
+	CHECK_AGAINST_RESULT (splash_screen_ptr->init ());
 
 	current_scene = splash_screen_ptr;
 	current_scene_type = e_scene_type::splash_screen;
@@ -219,7 +214,6 @@ game::~game ()
 {
 	OutputDebugString (L"game::~game\n");
 	
-	delete event_ptr;
 	delete splash_screen_ptr;
 	delete main_menu_ptr;
 }

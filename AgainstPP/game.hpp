@@ -38,7 +38,6 @@ private:
 	splash_screen* splash_screen_ptr;
 	main_menu* main_menu_ptr;
 	scene* current_scene;
-	event* event_ptr;
 
 	e_scene_type current_scene_type;
 };

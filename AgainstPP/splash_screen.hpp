@@ -29,7 +29,7 @@ public:
 	splash_screen ();
 	~splash_screen ();
 
-	egraphics_result init (event* event_ptr) override;
+	egraphics_result init () override;
 	void process_keyboard_input (WPARAM wParam, LPARAM lParam) override;
 	egraphics_result main_loop () override;
 	void exit () override;
