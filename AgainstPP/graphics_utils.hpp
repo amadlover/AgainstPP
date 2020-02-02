@@ -58,3 +58,83 @@
 		vk::PipelineShaderStageCreateInfo& shader_stage_create_info
 	);
 }*/
+
+class graphics_utils
+{
+public:
+	static egraphics_result create_buffer (
+		VkDevice graphics_device,
+		VkDeviceSize size,
+		VkBufferUsageFlags usage, 
+		VkSharingMode sharing_mode, 
+		uint32_t graphics_queue_family_index, 
+		VkBuffer* out_buffer
+	);
+
+	static egraphics_result allocate_bind_buffer_memory (
+		VkDevice graphics_device, 
+		VkBuffer* buffers, 
+		uint32_t buffer_count, 
+		VkPhysicalDeviceMemoryProperties physical_device_memory_properties, 
+		VkMemoryPropertyFlags required_types, 
+		VkDeviceMemory* out_memory
+	);
+
+	static egraphics_result map_data_to_buffer (
+		VkDevice graphics_device, 
+		VkDeviceMemory memory, 
+		VkDeviceSize offset, 
+		VkDeviceSize size, 
+		void* data_source
+	);
+
+	static egraphics_result create_image (
+		VkDevice graphics_device, 
+		uint32_t graphics_queue_family_index, 
+		VkExtent3D extent, 
+		uint32_t array_layers, 
+		VkFormat format, 
+		VkImageLayout initial_layout, 
+		VkSharingMode sharing_mode, 
+		VkImage* out_image
+	);	
+
+	static egraphics_result allocate_bind_image_memory (
+		VkDevice graphics_device, 
+		VkImage* images, 
+		uint32_t image_count, 
+		VkPhysicalDeviceMemoryProperties physical_device_memory_properties, 
+		VkMemoryPropertyFlags required_types, 
+		VkDeviceMemory* out_memory
+	);
+	
+	static egraphics_result change_image_layout (
+	);
+
+	static egraphics_result copy_buffer_to_buffer (
+		VkDevice graphics_device, 
+		VkCommandPool command_pool, 
+		VkQueue graphics_queue, 
+		VkBuffer src_buffer, 
+		VkBuffer dst_buffer, 
+		VkDeviceSize size
+	);
+
+	static egraphics_result copy_buffer_to_image (
+	);
+
+
+	static egraphics_result create_shader (
+		const char* file_path, 
+		VkDevice graphics_device, 
+		VkShaderStageFlagBits shader_stage, 
+		VkShaderModule* shader_module, 
+		VkPipelineShaderStageCreateInfo* shader_stage_create_info
+	);
+
+	static egraphics_result destroy_buffer_and_buffer_memory (
+		VkDevice graphics_device, 
+		VkBuffer buffer, 
+		VkDeviceMemory buffer_memory
+	);
+};

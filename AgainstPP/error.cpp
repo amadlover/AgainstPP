@@ -81,7 +81,7 @@ void log_error (egraphics_result err)
 		OutputDebugString (L"graphics error: create descriptor set layout\n");
 		break;
 
-	case egraphics_result::e_against_error_graphics_create_pipeline_layout:
+	case egraphics_result::e_against_error_graphics_create_graphics_pipeline_layout:
 		OutputDebugString (L"graphics error: create pipeline layout\n");
 		break;
 
@@ -167,6 +167,10 @@ void log_error (egraphics_result err)
 
 	case egraphics_result::e_against_error_system_create_file:
 		OutputDebugString (L"system error: create file\n");
+		break;
+
+	case egraphics_result::e_against_error_system_open_file:
+		OutputDebugString (L"system error: open file\n");
 		break;
 
 	default:

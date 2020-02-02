@@ -50,7 +50,7 @@ egraphics_result main_menu::init (event* event_ptr)
 	this->event_ptr = event_ptr;
 	state = e_scene_state::inited;
 
-	return egraphics_result::e_success;
+	return egraphics_result::success;
 }
 
 void main_menu::process_keyboard_input (WPARAM wParam, LPARAM lParam)
@@ -71,7 +71,7 @@ void main_menu::process_keyboard_input (WPARAM wParam, LPARAM lParam)
 
 egraphics_result main_menu::main_loop ()
 {
-	return egraphics_result::e_success;
+	return egraphics_result::success;
 }
 
 void main_menu::exit ()

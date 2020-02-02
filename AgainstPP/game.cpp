@@ -188,14 +188,14 @@ egraphics_result game::init (HINSTANCE hInstance, HWND hWnd)
 	current_scene = splash_screen_ptr;
 	current_scene_type = e_scene_type::splash_screen;
 
-	return egraphics_result::e_success;
+	return egraphics_result::success;
 }
 
 egraphics_result game::main_loop ()
 {
 	current_scene->main_loop ();
 
-	return egraphics_result::e_success;
+	return egraphics_result::success;
 }
 
 void game::exit ()

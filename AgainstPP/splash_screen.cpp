@@ -71,7 +71,7 @@ egraphics_result splash_screen::init (event* event_ptr)
 	CHECK_AGAINST_RESULT (graphics->init ());
 	state = e_scene_state::inited;
 
-	return egraphics_result::e_success;
+	return egraphics_result::success;
 }
 
 void splash_screen::process_keyboard_input (WPARAM wParam, LPARAM lParam)
@@ -92,7 +92,7 @@ void splash_screen::process_keyboard_input (WPARAM wParam, LPARAM lParam)
 
 egraphics_result splash_screen::main_loop ()
 {
-	return egraphics_result::e_success;
+	return egraphics_result::success;
 }
 
 void splash_screen::exit ()

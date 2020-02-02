@@ -14,7 +14,7 @@ include_directories (${CMAKE_SOURCE_DIR}/External/stb)
 link_directories ($ENV{VULKAN_SDK}/Lib32)
 link_directories ($ENV{VULKAN_SDK}/Lib)
 
-add_executable (AgainstPP WIN32 "template_event.hpp" "actor.cpp" "actor.hpp" "asset.cpp" "asset.hpp" "common_graphics.cpp" "common_graphics.hpp" "enums.hpp" "error.cpp" "error.hpp" "event.hpp" "event.cpp" "game.cpp" "game.hpp" "graphics_utils.cpp" "graphics_utils.hpp" "main.cpp" "scene.cpp" "scene.hpp" "main_menu.cpp" "main_menu.hpp" "splash_screen.cpp" "splash_screen.hpp" "splash_screen_graphics.cpp" "splash_screen_graphics.hpp" "utils.cpp" "utils.hpp")
+add_executable (AgainstPP WIN32 "array.hpp" "template_event.hpp" "actor.cpp" "actor.hpp" "asset.cpp" "asset.hpp" "common_graphics.cpp" "common_graphics.hpp" "enums.hpp" "error.cpp" "error.hpp" "event.hpp" "event.cpp" "game.cpp" "game.hpp" "graphics_utils.cpp" "graphics_utils.hpp" "main.cpp" "scene.cpp" "scene.hpp" "main_menu.cpp" "main_menu.hpp" "splash_screen.cpp" "splash_screen.hpp" "splash_screen_graphics.cpp" "splash_screen_graphics.hpp" "utils.cpp" "utils.hpp")
 add_compile_definitions (AgainstPP _CRT_SECURE_NO_WARNINGS UNICODE WIN32_LEAN_AND_MEAN VK_USE_PLATFORM_WIN32_KHR _HAS_EXCEPTIONS=0)
 target_link_libraries (AgainstPP vulkan-1)
 target_link_libraries (AgainstPP Shlwapi)

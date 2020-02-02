@@ -1,10 +1,10 @@
 #pragma once
 
-#define CHECK_AGAINST_RESULT(result) if (result != egraphics_result::e_success) return result;
+#define CHECK_AGAINST_RESULT(result) if (result != egraphics_result::success) return result;
 
 enum egraphics_result
 {
-	e_success,
+	success,
 	e_against_error_graphics_populate_instance_layers_and_extensions,
 	e_against_error_graphics_create_instance,
 	e_against_error_graphics_setup_debug_utils_messenger,
@@ -24,7 +24,7 @@ enum egraphics_result
 	e_against_error_graphics_bind_image_memory,
 	e_against_error_graphics_map_memory,
 	e_against_error_graphics_create_descriptor_set_layout,
-	e_against_error_graphics_create_pipeline_layout,
+	e_against_error_graphics_create_graphics_pipeline_layout,
 	e_against_error_graphics_create_descriptor_pool,
 	e_against_error_graphics_allocate_descriptor_set,
 	e_against_error_graphics_create_render_pass,
@@ -48,6 +48,7 @@ enum egraphics_result
 
 	e_against_error_system_allocate_memory,
 	e_against_error_system_create_file,
+	e_against_error_system_open_file
 };
 
 void log_error (egraphics_result Err);

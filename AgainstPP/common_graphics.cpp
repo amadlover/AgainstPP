@@ -506,7 +506,7 @@ egraphics_result populate_instance_layers_and_extensions ()
 		}
 	}
 
-	return egraphics_result::e_success;
+	return egraphics_result::success;
 }
 
 egraphics_result create_instance ()
@@ -535,7 +535,7 @@ egraphics_result create_instance ()
 		return egraphics_result::e_against_error_graphics_create_instance;
 	}
 
-	return egraphics_result::e_success;
+	return egraphics_result::success;
 }
 
 egraphics_result setup_debug_utils_messenger ()
@@ -556,7 +556,7 @@ egraphics_result setup_debug_utils_messenger ()
 		return egraphics_result::e_against_error_graphics_setup_debug_utils_messenger;
 	}
 
-	return egraphics_result::e_success;
+	return egraphics_result::success;
 }
 
 egraphics_result get_physical_device ()
@@ -596,7 +596,7 @@ egraphics_result get_physical_device ()
 	vkGetPhysicalDeviceProperties (physical_device, &device_properties);
 	common_graphics::physical_device_limits = device_properties.limits;
 
-	return egraphics_result::e_success;
+	return egraphics_result::success;
 }
 
 egraphics_result create_surface (HINSTANCE HInstance, HWND HWnd)
@@ -612,7 +612,7 @@ egraphics_result create_surface (HINSTANCE HInstance, HWND HWnd)
 		return egraphics_result::e_against_error_graphics_create_surface;
 	}
 
-	return egraphics_result::e_success;
+	return egraphics_result::success;
 }
 
 egraphics_result populate_graphics_device_extensions ()
@@ -632,7 +632,7 @@ egraphics_result populate_graphics_device_extensions ()
 		}
 	}
 
-	return egraphics_result::e_success;
+	return egraphics_result::success;
 }
 
 egraphics_result create_graphics_device ()
@@ -667,7 +667,7 @@ egraphics_result create_graphics_device ()
 
 	vkGetDeviceQueue (common_graphics::graphics_device, common_graphics::graphics_queue_family_index, 0, &common_graphics::graphics_queue);
 
-	return egraphics_result::e_success;
+	return egraphics_result::success;
 }
 
 egraphics_result create_swapchain ()
@@ -744,7 +744,7 @@ egraphics_result create_swapchain ()
 	
 	common_graphics::swapchain_imageviews.resize (common_graphics::swapchain_image_count);
 
-	return egraphics_result::e_success;
+	return egraphics_result::success;
 }
 
 egraphics_result create_swapchain_imageviews ()
@@ -782,7 +782,7 @@ egraphics_result create_swapchain_imageviews ()
 		}
 	}
 
-	return egraphics_result::e_success;
+	return egraphics_result::success;
 }
 
 egraphics_result create_command_pool ()
@@ -797,7 +797,7 @@ egraphics_result create_command_pool ()
 		return egraphics_result::e_against_error_graphics_create_command_pool;
 	}
 
-	return egraphics_result::e_success;
+	return egraphics_result::success;
 }
 
 egraphics_result create_sampler ()
@@ -818,7 +818,7 @@ egraphics_result create_sampler ()
 		return egraphics_result::e_against_error_graphics_create_sampler;
 	}
 
-	return egraphics_result::e_success;
+	return egraphics_result::success;
 }
 
 egraphics_result common_graphics::init (HINSTANCE hInstance, HWND hWnd)
@@ -847,7 +847,10 @@ egraphics_result common_graphics::init (HINSTANCE hInstance, HWND hWnd)
 	CHECK_AGAINST_RESULT (create_command_pool ());
 	CHECK_AGAINST_RESULT (create_sampler ());
 
-	return egraphics_result::e_success;
+	swapchain_images.shrink_to_fit ();
+	swapchain_imageviews.shrink_to_fit ();
+
+	return egraphics_result::success;
 }
 
 void common_graphics::exit ()
