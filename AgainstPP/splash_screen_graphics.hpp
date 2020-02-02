@@ -26,9 +26,9 @@ public:
 	splash_screen_graphics ();
 	~splash_screen_graphics ();
 
-	egraphics_result init ();
+	egraphics_result init (std::vector<asset::mesh>& meshes);
 	egraphics_result draw ();
-	void exit ();
+	void exit (std::vector<asset::mesh>& meshes);
 
 private:
 	egraphics_result create_renderpasses ();
@@ -38,6 +38,8 @@ private:
 	egraphics_result create_graphics_pipeline ();
 	egraphics_result create_sync_objects ();
 	egraphics_result allocate_command_buffers ();
+
+	egraphics_result create_vulkan_handles_for_meshes (std::vector<asset::mesh>& meshes);
 
 	VkRenderPass render_pass;
 	std::vector<VkFramebuffer> swapchain_framebuffers;

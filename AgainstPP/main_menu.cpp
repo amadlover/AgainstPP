@@ -54,6 +54,7 @@ egraphics_result main_menu::init ()
 
 void main_menu::process_keyboard_input (WPARAM wParam, LPARAM lParam)
 {
+	OutputDebugString (L"main_menu::process_keyboard_input\n");
 	switch (wParam)
 	{
 	case VK_ESCAPE:

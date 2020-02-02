@@ -8,7 +8,8 @@
         {
             "name" : "Scene",
             "nodes" : [
-                0
+                0,
+                1
             ]
         }
     ],
@@ -16,6 +17,10 @@
         {
             "mesh" : 0,
             "name" : "Cube"
+        },
+        {
+            "mesh" : 1,
+            "name" : "CS_Cube_00"
         }
     ],
     "materials" : [
@@ -143,6 +148,18 @@
                     },
                     "indices" : 2,
                     "material" : 5
+                }
+            ]
+        },
+        {
+            "name" : "Cube.001",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 13,
+                        "TEXCOORD_0" : 14
+                    },
+                    "indices" : 15
                 }
             ]
         }
@@ -337,6 +354,34 @@
             "componentType" : 5126,
             "count" : 4,
             "type" : "VEC2"
+        },
+        {
+            "bufferView" : 13,
+            "componentType" : 5126,
+            "count" : 24,
+            "max" : [
+                1,
+                1,
+                1
+            ],
+            "min" : [
+                -1,
+                -1,
+                -1
+            ],
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 14,
+            "componentType" : 5126,
+            "count" : 24,
+            "type" : "VEC2"
+        },
+        {
+            "bufferView" : 15,
+            "componentType" : 5123,
+            "count" : 36,
+            "type" : "SCALAR"
         }
     ],
     "bufferViews" : [
@@ -404,11 +449,26 @@
             "buffer" : 0,
             "byteLength" : 32,
             "byteOffset" : 460
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 288,
+            "byteOffset" : 492
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 192,
+            "byteOffset" : 780
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 72,
+            "byteOffset" : 972
         }
     ],
     "buffers" : [
         {
-            "byteLength" : 492,
+            "byteLength" : 1044,
             "uri" : "SplashScreen.bin"
         }
     ]

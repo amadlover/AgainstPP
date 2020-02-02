@@ -36,4 +36,6 @@ public:
 
 private:
 	splash_screen_graphics* graphics;
+
+	std::vector<asset::mesh> meshes;
 };

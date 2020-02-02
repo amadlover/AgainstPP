@@ -132,13 +132,8 @@
       {
         "label": "Debug Asset Copy",
         "type": "shell",
-        "command": "copy",
-        "args":[
-          "/Y",
-          "/V"
-          "${workspaceFolder}/AgainstPP/Assets/*",
-          "${workspaceFolder}/build32/vscode/debug/",
-        ],
+        "command": "Copy-Item",
+        "args":["-Path ${workspaceFolder}/AgainstPP/Assets/* -Destination ${workspaceFolder}/build32/vscode/debug/ -Recurse"],
         "group":{
           "kind": "build",
           "isDefault": true
@@ -147,7 +142,7 @@
           "echo": true,
           "reveal": "always",
           "focus": false,
-          "panel": "shared",
+          "panel": "new",
           "showReuseMessage": true,
           "clear": false
         }

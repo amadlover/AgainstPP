@@ -886,6 +886,11 @@ egraphics_result splash_screen_graphics::allocate_command_buffers ()
 	return egraphics_result::success;
 }
 
+egraphics_result splash_screen_graphics::create_vulkan_handles_for_meshes (std::vector<asset::mesh>& meshes)
+{
+	return egraphics_result::success;
+}
+
 splash_screen_graphics::splash_screen_graphics ()
 {
 	OutputDebugString (L"splash_screen_graphics::splash_screen_graphics\n");
@@ -905,7 +910,7 @@ splash_screen_graphics::~splash_screen_graphics ()
 	OutputDebugString (L"splash_screen_graphics::~splash_screen_graphics\n");
 }
 
-egraphics_result splash_screen_graphics::init ()
+egraphics_result splash_screen_graphics::init (std::vector<asset::mesh>& meshes)
 {
 	OutputDebugString (L"splash_screen_graphics::init\n");
 	/*CHECK_AGAINST_RESULT (create_renderpasses ());
@@ -928,7 +933,7 @@ egraphics_result splash_screen_graphics::draw ()
 	return egraphics_result::success;
 }
 
-void splash_screen_graphics::exit ()
+void splash_screen_graphics::exit (std::vector<asset::mesh>& meshes)
 {
 	OutputDebugString (L"splash_screen_graphics::exit\n");
 	if (render_pass != VK_NULL_HANDLE)

@@ -55,19 +55,21 @@
 splash_screen::splash_screen ()
 {
 	OutputDebugString (L"splash_screen::splash_screen\n");
-	
 }
 
 egraphics_result splash_screen::init ()
 {
 	OutputDebugString (L"splash_screen::init\n");
+
+	CHECK_AGAINST_RESULT (asset::import_meshes (utils::get_full_path ("\\UIElements\\SplashScreen\\SplashScreen.gltf"), meshes));
+
 	graphics = new splash_screen_graphics ();
 	if (graphics == nullptr)
 	{
 		return egraphics_result::e_against_error_system_allocate_memory;
 	}
 
-	CHECK_AGAINST_RESULT (graphics->init ());
+	CHECK_AGAINST_RESULT (graphics->init (meshes));
 	state = e_scene_state::inited;
 
 	return egraphics_result::success;
@@ -75,6 +77,7 @@ egraphics_result splash_screen::init ()
 
 void splash_screen::process_keyboard_input (WPARAM wParam, LPARAM lParam)
 {
+	OutputDebugString (L"splash_screen::process_keyboard_input\n");
 	switch (wParam)
 	{
 	case VK_ESCAPE:
@@ -97,7 +100,8 @@ egraphics_result splash_screen::main_loop ()
 void splash_screen::exit ()
 {
 	OutputDebugString (L"splash_screen::exit\n");
-	graphics->exit ();
+	graphics->exit (meshes);
+	asset::destroy_meshes (meshes);
 	state = e_scene_state::exited;
 	delete graphics;
 }
