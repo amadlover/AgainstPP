@@ -295,7 +295,7 @@ egraphics_result graphics_utils::allocate_bind_buffer_memory (VkDevice graphics_
 		vkGetBufferMemoryRequirements (graphics_device, buffers[b], &memory_requirements);
 
 		memory_allocation.allocationSize += memory_requirements.size;
-		get_memory_type_index (memory_requirements, physical_device_memory_properties, required_types, &memory_allocation.memoryTypeIndex);
+		CHECK_AGAINST_RESULT (get_memory_type_index (memory_requirements, physical_device_memory_properties, required_types, &memory_allocation.memoryTypeIndex));
 	}
 
 	if (vkAllocateMemory (graphics_device, &memory_allocation, NULL, out_memory) != VK_SUCCESS)
@@ -328,7 +328,19 @@ egraphics_result graphics_utils::map_data_to_device_memory (VkDevice graphics_de
 	return egraphics_result::success;
 }
 
-egraphics_result graphics_utils::create_image (VkDevice graphics_device, uint32_t graphics_queue_family_index, VkExtent3D extent, uint32_t array_layers, VkFormat format, VkImageType image_type, VkImageLayout initial_layout, VkImageUsageFlags usage, VkSharingMode sharing_mode, VkImage* out_image)
+egraphics_result graphics_utils::create_image (
+	VkDevice graphics_device, 
+	uint32_t graphics_queue_family_index, 
+	VkExtent3D extent, 
+	uint32_t array_layers, 
+	VkFormat format, 
+	VkImageTiling tiling,
+	VkImageType image_type, 
+	VkImageLayout initial_layout, 
+	VkImageUsageFlags usage, 
+	VkSharingMode sharing_mode, 
+	VkImage* out_image
+)
 {
 	VkImageCreateInfo create_info = { 0 };
 
@@ -344,7 +356,7 @@ egraphics_result graphics_utils::create_image (VkDevice graphics_device, uint32_
 	create_info.pQueueFamilyIndices = &graphics_queue_family_index;
 	create_info.usage = usage;
 	create_info.imageType = image_type;
-	create_info.tiling = VK_IMAGE_TILING_OPTIMAL;
+	create_info.tiling = tiling;
 
 	if (vkCreateImage (graphics_device, &create_info, NULL, out_image) != VK_SUCCESS)
 	{
@@ -357,9 +369,7 @@ egraphics_result graphics_utils::create_image (VkDevice graphics_device, uint32_
 egraphics_result graphics_utils::allocate_bind_image_memory (VkDevice graphics_device, VkImage* images, uint32_t image_count, VkPhysicalDeviceMemoryProperties physical_device_memory_properties, VkMemoryPropertyFlags required_types, VkDeviceMemory* out_memory)
 {
 	VkMemoryAllocateInfo memory_allocate_info = { 0 };
-
 	memory_allocate_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-
 	std::vector<VkDeviceSize> offsets (image_count);
 
 	for (uint32_t i = 0; i < image_count; i++)
@@ -368,10 +378,8 @@ egraphics_result graphics_utils::allocate_bind_image_memory (VkDevice graphics_d
 
 		VkMemoryRequirements memory_requirements = { 0 };
 		vkGetImageMemoryRequirements (graphics_device, images[i], &memory_requirements);
-
 		memory_allocate_info.allocationSize += memory_requirements.size;
-
-		get_memory_type_index (memory_requirements, physical_device_memory_properties, required_types, &memory_allocate_info.memoryTypeIndex);
+		CHECK_AGAINST_RESULT (get_memory_type_index (memory_requirements, physical_device_memory_properties, required_types, &memory_allocate_info.memoryTypeIndex));
 	}
 
 	if (vkAllocateMemory (graphics_device, &memory_allocate_info, NULL, out_memory) != VK_SUCCESS)
@@ -448,13 +456,20 @@ egraphics_result graphics_utils::change_image_layout (
 	{
 		return egraphics_result::e_against_error_graphics_end_command_buffer;
 	}
-	submit_one_time_cmd (common_graphics::graphics_queue, command_buffer);
+	CHECK_AGAINST_RESULT (submit_one_time_cmd (common_graphics::graphics_queue, command_buffer));
 	vkFreeCommandBuffers (common_graphics::graphics_device, common_graphics::command_pool, 1, &command_buffer);
 
 	return egraphics_result::success;
 }
 
-egraphics_result graphics_utils::copy_buffer_to_buffer (VkDevice graphics_device, VkCommandPool command_pool, VkQueue graphics_queue, VkBuffer src_buffer, VkBuffer dst_buffer, VkDeviceSize size)
+egraphics_result graphics_utils::copy_buffer_to_buffer (
+	VkDevice graphics_device, 
+	VkCommandPool command_pool, 
+	VkQueue graphics_queue, 
+	VkBuffer src_buffer, 
+	VkBuffer dst_buffer, 
+	VkDeviceSize size
+)
 {
 	VkCommandBuffer command_buffer;
 	CHECK_AGAINST_RESULT (get_one_time_command_buffer (graphics_device, command_pool, &command_buffer));
@@ -467,7 +482,42 @@ egraphics_result graphics_utils::copy_buffer_to_buffer (VkDevice graphics_device
 	{
 		return egraphics_result::e_against_error_graphics_end_command_buffer;
 	}
-	submit_one_time_cmd (graphics_queue, command_buffer);
+	CHECK_AGAINST_RESULT (submit_one_time_cmd (graphics_queue, command_buffer));
+	vkFreeCommandBuffers (graphics_device, command_pool, 1, &command_buffer);
+
+	return egraphics_result::success;
+}
+
+egraphics_result graphics_utils::copy_buffer_to_image (
+	VkDevice graphics_device,
+	VkCommandPool command_pool,
+	VkQueue graphics_queue,
+	VkDeviceSize offset,
+	VkBuffer buffer,
+	VkImage* image,
+	VkExtent3D extent,
+	uint32_t layer_count
+)
+{
+	VkCommandBuffer command_buffer;
+	CHECK_AGAINST_RESULT (get_one_time_command_buffer (graphics_device, command_pool, &command_buffer));
+
+	VkImageSubresourceLayers subresource_layers = { 0 };
+	subresource_layers.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	subresource_layers.layerCount = layer_count;
+	
+	VkBufferImageCopy buffer_image_copy = { 0 };
+	buffer_image_copy.bufferOffset = offset;
+	buffer_image_copy.imageExtent = extent;
+	buffer_image_copy.imageSubresource = subresource_layers;
+
+	vkCmdCopyBufferToImage (command_buffer, buffer, *image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &buffer_image_copy);
+	if (vkEndCommandBuffer (command_buffer) != VK_SUCCESS)
+	{
+		return egraphics_result::e_against_error_graphics_end_command_buffer;
+	}
+	
+	CHECK_AGAINST_RESULT (submit_one_time_cmd (graphics_queue, command_buffer));
 	vkFreeCommandBuffers (graphics_device, command_pool, 1, &command_buffer);
 
 	return egraphics_result::success;

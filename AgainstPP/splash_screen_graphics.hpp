@@ -64,6 +64,6 @@ private:
 	std::vector<VkImage> scene_images;
 	VkDeviceMemory scene_images_memory;
 
-	std::vector<VkImage> staging_images;
-	VkDeviceMemory staging_images_memory;
+	VkBuffer staging_image_buffer;
+	VkDeviceMemory staging_image_buffer_memory;
 };

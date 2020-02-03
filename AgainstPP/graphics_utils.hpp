@@ -94,6 +94,7 @@ public:
 		VkExtent3D extent, 
 		uint32_t array_layers, 
 		VkFormat format, 
+		VkImageTiling tiling,
 		VkImageType image_type,
 		VkImageLayout initial_layout, 
 		VkImageUsageFlags usage,
@@ -130,6 +131,17 @@ public:
 		VkBuffer src_buffer, 
 		VkBuffer dst_buffer, 
 		VkDeviceSize size
+	);
+
+	static egraphics_result copy_buffer_to_image (
+		VkDevice graphics_device,
+		VkCommandPool command_pool,
+		VkQueue graphics_queue,
+		VkDeviceSize offset,
+		VkBuffer buffer,
+		VkImage* image,
+		VkExtent3D extent,
+		uint32_t layer_count
 	);
 
 	static egraphics_result copy_image_to_image (
