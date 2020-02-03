@@ -232,6 +232,34 @@ egraphics_result submit_one_time_cmd (VkQueue graphics_queue, VkCommandBuffer co
 	return egraphics_result::success;
 }
 
+egraphics_result get_one_time_command_buffer (VkDevice graphics_device, VkCommandPool command_pool, VkCommandBuffer* out_buffer)
+{
+	VkCommandBufferAllocateInfo command_buffer_allocate_info = { 0 };
+
+	command_buffer_allocate_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+	command_buffer_allocate_info.commandPool = command_pool;
+	command_buffer_allocate_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+	command_buffer_allocate_info.commandBufferCount = 1;
+
+	VkCommandBuffer command_buffer;
+
+	if (vkAllocateCommandBuffers (graphics_device, &command_buffer_allocate_info, &command_buffer) != VK_SUCCESS)
+	{
+		return egraphics_result::e_against_error_graphics_allocate_command_buffer;
+	}
+
+	VkCommandBufferBeginInfo command_buffer_begin_info = { 0 };
+	command_buffer_begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	command_buffer_begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+	if (vkBeginCommandBuffer (command_buffer, &command_buffer_begin_info) != VK_SUCCESS)
+	{
+		return egraphics_result::e_against_error_graphics_begin_command_buffer;
+	}
+
+	*out_buffer = command_buffer;
+}
+
 egraphics_result graphics_utils::create_buffer (VkDevice graphics_device, VkDeviceSize size, VkBufferUsageFlags usage, VkSharingMode sharing_mode, uint32_t graphics_queue_family_index, VkBuffer * out_buffer)
 {
 	VkBufferCreateInfo create_info = { 0 };
@@ -360,50 +388,115 @@ egraphics_result graphics_utils::allocate_bind_image_memory (VkDevice graphics_d
 	return egraphics_result::success;
 }
 
-egraphics_result graphics_utils::change_image_layout ()
+egraphics_result graphics_utils::change_image_layout (
+	VkDevice graphics_device,
+	uint32_t graphics_queue_family_index,
+	VkImage image, 
+	uint32_t layer_count, 
+	VkImageLayout old_layout, 
+	VkImageLayout new_layout, 
+	VkAccessFlags src_access, 
+	VkAccessFlags dst_access, 
+	VkPipelineStageFlags src_stage, 
+	VkPipelineStageFlags dst_stage
+)
 {
-    return egraphics_result ();
-}
-
-egraphics_result graphics_utils::copy_buffer_to_buffer (VkDevice graphics_device, VkCommandPool command_pool, VkQueue graphics_queue, VkBuffer src_buffer, VkBuffer dst_buffer, VkDeviceSize size)
-{
-	VkCommandBufferAllocateInfo command_buffer_allocate_info = { 0 };
-
-	command_buffer_allocate_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-	command_buffer_allocate_info.commandPool = command_pool;
-	command_buffer_allocate_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-	command_buffer_allocate_info.commandBufferCount = 1;
-
+	VkCommandBufferAllocateInfo allocate_info = { 0 };
+	allocate_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+	allocate_info.commandPool = common_graphics::command_pool;
+	allocate_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+	allocate_info.commandBufferCount = 1;
+	
 	VkCommandBuffer command_buffer;
 
-	if (vkAllocateCommandBuffers (graphics_device, &command_buffer_allocate_info, &command_buffer) != VK_SUCCESS)
+	if (vkAllocateCommandBuffers (common_graphics::graphics_device, &allocate_info, &command_buffer) != VK_SUCCESS)
 	{
 		return egraphics_result::e_against_error_graphics_allocate_command_buffer;
 	}
 
-	VkCommandBufferBeginInfo command_buffer_begin_info = { 0 };
-	command_buffer_begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-	command_buffer_begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+	VkCommandBufferBeginInfo begin_info = { 0 };
+	begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
-	if (vkBeginCommandBuffer (command_buffer, &command_buffer_begin_info) != VK_SUCCESS)
+	if (vkBeginCommandBuffer (command_buffer, &begin_info) != VK_SUCCESS)
 	{
 		return egraphics_result::e_against_error_graphics_begin_command_buffer;
 	}
+
+	VkImageSubresourceRange subresource_range = { 0 };
+	subresource_range.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	subresource_range.baseMipLevel = 0;
+	subresource_range.levelCount = 1;
+	subresource_range.baseArrayLayer = 0;
+	subresource_range.layerCount = layer_count;
+
+	VkImageMemoryBarrier image_memory_barrier = { 0 };
+	image_memory_barrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
+	image_memory_barrier.image = image;
+	image_memory_barrier.srcQueueFamilyIndex = graphics_queue_family_index;
+	image_memory_barrier.dstQueueFamilyIndex = graphics_queue_family_index;
+	image_memory_barrier.oldLayout = old_layout;
+	image_memory_barrier.newLayout = new_layout;
+	image_memory_barrier.srcAccessMask = src_access;
+	image_memory_barrier.dstAccessMask = dst_access;
+	
+	vkCmdPipelineBarrier (command_buffer, src_stage, dst_stage, 0, 0, nullptr, 0, nullptr, 1, &image_memory_barrier);
+	if (vkEndCommandBuffer (command_buffer) != VK_SUCCESS)
+	{
+		return egraphics_result::e_against_error_graphics_end_command_buffer;
+	}
+	submit_one_time_cmd (common_graphics::graphics_queue, command_buffer);
+	vkFreeCommandBuffers (common_graphics::graphics_device, common_graphics::command_pool, 1, &command_buffer);
+
+	return egraphics_result::success;
+}
+
+egraphics_result graphics_utils::copy_buffer_to_buffer (VkDevice graphics_device, VkCommandPool command_pool, VkQueue graphics_queue, VkBuffer src_buffer, VkBuffer dst_buffer, VkDeviceSize size)
+{
+	VkCommandBuffer command_buffer;
+	CHECK_AGAINST_RESULT (get_one_time_command_buffer (graphics_device, command_pool, &command_buffer));
 
 	VkBufferCopy buffer_copy = { 0 };
 	buffer_copy.size = size;
 
 	vkCmdCopyBuffer (command_buffer, src_buffer, dst_buffer, 1, &buffer_copy);
-	vkEndCommandBuffer (command_buffer);
+	if (vkEndCommandBuffer (command_buffer) != VK_SUCCESS)
+	{
+		return egraphics_result::e_against_error_graphics_end_command_buffer;
+	}
 	submit_one_time_cmd (graphics_queue, command_buffer);
 	vkFreeCommandBuffers (graphics_device, command_pool, 1, &command_buffer);
 
 	return egraphics_result::success;
 }
 
-egraphics_result graphics_utils::copy_image_to_image ()
+egraphics_result graphics_utils::copy_image_to_image (
+	VkDevice graphics_device,
+	VkCommandPool command_pool,
+	VkImage src_image,
+	VkImageLayout src_image_layout,
+	VkImage dst_image,
+	VkImageLayout dst_image_layout,
+	VkExtent3D extent
+)
 {
-    return egraphics_result ();
+	VkCommandBuffer command_buffer;
+	CHECK_AGAINST_RESULT (get_one_time_command_buffer (graphics_device, command_pool, &command_buffer));
+
+	VkImageCopy image_copy = { 0 };
+	image_copy.extent = extent;
+
+	vkCmdCopyImage (
+		command_buffer,
+		src_image,
+		src_image_layout,
+		dst_image,
+		dst_image_layout,
+		1,
+		&image_copy
+	);
+
+	return egraphics_result::success;
 }
 
 egraphics_result graphics_utils::create_shader (const char* file_path, VkDevice graphics_device, VkShaderStageFlagBits shader_stage, VkShaderModule* shader_module, VkPipelineShaderStageCreateInfo* shader_stage_create_info)

@@ -111,6 +111,16 @@ public:
 	);
 	
 	static egraphics_result change_image_layout (
+		VkDevice graphics_device, 
+		uint32_t graphics_queue_family_index,
+		VkImage image, 
+		uint32_t layer_count, 
+		VkImageLayout old_layout, 
+		VkImageLayout new_layout, 
+		VkAccessFlags src_access, 
+		VkAccessFlags dst_access, 
+		VkPipelineStageFlags src_stage, 
+		VkPipelineStageFlags dst_stage
 	);
 
 	static egraphics_result copy_buffer_to_buffer (
@@ -123,8 +133,14 @@ public:
 	);
 
 	static egraphics_result copy_image_to_image (
+		VkDevice graphics_device,
+		VkCommandPool command_pool,
+		VkImage src_image,
+		VkImageLayout src_image_layout,
+		VkImage dst_image,
+		VkImageLayout dst_image_layout,
+		VkExtent3D extent
 	);
-
 
 	static egraphics_result create_shader (
 		const char* file_path, 

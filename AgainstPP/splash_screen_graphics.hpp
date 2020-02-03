@@ -58,6 +58,6 @@ private:
 	VkBuffer vertex_index_buffer;
 	VkDeviceMemory vertex_index_memory;
 
-	std::vector<VkImage> images;
-	VkDeviceMemory images_memory;
+	std::vector<VkImage> scene_images;
+	VkDeviceMemory scene_images_memory;
 };

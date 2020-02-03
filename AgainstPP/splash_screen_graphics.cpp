@@ -35,8 +35,8 @@ namespace splash_screen_graphics
 
 	void check_for_similar_image_indices (
 		uint32_t from_index,
-		const asset::image::image& current_image,
-		const std::vector<asset::image::image>& images,
+		const asset::staging_image::staging_image& current_image,
+		const std::vector<asset::staging_image::staging_image>& images,
 		std::vector<uint32_t>& similar_image_indices
 	)
 	{
@@ -52,7 +52,7 @@ namespace splash_screen_graphics
 		}
 	}
 
-	void create_vulkan_handles_for_images (const std::vector<asset::image::image>& images, std::vector<asset::mesh::mesh>& meshes)
+	void create_vulkan_handles_for_images (const std::vector<asset::staging_image::staging_image>& images, std::vector<asset::mesh::mesh>& meshes)
 	{
 		std::map<vk::Image, std::vector<uint32_t>> similar_indices;
 
@@ -80,7 +80,7 @@ namespace splash_screen_graphics
 				continue;
 			}
 
-			asset::image::image image = images.at (index);
+			asset::staging_image::staging_image staging_image = images.at (index);
 			std::vector<uint32_t> similar_images_indices;
 			similar_images_indices.reserve (images.size ());
 			similar_images_indices.push_back (index);
@@ -88,7 +88,7 @@ namespace splash_screen_graphics
 			uint32_t start_index = index + 1;
 			check_for_similar_image_indices (
 				start_index,
-				image,
+				staging_image,
 				images,
 				similar_images_indices
 			);
@@ -97,7 +97,7 @@ namespace splash_screen_graphics
 
 			for (const auto& similar_index : similar_images_indices)
 			{
-				const asset::image::image similar_image = images.at (similar_index);
+				const asset::staging_image::staging_image similar_image = images.at (similar_index);
 				similar_image_size += similar_image.pixels.size ();
 			}
 
@@ -555,7 +555,7 @@ namespace splash_screen_graphics
 
 	void init (
 		std::vector<asset::mesh::mesh>& meshes,
-		std::vector<asset::image::image>& images,
+		std::vector<asset::staging_image::staging_image>& images,
 		common_graphics::common_graphics* ptr
 	)
 	{
@@ -713,11 +713,11 @@ namespace splash_screen_graphics
 		}
 		image_views.clear ();
 
-		for (auto& image : splash_screen_graphics_images)
+		for (auto& staging_image : splash_screen_graphics_images)
 		{
-			if (image != VK_NULL_HANDLE)
+			if (staging_image != VK_NULL_HANDLE)
 			{
-				graphics_device.destroyImage (image);
+				graphics_device.destroyImage (staging_image);
 			}
 		}
 		splash_screen_graphics_images.clear ();
@@ -1016,10 +1016,11 @@ egraphics_result splash_screen_graphics::create_vulkan_handles_for_meshes (std::
 
 	std::vector<VkImage> staging_images;
 	staging_images.reserve (all_similar_images.size ());
+	scene_images.reserve (all_similar_images.size ());
 
 	for (auto& similar_images : all_similar_images)
 	{
-		VkImage image;
+		VkImage staging_image;
 		CHECK_AGAINST_RESULT (
 			graphics_utils::create_image (
 				common_graphics::graphics_device,
@@ -1031,11 +1032,56 @@ egraphics_result splash_screen_graphics::create_vulkan_handles_for_meshes (std::
 				VK_IMAGE_LAYOUT_UNDEFINED,
 				VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
 				VK_SHARING_MODE_EXCLUSIVE,
-				&image
+				&staging_image
+			)
+		);
+		CHECK_AGAINST_RESULT (
+			graphics_utils::change_image_layout (
+				common_graphics::graphics_device,
+				common_graphics::graphics_queue_family_index,
+				staging_image,
+				similar_images.size (),
+				VK_IMAGE_LAYOUT_UNDEFINED,
+				VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+				0,
+				VK_ACCESS_TRANSFER_WRITE_BIT,
+				VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+				VK_PIPELINE_STAGE_TRANSFER_BIT
+			)
+		);
+		staging_images.push_back (staging_image);
+
+		VkImage scene_image;
+		CHECK_AGAINST_RESULT (
+			graphics_utils::create_image (
+				common_graphics::graphics_device,
+				common_graphics::graphics_queue_family_index,
+				VkExtent3D{ (uint32_t)similar_images[0].width, (uint32_t)similar_images[0].height, 1 },
+				similar_images.size (),
+				VK_FORMAT_R8G8B8A8_UNORM,
+				VK_IMAGE_TYPE_2D,
+				VK_IMAGE_LAYOUT_UNDEFINED,
+				VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+				VK_SHARING_MODE_EXCLUSIVE,
+				& scene_image
 			)
 		);
 
-		staging_images.push_back (image);
+		CHECK_AGAINST_RESULT (
+			graphics_utils::change_image_layout (
+				common_graphics::graphics_device,
+				common_graphics::graphics_queue_family_index,
+				scene_image,
+				similar_images.size (),
+				VK_IMAGE_LAYOUT_UNDEFINED,
+				VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+				0,
+				VK_ACCESS_TRANSFER_WRITE_BIT,
+				VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+				VK_PIPELINE_STAGE_TRANSFER_BIT
+			)
+		);
+		scene_images.push_back (scene_image);
 	}
 
 	VkDeviceMemory staging_images_memory;
@@ -1046,7 +1092,7 @@ egraphics_result splash_screen_graphics::create_vulkan_handles_for_meshes (std::
 			staging_images.data (), 
 			staging_images.size (), 
 			common_graphics::physical_device_memory_properties, 
-			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, 
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
 			&staging_images_memory
 		)
 	);
@@ -1056,13 +1102,49 @@ egraphics_result splash_screen_graphics::create_vulkan_handles_for_meshes (std::
 	{
 		for (auto similar_image : similar_images)
 		{
-			CHECK_AGAINST_RESULT (graphics_utils::map_data_to_device_memory (common_graphics::graphics_device, staging_images_memory, offset, similar_image.pixels.size (), similar_image.pixels.data ()));
+			CHECK_AGAINST_RESULT (
+				graphics_utils::map_data_to_device_memory (
+					common_graphics::graphics_device,
+					staging_images_memory,
+					offset,
+					similar_image.pixels.size (),
+					similar_image.pixels.data ()
+				)
+			);
 			similar_image.offset = offset;
 			offset += similar_image.pixels.size ();
 		}
 	}
+	
+	for (uint32_t s = 0; s < all_similar_images.size (); s++)
+	{
+		CHECK_AGAINST_RESULT (
+			graphics_utils::copy_image_to_image (
+				common_graphics::graphics_device,
+				common_graphics::command_pool,
+				staging_images[s],
+				VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+				scene_images[s],
+				VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+				VkExtent3D{ all_similar_images[s][0].width, all_similar_images[s][0].height, 1 }
+			)
+		);
 
-
+		CHECK_AGAINST_RESULT (
+			graphics_utils::change_image_layout (
+				common_graphics::graphics_device,
+				common_graphics::graphics_queue_family_index,
+				scene_images[s],
+				all_similar_images[s].size (),
+				VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+				VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+				VK_ACCESS_TRANSFER_WRITE_BIT,
+				VK_ACCESS_SHADER_READ_BIT,
+				VK_PIPELINE_STAGE_TRANSFER_BIT,
+				VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT
+			)
+		);
+	}
 
 	graphics_utils::destroy_images_and_image_memory (common_graphics::graphics_device, staging_images.data (), staging_images.size (), staging_images_memory);
 
@@ -1130,7 +1212,7 @@ void splash_screen_graphics::exit (std::vector<asset::mesh>& meshes)
 	swapchain_framebuffers.clear ();
 
 	graphics_utils::destroy_buffers_and_buffer_memory (common_graphics::graphics_device, &vertex_index_buffer, 1, vertex_index_memory);
-	graphics_utils::destroy_images_and_image_memory (common_graphics::graphics_device, images.data (), images.size (), images_memory);
+	graphics_utils::destroy_images_and_image_memory (common_graphics::graphics_device, scene_images.data (), scene_images.size (), scene_images_memory);
 }
 
 splash_screen_graphics::~splash_screen_graphics ()
