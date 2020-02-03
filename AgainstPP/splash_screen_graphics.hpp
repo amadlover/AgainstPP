@@ -54,4 +54,10 @@ private:
 	VkSemaphore wait_semaphore;
 	std::vector<VkFence> swapchain_fences;
 	std::vector<VkCommandBuffer> swapchain_command_buffers;
+
+	VkBuffer vertex_index_buffer;
+	VkDeviceMemory vertex_index_memory;
+
+	std::vector<VkImage> images;
+	VkDeviceMemory images_memory;
 };

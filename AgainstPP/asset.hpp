@@ -112,7 +112,6 @@ namespace asset
 
 		std::vector<uint8_t> pixels;
 
-		VkDeviceSize size;
 		VkDeviceSize offset;
 
 		VkImage* vk_image;

@@ -21,7 +21,7 @@
 		vk::MemoryPropertyFlags required_types
 	);
 
-	void map_data_to_buffer (
+	void map_data_to_device_memory (
 		vk::DeviceMemory& memory,
 		vk::DeviceSize offset,
 		vk::DeviceSize size,
@@ -49,7 +49,7 @@
 		vk::MemoryPropertyFlags required_types
 	);
 
-	void copy_buffer_to_image ();
+	void copy_image_to_image ();
 
 	void create_shader (
 		std::string file_path,
@@ -80,7 +80,7 @@ public:
 		VkDeviceMemory* out_memory
 	);
 
-	static egraphics_result map_data_to_buffer (
+	static egraphics_result map_data_to_device_memory (
 		VkDevice graphics_device, 
 		VkDeviceMemory memory, 
 		VkDeviceSize offset, 
@@ -94,7 +94,9 @@ public:
 		VkExtent3D extent, 
 		uint32_t array_layers, 
 		VkFormat format, 
+		VkImageType image_type,
 		VkImageLayout initial_layout, 
+		VkImageUsageFlags usage,
 		VkSharingMode sharing_mode, 
 		VkImage* out_image
 	);	
@@ -120,7 +122,7 @@ public:
 		VkDeviceSize size
 	);
 
-	static egraphics_result copy_buffer_to_image (
+	static egraphics_result copy_image_to_image (
 	);
 
 
@@ -132,9 +134,17 @@ public:
 		VkPipelineShaderStageCreateInfo* shader_stage_create_info
 	);
 
-	static egraphics_result destroy_buffer_and_buffer_memory (
+	static void destroy_buffers_and_buffer_memory (
 		VkDevice graphics_device, 
-		VkBuffer buffer, 
+		VkBuffer* buffers, 
+		uint32_t buffer_count,
 		VkDeviceMemory buffer_memory
+	);
+
+	static void destroy_images_and_image_memory (
+		VkDevice graphics_device,
+		VkImage* images,
+		uint32_t image_count,
+		VkDeviceMemory image_memory
 	);
 };
