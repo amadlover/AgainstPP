@@ -154,13 +154,13 @@ public:
 		VkDevice graphics_device, 
 		VkBuffer* buffers, 
 		uint32_t buffer_count,
-		VkDeviceMemory buffer_memory
+		VkDeviceMemory* buffer_memory
 	);
 
 	static void destroy_images_and_image_memory (
 		VkDevice graphics_device,
 		VkImage* images,
 		uint32_t image_count,
-		VkDeviceMemory image_memory
+		VkDeviceMemory* image_memory
 	);
 };

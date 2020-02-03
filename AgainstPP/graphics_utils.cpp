@@ -258,6 +258,8 @@ egraphics_result get_one_time_command_buffer (VkDevice graphics_device, VkComman
 	}
 
 	*out_buffer = command_buffer;
+
+	return egraphics_result::success;
 }
 
 egraphics_result graphics_utils::create_buffer (VkDevice graphics_device, VkDeviceSize size, VkBufferUsageFlags usage, VkSharingMode sharing_mode, uint32_t graphics_queue_family_index, VkBuffer * out_buffer)
@@ -431,7 +433,7 @@ egraphics_result graphics_utils::change_image_layout (
 	subresource_range.layerCount = layer_count;
 
 	VkImageMemoryBarrier image_memory_barrier = { 0 };
-	image_memory_barrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
+	image_memory_barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 	image_memory_barrier.image = image;
 	image_memory_barrier.srcQueueFamilyIndex = graphics_queue_family_index;
 	image_memory_barrier.dstQueueFamilyIndex = graphics_queue_family_index;
@@ -439,6 +441,7 @@ egraphics_result graphics_utils::change_image_layout (
 	image_memory_barrier.newLayout = new_layout;
 	image_memory_barrier.srcAccessMask = src_access;
 	image_memory_barrier.dstAccessMask = dst_access;
+	image_memory_barrier.subresourceRange = subresource_range;
 	
 	vkCmdPipelineBarrier (command_buffer, src_stage, dst_stage, 0, 0, nullptr, 0, nullptr, 1, &image_memory_barrier);
 	if (vkEndCommandBuffer (command_buffer) != VK_SUCCESS)
@@ -540,34 +543,38 @@ egraphics_result graphics_utils::create_shader (const char* file_path, VkDevice 
 	return egraphics_result::success;
 }
 
-void graphics_utils::destroy_buffers_and_buffer_memory (VkDevice graphics_device, VkBuffer* buffers, uint32_t buffer_count, VkDeviceMemory buffer_memory)
+void graphics_utils::destroy_buffers_and_buffer_memory (VkDevice graphics_device, VkBuffer* buffers, uint32_t buffer_count, VkDeviceMemory* buffer_memory)
 {
 	for (uint32_t b = 0; b < buffer_count; b++)
 	{
 		if (buffers[b] != VK_NULL_HANDLE)
 		{
 			vkDestroyBuffer (graphics_device, buffers[b], NULL);
+			buffers[b] = VK_NULL_HANDLE;
 		}
 	}
 
 	if (buffer_memory != VK_NULL_HANDLE)
 	{
-		vkFreeMemory (graphics_device, buffer_memory, NULL);
+		vkFreeMemory (graphics_device, *buffer_memory, NULL);
+		*buffer_memory = VK_NULL_HANDLE;
 	}
 }
 
-void graphics_utils::destroy_images_and_image_memory (VkDevice graphics_device, VkImage* images, uint32_t image_count, VkDeviceMemory image_memory)
+void graphics_utils::destroy_images_and_image_memory (VkDevice graphics_device, VkImage* images, uint32_t image_count, VkDeviceMemory* image_memory)
 {
 	for (uint32_t i = 0; i < image_count; i++)
 	{
 		if (images[i] != VK_NULL_HANDLE)
 		{
 			vkDestroyImage (graphics_device, images[i], nullptr);
+			images[i] = VK_NULL_HANDLE;
 		}
 	}
 
 	if (image_memory != VK_NULL_HANDLE)
 	{
-		vkFreeMemory (graphics_device, image_memory, nullptr);
+		vkFreeMemory (graphics_device, *image_memory, nullptr);
+		*image_memory = VK_NULL_HANDLE;
 	}
 }

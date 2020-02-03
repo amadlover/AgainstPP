@@ -197,16 +197,9 @@ void game::exit ()
 {
 	OutputDebugString (L"game::exit\n");
 
-	if (splash_screen_ptr->state == e_scene_state::inited)
-	{
-		splash_screen_ptr->exit ();
-	}
-	
-	if (main_menu_ptr->state == e_scene_state::inited)
-	{
-		main_menu_ptr->exit ();
-	}
-	
+	splash_screen_ptr->exit ();
+	main_menu_ptr->exit ();
+
 	common_graphics::exit ();
 }
 

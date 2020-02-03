@@ -1,7 +1,5 @@
 #pragma once
 
-#define CHECK_AGAINST_RESULT(result) if (result != egraphics_result::success) return result;
-
 enum egraphics_result
 {
 	success,
@@ -50,6 +48,11 @@ enum egraphics_result
 	e_against_error_system_create_file,
 	e_against_error_system_open_file
 };
+
+static egraphics_result result = egraphics_result::success;
+
+#define CHECK_AGAINST_RESULT(func) result = func; if (result != egraphics_result::success) return result;
+
 
 void log_error (egraphics_result Err);
 
