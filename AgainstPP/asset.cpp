@@ -616,13 +616,4 @@ namespace asset
 	{
 		meshes.clear ();
 	}
-
-	mesh::mesh ()
-	{
-		id = 0;
-	}
-
-	mesh::~mesh ()
-	{
-	}
 }

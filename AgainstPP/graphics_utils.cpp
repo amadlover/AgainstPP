@@ -597,34 +597,22 @@ void graphics_utils::destroy_buffers_and_buffer_memory (VkDevice graphics_device
 {
 	for (uint32_t b = 0; b < buffer_count; b++)
 	{
-		if (buffers[b] != VK_NULL_HANDLE)
-		{
-			vkDestroyBuffer (graphics_device, buffers[b], NULL);
-			buffers[b] = VK_NULL_HANDLE;
-		}
+		vkDestroyBuffer (graphics_device, buffers[b], NULL);
+		buffers[b] = VK_NULL_HANDLE;
 	}
 
-	if (buffer_memory != VK_NULL_HANDLE)
-	{
-		vkFreeMemory (graphics_device, *buffer_memory, NULL);
-		*buffer_memory = VK_NULL_HANDLE;
-	}
+	vkFreeMemory (graphics_device, *buffer_memory, NULL);
+	*buffer_memory = VK_NULL_HANDLE;
 }
 
 void graphics_utils::destroy_images_and_image_memory (VkDevice graphics_device, VkImage* images, uint32_t image_count, VkDeviceMemory* image_memory)
 {
 	for (uint32_t i = 0; i < image_count; i++)
 	{
-		if (images[i] != VK_NULL_HANDLE)
-		{
-			vkDestroyImage (graphics_device, images[i], nullptr);
-			images[i] = VK_NULL_HANDLE;
-		}
+		vkDestroyImage (graphics_device, images[i], nullptr);
+		images[i] = VK_NULL_HANDLE;
 	}
 
-	if (image_memory != VK_NULL_HANDLE)
-	{
-		vkFreeMemory (graphics_device, *image_memory, nullptr);
-		*image_memory = VK_NULL_HANDLE;
-	}
+	vkFreeMemory (graphics_device, *image_memory, nullptr);
+	*image_memory = VK_NULL_HANDLE;
 }

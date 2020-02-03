@@ -754,7 +754,7 @@ egraphics_result splash_screen_graphics::create_renderpasses ()
 	subpass_description.colorAttachmentCount = 1;
 	subpass_description.pColorAttachments = &color_reference;
 
-	VkSubpassDependency subpass_dependencies[2] = { 0 };
+	/*VkSubpassDependency subpass_dependencies[2] = { 0 };
 
 	subpass_dependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
 	subpass_dependencies[0].dstSubpass = 0;
@@ -770,7 +770,7 @@ egraphics_result splash_screen_graphics::create_renderpasses ()
 	subpass_dependencies[1].srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
 	subpass_dependencies[1].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_MEMORY_WRITE_BIT;
 	subpass_dependencies[1].srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
-	subpass_dependencies[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+	subpass_dependencies[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;*/
 
 	VkRenderPassCreateInfo create_info = { 0 };
 
@@ -779,8 +779,6 @@ egraphics_result splash_screen_graphics::create_renderpasses ()
 	create_info.pSubpasses = &subpass_description;
 	create_info.attachmentCount = 1;
 	create_info.pAttachments = &attachment_description;
-	create_info.dependencyCount = 2;
-	create_info.pDependencies = subpass_dependencies;
 
 	if (vkCreateRenderPass (common_graphics::graphics_device, &create_info, NULL, &render_pass) != VK_SUCCESS)
 	{
@@ -842,13 +840,13 @@ egraphics_result splash_screen_graphics::create_graphics_pipeline_layout ()
 
 egraphics_result splash_screen_graphics::create_graphics_pipeline ()
 {
-	VkGraphicsPipelineCreateInfo create_info = { 0 };
+	/*VkGraphicsPipelineCreateInfo create_info = { 0 };
 	create_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 
 	if (vkCreateGraphicsPipelines (common_graphics::graphics_device, 0, 1, &create_info, nullptr, &graphics_pipeline) != VK_SUCCESS)
 	{
 		return egraphics_result::e_against_error_graphics_create_graphics_pipeline;
-	}	
+	}*/
 
 	return egraphics_result::success;
 }
@@ -858,14 +856,37 @@ egraphics_result splash_screen_graphics::create_sync_objects ()
 	VkSemaphoreCreateInfo create_info = { 0 };
 	create_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
-	if (vkCreateSemaphore (common_graphics::graphics_device, &create_info, nullptr, &signal_semaphore) != VK_SUCCESS)
+	swapchain_signal_semaphores.resize (common_graphics::swapchain_image_count);
+	swapchain_wait_semaphores.resize (common_graphics::swapchain_image_count);
+
+	for (uint32_t i = 0; i < common_graphics::swapchain_image_count; ++i)
 	{
-		return egraphics_result::e_against_error_graphics_create_semaphore;
+		if (vkCreateSemaphore (common_graphics::graphics_device, &create_info, nullptr, &swapchain_signal_semaphores[i]) != VK_SUCCESS)
+		{
+			return egraphics_result::e_against_error_graphics_create_semaphore;
+		}
+
+		if (vkCreateSemaphore (common_graphics::graphics_device, &create_info, nullptr, &swapchain_wait_semaphores[i]) != VK_SUCCESS)
+		{
+			return egraphics_result::e_against_error_graphics_create_semaphore;
+		}
 	}
 
-	if (vkCreateSemaphore (common_graphics::graphics_device, &create_info, nullptr, &wait_semaphore) != VK_SUCCESS)
+	VkFenceCreateInfo fence_create_info = { 0 };
+	fence_create_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+	
+	swapchain_fences.resize (common_graphics::swapchain_image_count);
+	for (uint32_t f = 0; f < common_graphics::swapchain_image_count; ++f)
 	{
-		return egraphics_result::e_against_error_graphics_create_semaphore;
+		if (vkCreateFence (common_graphics::graphics_device, &fence_create_info, nullptr, &swapchain_fences[f]) != VK_SUCCESS)
+		{
+			return egraphics_result::e_against_error_graphics_create_fence;
+		}
+	}
+
+	if (vkCreateFence (common_graphics::graphics_device, &fence_create_info, nullptr, &acquire_next_image_fence) != VK_SUCCESS)
+	{
+		return egraphics_result::e_against_error_graphics_create_fence;
 	}
 
 	return egraphics_result::success;
@@ -958,12 +979,12 @@ egraphics_result splash_screen_graphics::create_vulkan_handles_for_meshes (std::
 	graphics_utils::destroy_buffers_and_buffer_memory (common_graphics::graphics_device, &staging_vertex_index_buffer, 1, &staging_vertex_index_memory);
 
 	total_size = 0;
-	std::vector<asset::image> images;
+	std::vector<asset::image> all_images;
 	for (auto& mesh : meshes)
 	{
 		for (auto& graphics_primitive : mesh.graphics_primitves)
 		{
-			images.push_back (graphics_primitive.material.base_color_texture.texture_image);
+			all_images.push_back (graphics_primitive.material.base_color_texture.texture_image);
 			total_size += graphics_primitive.material.base_color_texture.texture_image.pixels.size ();
 		}
 	}
@@ -980,9 +1001,9 @@ egraphics_result splash_screen_graphics::create_vulkan_handles_for_meshes (std::
 	);
 
 	std::vector<std::vector<asset::image>> all_similar_images;
-	for (uint32_t i = 0; i < images.size (); i++)
+	for (uint32_t i = 0; i < all_images.size (); i++)
 	{
-		auto image = images.at (i);
+		auto image = all_images.at (i);
 		bool is_image_present = false;
 
 		for (auto& similar_images : all_similar_images)
@@ -1010,9 +1031,9 @@ egraphics_result splash_screen_graphics::create_vulkan_handles_for_meshes (std::
 		std::vector<asset::image> similar_images;
 		similar_images.push_back (image);
 
-		for (uint32_t j = i + 1; j < images.size (); j++)
+		for (uint32_t j = i + 1; j < all_images.size (); j++)
 		{
-			auto image_to_be_checked = images.at (j);
+			auto image_to_be_checked = all_images.at (j);
 			if (image.width == image_to_be_checked.width && image.height == image_to_be_checked.height)
 			{
 				similar_images.push_back (image_to_be_checked);
@@ -1138,6 +1159,48 @@ egraphics_result splash_screen_graphics::create_vulkan_handles_for_meshes (std::
 
 	graphics_utils::destroy_buffers_and_buffer_memory (common_graphics::graphics_device, &staging_image_buffer, 1, &staging_image_buffer_memory);
 
+	VkComponentMapping components = { 0 };
+	VkImageViewCreateInfo image_view_create_info = { 0 };
+	image_view_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+	image_view_create_info.components = components;
+	image_view_create_info.format = VK_FORMAT_R8G8B8A8_UNORM;
+	image_view_create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+
+	VkImageSubresourceRange subresource_range = { 0 };
+	subresource_range.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	subresource_range.layerCount = 1;
+	subresource_range.levelCount = 1;
+	subresource_range.baseMipLevel = 0;
+
+	image_view_create_info.subresourceRange = subresource_range;
+
+	for (uint32_t as = 0; as < all_similar_images.size (); ++as)
+	{
+		for (uint32_t a = 0 ; a < all_similar_images[as].size (); ++a)
+		{
+			for (auto& mesh : meshes)
+			{
+				for (auto& graphics_primitve : mesh.graphics_primitves)
+				{
+					if (graphics_primitve.material.base_color_texture.texture_image.name.compare (all_similar_images[as][a].name) == 0)
+					{
+						image_view_create_info.image = scene_images[as];
+						image_view_create_info.subresourceRange.baseArrayLayer = a;
+
+						if (vkCreateImageView (
+							common_graphics::graphics_device,
+							&image_view_create_info, 
+							nullptr,
+							&graphics_primitve.material.base_color_texture.texture_image.image_view) != VK_SUCCESS)
+						{
+							return egraphics_result::e_against_error_graphics_create_image_view;
+						}
+					}
+				}
+			}
+		}
+	}
+
 	return egraphics_result::success;
 }
 
@@ -1151,8 +1214,6 @@ splash_screen_graphics::splash_screen_graphics ()
 	vertex_shader_module = VK_NULL_HANDLE;
 	fragment_shader_module = VK_NULL_HANDLE;
 	descriptor_pool = VK_NULL_HANDLE;
-	signal_semaphore = VK_NULL_HANDLE;
-	wait_semaphore = VK_NULL_HANDLE;
 
 	vertex_index_buffer = VK_NULL_HANDLE;
 	vertex_index_memory = VK_NULL_HANDLE;
@@ -1168,15 +1229,17 @@ egraphics_result splash_screen_graphics::init (std::vector<asset::mesh>& meshes)
 {
 	OutputDebugString (L"splash_screen_graphics::init\n");
 
+	vkDestroyBuffer (common_graphics::graphics_device, VK_NULL_HANDLE, nullptr);
+
 	CHECK_AGAINST_RESULT (create_vulkan_handles_for_meshes (meshes));
 
-	/*CHECK_AGAINST_RESULT (create_renderpasses ());
+	CHECK_AGAINST_RESULT (create_renderpasses ());
 	CHECK_AGAINST_RESULT (create_framebuffers ());
 	CHECK_AGAINST_RESULT (create_shaders ());
 	CHECK_AGAINST_RESULT (create_graphics_pipeline_layout ());
 	CHECK_AGAINST_RESULT (create_graphics_pipeline ());
 	CHECK_AGAINST_RESULT (create_sync_objects ());
-	CHECK_AGAINST_RESULT (allocate_command_buffers ());*/
+	CHECK_AGAINST_RESULT (allocate_command_buffers ());
 
 	swapchain_framebuffers.shrink_to_fit ();
 	swapchain_fences.shrink_to_fit ();
@@ -1187,27 +1250,113 @@ egraphics_result splash_screen_graphics::init (std::vector<asset::mesh>& meshes)
 
 egraphics_result splash_screen_graphics::draw ()
 {
+	uint32_t image_index;
+	VkResult result = vkAcquireNextImageKHR (
+		common_graphics::graphics_device,
+		common_graphics::swapchain,
+		UINT64_MAX,
+		VK_NULL_HANDLE,
+		acquire_next_image_fence,
+		&image_index
+	);
+
+	if (result != VK_SUCCESS)
+	{
+		if (result == VK_SUBOPTIMAL_KHR || result == VK_ERROR_OUT_OF_DATE_KHR)
+		{
+			return egraphics_result::success;
+		}
+		else
+		{
+			return egraphics_result::e_against_error_graphics_acquire_next_image;
+		}
+	}
+
+	VkPipelineStageFlags wait_dst_stage_mask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	VkSubmitInfo submit_info = { 0 };
+	submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	submit_info.commandBufferCount = 1;
+	submit_info.pCommandBuffers = &swapchain_command_buffers[image_index];
+	submit_info.pWaitDstStageMask = &wait_dst_stage_mask;
+	submit_info.signalSemaphoreCount = 1;
+	submit_info.pSignalSemaphores = &swapchain_signal_semaphores[image_index];
+	submit_info.waitSemaphoreCount = 1;
+	submit_info.pWaitSemaphores = &swapchain_wait_semaphores[image_index];
+	
+	if (vkQueueSubmit (common_graphics::graphics_queue, 1, &submit_info, swapchain_fences[image_index]) != VK_SUCCESS)
+	{
+		return egraphics_result::e_against_error_graphics_queue_submit;
+	}
+
+	if (vkWaitForFences (common_graphics::graphics_device, 1, &swapchain_fences[image_index], VK_TRUE, UINT64_MAX) != VK_SUCCESS)
+	{
+		return egraphics_result::e_against_error_graphics_wait_for_fences;
+	}
+
+	VkPresentInfoKHR present_info = { 0 };
+	present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+	present_info.swapchainCount =1;
+	present_info.pSwapchains = &common_graphics::swapchain;
+	present_info.pImageIndices = &image_index;
+	present_info.waitSemaphoreCount = 1;
+	present_info.pWaitSemaphores = &swapchain_signal_semaphores[image_index];
+
+	if (vkQueuePresentKHR (common_graphics::graphics_queue, &present_info) != VK_SUCCESS)
+	{
+		return egraphics_result::e_against_error_graphics_queue_present;
+	}
+
 	return egraphics_result::success;
 }
 
 void splash_screen_graphics::exit (std::vector<asset::mesh>& meshes)
 {
 	OutputDebugString (L"splash_screen_graphics::exit\n");
-	if (render_pass != VK_NULL_HANDLE)
-	{
-		vkDestroyRenderPass (common_graphics::graphics_device, render_pass, nullptr);
-		render_pass = VK_NULL_HANDLE;
-	}
+
+	vkDestroyRenderPass (common_graphics::graphics_device, render_pass, nullptr);
+	render_pass = VK_NULL_HANDLE;
 
 	for (auto& swapchain_framebuffer : swapchain_framebuffers)
 	{
-		if (swapchain_framebuffer != VK_NULL_HANDLE)
-		{
-			vkDestroyFramebuffer (common_graphics::graphics_device, swapchain_framebuffer, nullptr);
-			swapchain_framebuffer = VK_NULL_HANDLE;
-		}
+		vkDestroyFramebuffer (common_graphics::graphics_device, swapchain_framebuffer, nullptr);
+		swapchain_framebuffer = VK_NULL_HANDLE;
 	}
 	swapchain_framebuffers.clear ();
+
+	for (auto& swapchain_signal_semaphore : swapchain_signal_semaphores)
+	{
+		vkDestroySemaphore (common_graphics::graphics_device, swapchain_signal_semaphore, nullptr);
+		swapchain_signal_semaphore = VK_NULL_HANDLE;
+	}
+	swapchain_signal_semaphores.clear ();
+
+	for (auto& swapchain_wait_semaphore : swapchain_wait_semaphores)
+	{
+		vkDestroySemaphore (common_graphics::graphics_device, swapchain_wait_semaphore, nullptr);
+		swapchain_wait_semaphore = VK_NULL_HANDLE;
+	}
+	swapchain_wait_semaphores.clear ();
+
+	for (auto& swapchain_fence : swapchain_fences)
+	{
+		vkDestroyFence (common_graphics::graphics_device, swapchain_fence, nullptr);
+		swapchain_fence = VK_NULL_HANDLE;
+	}
+	swapchain_fences.clear ();
+
+	vkDestroyFence (common_graphics::graphics_device, acquire_next_image_fence, nullptr);
+	acquire_next_image_fence = VK_NULL_HANDLE;
+
+	for (auto& mesh : meshes)
+	{
+		for (auto& graphics_primitive : mesh.graphics_primitves)
+		{
+			vkDestroyImageView (common_graphics::graphics_device, graphics_primitive.material.base_color_texture.texture_image.image_view, nullptr);
+			graphics_primitive.material.base_color_texture.texture_image.image_view = VK_NULL_HANDLE;
+			vkFreeDescriptorSets (common_graphics::graphics_device, descriptor_pool, 1, &graphics_primitive.material.base_color_texture.texture_image.descriptor_set);
+			graphics_primitive.material.base_color_texture.texture_image.descriptor_set = VK_NULL_HANDLE;
+		}
+	}
 
 	graphics_utils::destroy_buffers_and_buffer_memory (common_graphics::graphics_device, &staging_vertex_index_buffer, 1, &staging_vertex_index_memory);
 	graphics_utils::destroy_buffers_and_buffer_memory (common_graphics::graphics_device, &staging_image_buffer, 1, &staging_image_buffer_memory);

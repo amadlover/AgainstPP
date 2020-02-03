@@ -104,6 +104,15 @@ namespace asset
 {
 	struct image
 	{
+		image ()
+		{
+			width = 0;
+			height = 0;
+			bpp = 0;
+			offset = 0;
+			image_view = VK_NULL_HANDLE;
+			descriptor_set = VK_NULL_HANDLE;
+		}
 		std::string name;
 
 		VkDeviceSize width;
@@ -114,18 +123,14 @@ namespace asset
 
 		VkDeviceSize offset;
 
-		VkImage* vk_image;
-		uint32_t layer_index;
-		VkImageView* image_view;
+		VkImageView image_view;
+		VkDescriptorSet descriptor_set;
 	};
 
 	struct texture
 	{
 		std::string name;
 		image texture_image;
-		uint32_t image_index;
-		VkImageView image_view;
-		VkDescriptorSet descriptor_set;
 	};
 
 	struct material
@@ -136,6 +141,15 @@ namespace asset
 
 	struct graphics_primitive
 	{
+		graphics_primitive ()
+		{
+			positions_offset = 0;
+			normals_offset = 0;
+			uv0s_offset = 0;
+			uv1s_offset = 0;
+			indices_offset = 0;
+		}
+
 		std::vector<uint8_t> positions;
 		std::vector<uint8_t> normals;
 		std::vector<uint8_t> uv0s;
@@ -156,6 +170,11 @@ namespace asset
 
 	struct physics_primitive
 	{
+		physics_primitive ()
+		{
+			positions_offset = 0;
+			indices_offset = 0;
+		}
 		std::vector<uint8_t> positions;
 		std::vector<uint8_t> indices;
 		VkIndexType indices_type;
@@ -167,12 +186,8 @@ namespace asset
 		VkDeviceSize indices_offset;
 	};
 
-	class mesh
+	struct mesh
 	{
-	public:
-		mesh ();
-		~mesh ();
-
 		std::string name;
 		uint32_t id;
 

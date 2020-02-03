@@ -50,10 +50,12 @@ private:
 	VkShaderModule fragment_shader_module;
 	VkDescriptorPool descriptor_pool;
 	std::vector<VkDescriptorSetLayout> descriptor_set_layouts;
-	VkSemaphore signal_semaphore;
-	VkSemaphore wait_semaphore;
+	std::vector<VkSemaphore> swapchain_signal_semaphores;
+	std::vector<VkSemaphore> swapchain_wait_semaphores;
 	std::vector<VkFence> swapchain_fences;
 	std::vector<VkCommandBuffer> swapchain_command_buffers;
+
+	VkFence acquire_next_image_fence;
 
 	VkBuffer vertex_index_buffer;
 	VkDeviceMemory vertex_index_memory;

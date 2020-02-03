@@ -138,12 +138,7 @@
           "isDefault": true
         },
         "presentation": {
-          "echo": true,
           "reveal": "always",
-          "focus": false,
-          "panel": "new",
-          "showReuseMessage": true,
-          "clear": false
         }
       },
       {
@@ -155,12 +150,7 @@
           "isDefault": true
         },
         "presentation":{
-          "echo": true,
           "reveal": "always",
-          "focus": false,
-          "panel": "new",
-          "showReuseMessage": true,
-          "clear": false
         },
         "problemMatcher": []
       }

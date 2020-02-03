@@ -855,50 +855,22 @@ egraphics_result common_graphics::init (HINSTANCE hInstance, HWND hWnd)
 
 void common_graphics::exit ()
 {
-
-	if (common_sampler != VK_NULL_HANDLE)
-	{
-		vkDestroySampler (graphics_device, common_sampler, nullptr);
-	}
-
-	if (command_pool != VK_NULL_HANDLE)
-	{
-		vkDestroyCommandPool (graphics_device, command_pool, nullptr);
-	}
-
-	if (swapchain != VK_NULL_HANDLE)
-	{
-		vkDestroySwapchainKHR (graphics_device, swapchain, nullptr);
-	}
+	vkDestroySampler (graphics_device, common_sampler, nullptr);
+	vkDestroyCommandPool (graphics_device, command_pool, nullptr);
+	vkDestroySwapchainKHR (graphics_device, swapchain, nullptr);
 
 	for (auto& swapchain_imageview : swapchain_imageviews)
 	{
-		if (swapchain_imageview != VK_NULL_HANDLE)
-		{
-			vkDestroyImageView (graphics_device, swapchain_imageview, nullptr);
-		}
+		vkDestroyImageView (graphics_device, swapchain_imageview, nullptr);
 	}
+	swapchain_imageviews.clear ();
 
-	if (graphics_device != VK_NULL_HANDLE)
-	{
-		vkDestroyDevice (graphics_device, nullptr);
-	}
-
-	if (surface != VK_NULL_HANDLE)
-	{
-		vkDestroySurfaceKHR (instance, surface, nullptr);
-	}
-
+	vkDestroyDevice (graphics_device, nullptr);
+	vkDestroySurfaceKHR (instance, surface, nullptr);
+	
 	if (is_validation_needed)
 	{
-		if (debug_utils_messenger != VK_NULL_HANDLE)
-		{
-			destroy_debug_utils_messenger (instance, debug_utils_messenger, nullptr);
-		}
+		destroy_debug_utils_messenger (instance, debug_utils_messenger, nullptr);
 	}
-
-	if (instance != VK_NULL_HANDLE)
-	{
-		vkDestroyInstance (instance, nullptr);
-	}	
+	vkDestroyInstance (instance, nullptr);
 }
