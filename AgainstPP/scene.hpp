@@ -1,8 +1,11 @@
 #pragma once
 
-#include <Windows.h>
 #include "error.hpp"
 #include "enums.hpp"
+#include "asset.hpp"
+
+#include <Windows.h>
+#include <vector>
 
 class scene
 {
@@ -16,4 +19,8 @@ public:
     virtual void exit () = 0;
 
     e_scene_state state;
+
+protected:
+    virtual egraphics_result update (const std::vector<asset::mesh>& meshes) = 0;
+    virtual egraphics_result draw (const std::vector<asset::mesh>& meshes) = 0;
 };

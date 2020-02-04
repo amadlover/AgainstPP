@@ -34,8 +34,10 @@ public:
 	egraphics_result main_loop () override;
 	void exit () override;
 
-private:
-	splash_screen_graphics* graphics;
+protected:
+	egraphics_result update (const std::vector<asset::mesh>& meshes) override;
+	egraphics_result draw (const std::vector<asset::mesh>& meshes) override;
 
+	splash_screen_graphics* graphics;
 	std::vector<asset::mesh> meshes;
 };

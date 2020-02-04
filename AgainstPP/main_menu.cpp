@@ -79,3 +79,13 @@ void main_menu::exit ()
 	OutputDebugString (L"main_menu::exit\n");
 	state = e_scene_state::exited;
 }
+
+egraphics_result main_menu::update (const std::vector<asset::mesh>& meshes)
+{
+	return egraphics_result::success;
+}
+
+egraphics_result main_menu::draw (const std::vector<asset::mesh>& meshes)
+{
+	return egraphics_result::success;
+}

@@ -857,22 +857,20 @@ egraphics_result splash_screen_graphics::create_sync_objects ()
 	create_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
 	swapchain_signal_semaphores.resize (common_graphics::swapchain_image_count);
-	swapchain_wait_semaphores.resize (common_graphics::swapchain_image_count);
-
-	for (uint32_t i = 0; i < common_graphics::swapchain_image_count; ++i)
+	for (uint32_t i = 0; i < common_graphics::swapchain_image_count; i++)
 	{
 		if (vkCreateSemaphore (common_graphics::graphics_device, &create_info, nullptr, &swapchain_signal_semaphores[i]) != VK_SUCCESS)
 		{
 			return egraphics_result::e_against_error_graphics_create_semaphore;
 		}
-
-		if (vkCreateSemaphore (common_graphics::graphics_device, &create_info, nullptr, &swapchain_wait_semaphores[i]) != VK_SUCCESS)
-		{
-			return egraphics_result::e_against_error_graphics_create_semaphore;
-		}
 	}
 
-	VkFenceCreateInfo fence_create_info = { 0 };
+	if (vkCreateSemaphore (common_graphics::graphics_device, &create_info, nullptr, &swapchain_wait_semaphore) != VK_SUCCESS)
+	{
+		return egraphics_result::e_against_error_graphics_create_semaphore;
+	}
+
+	/*VkFenceCreateInfo fence_create_info = { 0 };
 	fence_create_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 	
 	swapchain_fences.resize (common_graphics::swapchain_image_count);
@@ -887,7 +885,7 @@ egraphics_result splash_screen_graphics::create_sync_objects ()
 	if (vkCreateFence (common_graphics::graphics_device, &fence_create_info, nullptr, &acquire_next_image_fence) != VK_SUCCESS)
 	{
 		return egraphics_result::e_against_error_graphics_create_fence;
-	}
+	}*/
 
 	return egraphics_result::success;
 }
@@ -905,6 +903,43 @@ egraphics_result splash_screen_graphics::allocate_command_buffers ()
 	{
 		return egraphics_result::e_against_error_graphics_allocate_command_buffer;
 	}
+
+	return egraphics_result::success;
+}
+
+egraphics_result splash_screen_graphics::update_command_buffers (const std::vector<asset::mesh>& meshes)
+{
+	VkCommandBufferBeginInfo command_buffer_begin_info = { 0 };
+	command_buffer_begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	command_buffer_begin_info.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
+
+	VkClearValue clear_value = { 0 };
+	clear_value.color = { 1,1,0,1 };
+
+	VkRenderPassBeginInfo render_pass_begin_info = { 0 };
+	render_pass_begin_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	render_pass_begin_info.renderPass = render_pass;
+	render_pass_begin_info.renderArea = VkRect2D{ {}, common_graphics::surface_extent };
+	render_pass_begin_info.clearValueCount = 1;
+	render_pass_begin_info.pClearValues = &clear_value;
+
+	for (uint32_t i = 0; i < common_graphics::swapchain_image_count; i++)
+	{
+		render_pass_begin_info.framebuffer = swapchain_framebuffers[i];
+		if (vkBeginCommandBuffer (swapchain_command_buffers[i], &command_buffer_begin_info) != VK_SUCCESS)
+		{
+			return egraphics_result::e_against_error_graphics_begin_command_buffer;
+		}
+
+		vkCmdBeginRenderPass (swapchain_command_buffers[i], &render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
+		vkCmdEndRenderPass (swapchain_command_buffers[i]);
+
+		if (vkEndCommandBuffer (swapchain_command_buffers[i]) != VK_SUCCESS)
+		{
+			return egraphics_result::e_against_error_graphics_end_command_buffer;
+		}
+	}
+
 
 	return egraphics_result::success;
 }
@@ -1240,23 +1275,24 @@ egraphics_result splash_screen_graphics::init (std::vector<asset::mesh>& meshes)
 	CHECK_AGAINST_RESULT (create_graphics_pipeline ());
 	CHECK_AGAINST_RESULT (create_sync_objects ());
 	CHECK_AGAINST_RESULT (allocate_command_buffers ());
+	CHECK_AGAINST_RESULT (update_command_buffers (meshes));
 
 	swapchain_framebuffers.shrink_to_fit ();
-	swapchain_fences.shrink_to_fit ();
+	//swapchain_fences.shrink_to_fit ();
 	swapchain_command_buffers.shrink_to_fit ();
 
 	return egraphics_result::success;
 }
 
-egraphics_result splash_screen_graphics::draw ()
+egraphics_result splash_screen_graphics::draw (const std::vector<asset::mesh>& meshes)
 {
 	uint32_t image_index;
 	VkResult result = vkAcquireNextImageKHR (
 		common_graphics::graphics_device,
 		common_graphics::swapchain,
 		UINT64_MAX,
+		swapchain_wait_semaphore,
 		VK_NULL_HANDLE,
-		acquire_next_image_fence,
 		&image_index
 	);
 
@@ -1281,21 +1317,16 @@ egraphics_result splash_screen_graphics::draw ()
 	submit_info.signalSemaphoreCount = 1;
 	submit_info.pSignalSemaphores = &swapchain_signal_semaphores[image_index];
 	submit_info.waitSemaphoreCount = 1;
-	submit_info.pWaitSemaphores = &swapchain_wait_semaphores[image_index];
+	submit_info.pWaitSemaphores = &swapchain_wait_semaphore;
 	
-	if (vkQueueSubmit (common_graphics::graphics_queue, 1, &submit_info, swapchain_fences[image_index]) != VK_SUCCESS)
+	if (vkQueueSubmit (common_graphics::graphics_queue, 1, &submit_info, VK_NULL_HANDLE) != VK_SUCCESS)
 	{
 		return egraphics_result::e_against_error_graphics_queue_submit;
 	}
 
-	if (vkWaitForFences (common_graphics::graphics_device, 1, &swapchain_fences[image_index], VK_TRUE, UINT64_MAX) != VK_SUCCESS)
-	{
-		return egraphics_result::e_against_error_graphics_wait_for_fences;
-	}
-
 	VkPresentInfoKHR present_info = { 0 };
 	present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-	present_info.swapchainCount =1;
+	present_info.swapchainCount = 1;
 	present_info.pSwapchains = &common_graphics::swapchain;
 	present_info.pImageIndices = &image_index;
 	present_info.waitSemaphoreCount = 1;
@@ -1313,6 +1344,8 @@ void splash_screen_graphics::exit (std::vector<asset::mesh>& meshes)
 {
 	OutputDebugString (L"splash_screen_graphics::exit\n");
 
+	vkQueueWaitIdle (common_graphics::graphics_queue);
+
 	vkDestroyRenderPass (common_graphics::graphics_device, render_pass, nullptr);
 	render_pass = VK_NULL_HANDLE;
 
@@ -1326,18 +1359,13 @@ void splash_screen_graphics::exit (std::vector<asset::mesh>& meshes)
 	for (auto& swapchain_signal_semaphore : swapchain_signal_semaphores)
 	{
 		vkDestroySemaphore (common_graphics::graphics_device, swapchain_signal_semaphore, nullptr);
-		swapchain_signal_semaphore = VK_NULL_HANDLE;
 	}
-	swapchain_signal_semaphores.clear ();
 
-	for (auto& swapchain_wait_semaphore : swapchain_wait_semaphores)
-	{
-		vkDestroySemaphore (common_graphics::graphics_device, swapchain_wait_semaphore, nullptr);
-		swapchain_wait_semaphore = VK_NULL_HANDLE;
-	}
-	swapchain_wait_semaphores.clear ();
+	vkDestroySemaphore (common_graphics::graphics_device, swapchain_wait_semaphore, nullptr);
+	vkDestroyPipelineLayout (common_graphics::graphics_device, graphics_pipeline_layout, nullptr);
+	vkDestroyPipeline (common_graphics::graphics_device, graphics_pipeline, nullptr);
 
-	for (auto& swapchain_fence : swapchain_fences)
+	/*for (auto& swapchain_fence : swapchain_fences)
 	{
 		vkDestroyFence (common_graphics::graphics_device, swapchain_fence, nullptr);
 		swapchain_fence = VK_NULL_HANDLE;
@@ -1345,7 +1373,7 @@ void splash_screen_graphics::exit (std::vector<asset::mesh>& meshes)
 	swapchain_fences.clear ();
 
 	vkDestroyFence (common_graphics::graphics_device, acquire_next_image_fence, nullptr);
-	acquire_next_image_fence = VK_NULL_HANDLE;
+	acquire_next_image_fence = VK_NULL_HANDLE;*/
 
 	for (auto& mesh : meshes)
 	{
@@ -1353,8 +1381,12 @@ void splash_screen_graphics::exit (std::vector<asset::mesh>& meshes)
 		{
 			vkDestroyImageView (common_graphics::graphics_device, graphics_primitive.material.base_color_texture.texture_image.image_view, nullptr);
 			graphics_primitive.material.base_color_texture.texture_image.image_view = VK_NULL_HANDLE;
-			vkFreeDescriptorSets (common_graphics::graphics_device, descriptor_pool, 1, &graphics_primitive.material.base_color_texture.texture_image.descriptor_set);
-			graphics_primitive.material.base_color_texture.texture_image.descriptor_set = VK_NULL_HANDLE;
+			
+			if (graphics_primitive.material.base_color_texture.texture_image.descriptor_set != VK_NULL_HANDLE)
+			{
+				vkFreeDescriptorSets (common_graphics::graphics_device, descriptor_pool, 1, &graphics_primitive.material.base_color_texture.texture_image.descriptor_set);
+				graphics_primitive.material.base_color_texture.texture_image.descriptor_set = VK_NULL_HANDLE;
+			}
 		}
 	}
 

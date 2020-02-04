@@ -92,8 +92,22 @@ void splash_screen::process_keyboard_input (WPARAM wParam, LPARAM lParam)
 	}
 }
 
+egraphics_result splash_screen::update (const std::vector<asset::mesh>& meshes)
+{
+	return egraphics_result::success;
+}
+
+egraphics_result splash_screen::draw (const std::vector<asset::mesh>& meshes)
+{
+	CHECK_AGAINST_RESULT (graphics->draw (meshes));
+	return egraphics_result::success;
+}
+
 egraphics_result splash_screen::main_loop ()
 {
+	CHECK_AGAINST_RESULT (update (meshes));
+	CHECK_AGAINST_RESULT (draw (meshes));
+
 	return egraphics_result::success;
 }
 

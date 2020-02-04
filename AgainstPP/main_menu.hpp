@@ -1,8 +1,11 @@
 #pragma once
 
-#include <Windows.h>
 #include "scene.hpp"
 #include "event.hpp"
+#include "asset.hpp"
+
+#include <Windows.h>
+#include <vector>
 
 /*namespace main_menu
 {
@@ -22,4 +25,8 @@ public:
 	void process_keyboard_input (WPARAM wParam, LPARAM lParam);
 	egraphics_result main_loop () override;
 	void exit () override;
+
+protected:
+	egraphics_result update (const std::vector<asset::mesh>& meshes) override;
+	egraphics_result draw (const std::vector<asset::mesh>& meshes) override;
 };

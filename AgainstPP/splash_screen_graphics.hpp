@@ -27,7 +27,7 @@ public:
 	~splash_screen_graphics ();
 
 	egraphics_result init (std::vector<asset::mesh>& meshes);
-	egraphics_result draw ();
+	egraphics_result draw (const std::vector<asset::mesh>& meshes);
 	void exit (std::vector<asset::mesh>& meshes);
 
 private:
@@ -38,6 +38,7 @@ private:
 	egraphics_result create_graphics_pipeline ();
 	egraphics_result create_sync_objects ();
 	egraphics_result allocate_command_buffers ();
+	egraphics_result update_command_buffers (const std::vector<asset::mesh>& meshes);
 
 	egraphics_result create_vulkan_handles_for_meshes (std::vector<asset::mesh>& meshes);
 
@@ -51,11 +52,11 @@ private:
 	VkDescriptorPool descriptor_pool;
 	std::vector<VkDescriptorSetLayout> descriptor_set_layouts;
 	std::vector<VkSemaphore> swapchain_signal_semaphores;
-	std::vector<VkSemaphore> swapchain_wait_semaphores;
-	std::vector<VkFence> swapchain_fences;
+	VkSemaphore swapchain_wait_semaphore;
+	//std::vector<VkFence> swapchain_fences;
 	std::vector<VkCommandBuffer> swapchain_command_buffers;
 
-	VkFence acquire_next_image_fence;
+	//VkFence acquire_next_image_fence;
 
 	VkBuffer vertex_index_buffer;
 	VkDeviceMemory vertex_index_memory;
