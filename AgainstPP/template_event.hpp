@@ -1,5 +1,30 @@
 #pragma once
 
+struct object_function_ptr_no_param
+{
+	object_function_ptr_no_param (std::function<void ()> b, size_t id)
+	{
+		function_ptr = b;
+		obj_id = id;
+	}
+
+	std::function<void ()> function_ptr;
+	size_t obj_id;
+};
+
+template <typename U>
+struct object_function_ptr_one_param
+{
+	object_function_ptr_one_param (std::function<void (U)> b, size_t id)
+	{
+		function_ptr = b;
+		obj_id = id;
+	}
+
+	std::function<void (U)> function_ptr;
+	size_t obj_id;
+};
+
 template <typename U, typename V>
 struct object_function_ptr_two_param
 {
@@ -53,12 +78,17 @@ public:
 	{
 		for (auto binding : bindings)
 		{
-			binding (u);
+			binding.function_ptr (u);
 		}
 	}
 
+	void remove_binding (size_t id)
+	{
+		bindings.erase (std::find_if (bindings.begin (), bindings.end (), [&](auto b) {return b.obj_id == id; }));
+	}
+
 private:
-	typename std::vector<std::function<void (U)>> bindings;
+	typename std::vector<object_function_ptr_one_param<U>> bindings;
 };
 
 

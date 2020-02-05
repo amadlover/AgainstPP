@@ -138,6 +138,7 @@ void game::go_to_scene (e_scene_type new_scene)
 	case e_scene_type::splash_screen:
 		OutputDebugString (L"New scene splash screen\n");
 		main_menu_ptr->exit ();
+		keyboard_event.remove_binding (main_menu_ptr->unique_id);
 		main_menu_ptr.reset ();
 		splash_screen_ptr = std::make_shared<splash_screen> ();
 		splash_screen_ptr->init ();
@@ -152,6 +153,7 @@ void game::go_to_scene (e_scene_type new_scene)
 		splash_screen_ptr.reset ();
 		main_menu_ptr = std::make_shared <main_menu> ();
 		main_menu_ptr->init ();
+		keyboard_event.add_binding (std::bind (&main_menu::process_keyboard_input, main_menu_ptr.get (), std::placeholders::_1, std::placeholders::_2), main_menu_ptr->unique_id);
 		current_scene = main_menu_ptr;
 		break;
 
@@ -203,6 +205,7 @@ void game::exit ()
 	if (main_menu_ptr != nullptr && main_menu_ptr->state == e_scene_state::inited)
 	{
 		main_menu_ptr->exit ();
+		keyboard_event.remove_binding (main_menu_ptr->unique_id);
 	}
 
 	common_graphics::exit ();
