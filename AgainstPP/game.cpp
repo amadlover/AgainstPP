@@ -138,10 +138,10 @@ void game::go_to_scene (e_scene_type new_scene)
 	{
 	case e_scene_type::splash_screen:
 		OutputDebugString (L"New scene splash screen\n");
-		main_menu_ptr->exit ();
-		keyboard_event.remove_binding (main_menu_ptr->unique_id);
-		main_menu_ptr->go_to_scene_event.remove_binding (unique_id);
-		main_menu_ptr.reset ();
+		current_scene->exit ();
+		keyboard_event.remove_binding (current_scene->unique_id);
+		current_scene->go_to_scene_event.remove_binding (unique_id);
+		current_scene.reset ();
 		splash_screen_ptr = std::make_shared<splash_screen> ();
 		splash_screen_ptr->init ();
 		keyboard_event.add_binding (std::bind (&splash_screen::process_keyboard_input, splash_screen_ptr.get (), std::placeholders::_1, std::placeholders::_2), splash_screen_ptr->unique_id);
@@ -151,10 +151,10 @@ void game::go_to_scene (e_scene_type new_scene)
 
 	case e_scene_type::main_menu:
 		OutputDebugString (L"New scene main menu\n");
-		splash_screen_ptr->exit ();
-		keyboard_event.remove_binding (splash_screen_ptr->unique_id);
-		splash_screen_ptr->go_to_scene_event.remove_binding (unique_id);
-		splash_screen_ptr.reset ();
+		current_scene->exit ();
+		keyboard_event.remove_binding (current_scene->unique_id);
+		current_scene->go_to_scene_event.remove_binding (unique_id);
+		current_scene.reset ();
 		main_menu_ptr = std::make_shared <main_menu> ();
 		main_menu_ptr->init ();
 		keyboard_event.add_binding (std::bind (&main_menu::process_keyboard_input, main_menu_ptr.get (), std::placeholders::_1, std::placeholders::_2), main_menu_ptr->unique_id);
