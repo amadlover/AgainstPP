@@ -82,7 +82,7 @@ void splash_screen::process_keyboard_input (WPARAM wParam, LPARAM lParam)
 	switch (wParam)
 	{
 	case VK_ESCAPE:
-		event::go_to_scene (e_scene_type::main_menu);
+		go_to_scene_event.broadcast (e_scene_type::main_menu);
 		break;
 
 	case 0x53:

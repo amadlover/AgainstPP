@@ -1,13 +1,15 @@
 #pragma once
 
+#include "entity.hpp"
 #include "error.hpp"
 #include "enums.hpp"
 #include "asset.hpp"
+#include "event.hpp"
 
 #include <Windows.h>
 #include <vector>
 
-class scene
+class scene : public entity
 {
 public:
     scene () {}
@@ -18,9 +20,8 @@ public:
     virtual egraphics_result main_loop () = 0;
     virtual void exit () = 0;
 
+    event_one_param<e_scene_type> go_to_scene_event;
     e_scene_state state;
-
-    static size_t unique_id;
 
 protected:
     virtual egraphics_result update (const std::vector<asset::mesh>& meshes) = 0;

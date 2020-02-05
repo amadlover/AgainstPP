@@ -129,6 +129,7 @@ namespace game
 game::game ()
 {
 	OutputDebugString (L"game::game\n");
+	++unique_id;
 }
 
 void game::go_to_scene (e_scene_type new_scene)
@@ -139,10 +140,12 @@ void game::go_to_scene (e_scene_type new_scene)
 		OutputDebugString (L"New scene splash screen\n");
 		main_menu_ptr->exit ();
 		keyboard_event.remove_binding (main_menu_ptr->unique_id);
+		main_menu_ptr->go_to_scene_event.remove_binding (unique_id);
 		main_menu_ptr.reset ();
 		splash_screen_ptr = std::make_shared<splash_screen> ();
 		splash_screen_ptr->init ();
 		keyboard_event.add_binding (std::bind (&splash_screen::process_keyboard_input, splash_screen_ptr.get (), std::placeholders::_1, std::placeholders::_2), splash_screen_ptr->unique_id);
+		splash_screen_ptr->go_to_scene_event.add_binding (std::bind (&game::go_to_scene, this, std::placeholders::_1), unique_id);
 		current_scene = splash_screen_ptr;
 		break;
 
@@ -150,10 +153,12 @@ void game::go_to_scene (e_scene_type new_scene)
 		OutputDebugString (L"New scene main menu\n");
 		splash_screen_ptr->exit ();
 		keyboard_event.remove_binding (splash_screen_ptr->unique_id);
+		splash_screen_ptr->go_to_scene_event.remove_binding (unique_id);
 		splash_screen_ptr.reset ();
 		main_menu_ptr = std::make_shared <main_menu> ();
 		main_menu_ptr->init ();
 		keyboard_event.add_binding (std::bind (&main_menu::process_keyboard_input, main_menu_ptr.get (), std::placeholders::_1, std::placeholders::_2), main_menu_ptr->unique_id);
+		main_menu_ptr->go_to_scene_event.add_binding (std::bind (&game::go_to_scene, this, std::placeholders::_1), unique_id);
 		current_scene = main_menu_ptr;
 		break;
 
@@ -164,7 +169,6 @@ void game::go_to_scene (e_scene_type new_scene)
 
 void game::process_keyboard_input (WPARAM wParam, LPARAM lParam)
 {
-	//current_scene->process_keyboard_input (wParam, lParam);
 	keyboard_event.broadcast (wParam, lParam);
 }
 
@@ -172,9 +176,8 @@ egraphics_result game::init (HINSTANCE hInstance, HWND hWnd)
 {
 	OutputDebugString (L"game::init\n");
 
-	event::go_to_scene = std::bind (&game::go_to_scene, this, std::placeholders::_1);
-
 	splash_screen_ptr = std::make_shared <splash_screen> ();
+	splash_screen_ptr->go_to_scene_event.add_binding (std::bind (&game::go_to_scene, this, std::placeholders::_1), unique_id);
 	keyboard_event.add_binding (std::bind (&splash_screen::process_keyboard_input, splash_screen_ptr.get (), std::placeholders::_1, std::placeholders::_2), splash_screen_ptr->unique_id);
 	CHECK_AGAINST_RESULT (common_graphics::init (hInstance, hWnd));
 	CHECK_AGAINST_RESULT (splash_screen_ptr->init ());
@@ -200,12 +203,14 @@ void game::exit ()
 	{
 		splash_screen_ptr->exit ();
 		keyboard_event.remove_binding (splash_screen_ptr->unique_id);
+		splash_screen_ptr->go_to_scene_event.remove_binding (unique_id);
 	}
 
 	if (main_menu_ptr != nullptr && main_menu_ptr->state == e_scene_state::inited)
 	{
 		main_menu_ptr->exit ();
 		keyboard_event.remove_binding (main_menu_ptr->unique_id);
+		main_menu_ptr->go_to_scene_event.remove_binding (unique_id);
 	}
 
 	common_graphics::exit ();

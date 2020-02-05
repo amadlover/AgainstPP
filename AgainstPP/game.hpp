@@ -6,8 +6,9 @@
 #include "common_graphics.hpp"
 #include "splash_screen.hpp"
 #include "main_menu.hpp"
+#include "entity.hpp"
 
-#include "template_event.hpp"
+#include "event.hpp"
 
 /*namespace game
 {
@@ -24,7 +25,7 @@
 	void process_window_destroy ();
 };*/
 
-class game
+class game : public entity
 {
 public:
 	game ();
