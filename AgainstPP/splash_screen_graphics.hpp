@@ -34,13 +34,12 @@ private:
 	egraphics_result create_renderpasses ();
 	egraphics_result create_framebuffers ();
 	egraphics_result create_shaders ();
+	egraphics_result create_descriptor_sets (std::vector<asset::mesh>& meshes);
 	egraphics_result create_graphics_pipeline_layout ();
 	egraphics_result create_graphics_pipeline ();
 	egraphics_result create_sync_objects ();
 	egraphics_result allocate_command_buffers ();
 	egraphics_result update_command_buffers (const std::vector<asset::mesh>& meshes);
-
-	egraphics_result create_vulkan_handles_for_meshes (std::vector<asset::mesh>& meshes);
 
 	VkRenderPass render_pass;
 	std::vector<VkFramebuffer> swapchain_framebuffers;

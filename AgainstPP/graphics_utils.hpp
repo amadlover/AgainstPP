@@ -4,6 +4,7 @@
 
 #include <vulkan/vulkan.h>
 
+#include "asset.hpp"
 #include "common_graphics.hpp"
 
 /*namespace graphics_utils
@@ -62,6 +63,18 @@
 class graphics_utils
 {
 public:
+	static egraphics_result create_vulkan_handles_for_meshes (
+		std::vector<asset::mesh>& meshes,
+		VkBuffer* staging_vertex_index_buffer,
+		VkDeviceMemory* staging_vertex_index_memory,
+		VkBuffer* vertex_index_buffer,
+		VkBuffer* vertex_index_memory,
+		VkBuffer* staging_image_buffer,
+		VkDeviceMemory* staging_image_buffer_memory,
+		std::vector<VkImage>& scene_images,
+		VkDeviceMemory* scene_images_memory
+	);
+
 	static egraphics_result create_buffer (
 		VkDevice graphics_device,
 		VkDeviceSize size,

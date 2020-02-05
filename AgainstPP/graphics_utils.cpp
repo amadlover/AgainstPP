@@ -262,6 +262,311 @@ egraphics_result get_one_time_command_buffer (VkDevice graphics_device, VkComman
 	return egraphics_result::success;
 }
 
+egraphics_result graphics_utils::create_vulkan_handles_for_meshes (
+	std::vector<asset::mesh>& meshes,
+	VkBuffer* staging_vertex_index_buffer,
+	VkDeviceMemory* staging_vertex_index_memory,
+	VkBuffer* vertex_index_buffer,
+	VkBuffer* vertex_index_memory,
+	VkBuffer* staging_image_buffer,
+	VkDeviceMemory* staging_image_buffer_memory,
+	std::vector<VkImage>& scene_images,
+	VkDeviceMemory* scene_images_memory
+)
+{
+	VkDeviceSize total_size = 0;
+
+	for (auto& mesh : meshes)
+	{
+		for (auto& graphics_primitive : mesh.graphics_primitves)
+		{
+			total_size +=
+				(VkDeviceSize)graphics_primitive.positions.size () +
+				(VkDeviceSize)graphics_primitive.uv0s.size () +
+				(VkDeviceSize)graphics_primitive.uv1s.size () +
+				(VkDeviceSize)graphics_primitive.normals.size () +
+				(VkDeviceSize)graphics_primitive.indices.size ();
+		}
+	}
+
+	CHECK_AGAINST_RESULT (graphics_utils::create_buffer (common_graphics::graphics_device, total_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_SHARING_MODE_EXCLUSIVE, common_graphics::graphics_queue_family_index, staging_vertex_index_buffer));
+	CHECK_AGAINST_RESULT (graphics_utils::allocate_bind_buffer_memory (common_graphics::graphics_device, staging_vertex_index_buffer, 1, common_graphics::physical_device_memory_properties, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, staging_vertex_index_memory));
+
+	VkDeviceSize offset = 0;
+
+	for (auto& mesh : meshes)
+	{
+		for (auto& graphics_primitive : mesh.graphics_primitves)
+		{
+			if (graphics_primitive.positions.size () > 0)
+			{
+				CHECK_AGAINST_RESULT (graphics_utils::map_data_to_device_memory (common_graphics::graphics_device, *staging_vertex_index_memory, offset, graphics_primitive.positions.size (), graphics_primitive.positions.data ()));
+				graphics_primitive.positions_offset = offset;
+				offset += graphics_primitive.positions.size ();
+			}
+
+			if (graphics_primitive.uv0s.size () > 0)
+			{
+				CHECK_AGAINST_RESULT (graphics_utils::map_data_to_device_memory (common_graphics::graphics_device, *staging_vertex_index_memory, offset, graphics_primitive.uv0s.size (), graphics_primitive.uv0s.data ()));
+				graphics_primitive.uv0s_offset = offset;
+				offset += graphics_primitive.uv0s.size ();
+			}
+
+			if (graphics_primitive.uv1s.size () > 0)
+			{
+				CHECK_AGAINST_RESULT (graphics_utils::map_data_to_device_memory (common_graphics::graphics_device, *staging_vertex_index_memory, offset, graphics_primitive.uv1s.size (), graphics_primitive.uv1s.data ()));
+				graphics_primitive.uv1s_offset = offset;
+				offset += graphics_primitive.uv1s.size ();
+			}
+
+			if (graphics_primitive.normals.size () > 0)
+			{
+				CHECK_AGAINST_RESULT (graphics_utils::map_data_to_device_memory (common_graphics::graphics_device, *staging_vertex_index_memory, offset, graphics_primitive.normals.size (), graphics_primitive.normals.data ()));
+				graphics_primitive.normals_offset = offset;
+				offset += graphics_primitive.normals.size ();
+			}
+
+			if (graphics_primitive.indices.size () > 0)
+			{
+				CHECK_AGAINST_RESULT (graphics_utils::map_data_to_device_memory (common_graphics::graphics_device, *staging_vertex_index_memory, offset, graphics_primitive.indices.size (), graphics_primitive.indices.data ()));
+				graphics_primitive.indices_offset = offset;
+				offset += graphics_primitive.indices.size ();
+			}
+		}
+	}
+
+	CHECK_AGAINST_RESULT (graphics_utils::create_buffer (common_graphics::graphics_device, total_size, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_SHARING_MODE_EXCLUSIVE, common_graphics::graphics_queue_family_index, vertex_index_buffer));
+	CHECK_AGAINST_RESULT (graphics_utils::allocate_bind_buffer_memory (common_graphics::graphics_device, vertex_index_buffer, 1, common_graphics::physical_device_memory_properties, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertex_index_memory));
+	CHECK_AGAINST_RESULT (graphics_utils::copy_buffer_to_buffer (common_graphics::graphics_device, common_graphics::command_pool, common_graphics::graphics_queue, *staging_vertex_index_buffer, *vertex_index_buffer, total_size));
+
+	graphics_utils::destroy_buffers_and_buffer_memory (common_graphics::graphics_device, staging_vertex_index_buffer, 1, staging_vertex_index_memory);
+
+	total_size = 0;
+	std::vector<asset::image> all_images;
+	for (auto& mesh : meshes)
+	{
+		for (auto& graphics_primitive : mesh.graphics_primitves)
+		{
+			all_images.push_back (graphics_primitive.material.base_color_texture.texture_image);
+			total_size += graphics_primitive.material.base_color_texture.texture_image.pixels.size ();
+		}
+	}
+
+	CHECK_AGAINST_RESULT (
+		graphics_utils::create_buffer (
+			common_graphics::graphics_device,
+			total_size,
+			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+			VK_SHARING_MODE_EXCLUSIVE,
+			common_graphics::graphics_queue_family_index,
+			staging_image_buffer
+		)
+	);
+
+	std::vector<std::vector<asset::image>> all_similar_images;
+	for (uint32_t i = 0; i < all_images.size (); i++)
+	{
+		auto image = all_images.at (i);
+		bool is_image_present = false;
+
+		for (auto& similar_images : all_similar_images)
+		{
+			for (auto& similar_image : similar_images)
+			{
+				if (image.name.compare (similar_image.name) == 0)
+				{
+					is_image_present = true;
+					break;
+				}
+			}
+
+			if (is_image_present)
+			{
+				break;
+			}
+		}
+
+		if (is_image_present)
+		{
+			continue;
+		}
+
+		std::vector<asset::image> similar_images;
+		similar_images.push_back (image);
+
+		for (uint32_t j = i + 1; j < all_images.size (); j++)
+		{
+			auto image_to_be_checked = all_images.at (j);
+			if (image.width == image_to_be_checked.width && image.height == image_to_be_checked.height)
+			{
+				similar_images.push_back (image_to_be_checked);
+			}
+		}
+
+		all_similar_images.push_back (similar_images);
+	}
+
+	scene_images.reserve (all_similar_images.size ());
+
+	for (auto& similar_images : all_similar_images)
+	{
+		VkImage scene_image = VK_NULL_HANDLE;
+		CHECK_AGAINST_RESULT (
+			graphics_utils::create_image (
+				common_graphics::graphics_device,
+				common_graphics::graphics_queue_family_index,
+				VkExtent3D{ (uint32_t)similar_images[0].width, (uint32_t)similar_images[0].height, 1 },
+				similar_images.size (),
+				VK_FORMAT_R8G8B8A8_UNORM,
+				VK_IMAGE_TILING_OPTIMAL,
+				VK_IMAGE_TYPE_2D,
+				VK_IMAGE_LAYOUT_UNDEFINED,
+				VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+				VK_SHARING_MODE_EXCLUSIVE,
+				&scene_image
+			)
+		);
+		scene_images.push_back (scene_image);
+	}
+
+	CHECK_AGAINST_RESULT (
+		graphics_utils::allocate_bind_buffer_memory (
+			common_graphics::graphics_device,
+			staging_image_buffer,
+			1,
+			common_graphics::physical_device_memory_properties,
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
+			staging_image_buffer_memory
+		)
+	);
+
+	offset = 0;
+	std::vector<VkDeviceSize> buffer_image_offsets (all_similar_images.size ());
+
+	for (uint32_t as = 0; as < all_similar_images.size (); as++)
+	{
+		VkDeviceSize buffer_image_offset = 0;
+		for (uint32_t s = 0; s < all_similar_images[as].size (); s++)
+		{
+			CHECK_AGAINST_RESULT (
+				graphics_utils::map_data_to_device_memory (
+					common_graphics::graphics_device,
+					*staging_image_buffer_memory,
+					offset,
+					all_similar_images[as][s].pixels.size (),
+					all_similar_images[as][s].pixels.data ()
+				)
+			);
+			offset += all_similar_images[as][s].pixels.size ();
+			buffer_image_offset += all_similar_images[as][s].pixels.size ();
+		}
+		buffer_image_offsets.push_back (buffer_image_offset);
+	}
+
+	CHECK_AGAINST_RESULT (
+		graphics_utils::allocate_bind_image_memory (
+			common_graphics::graphics_device,
+			scene_images.data (),
+			scene_images.size (),
+			common_graphics::physical_device_memory_properties,
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+			scene_images_memory
+		)
+	);
+
+	for (uint32_t s = 0; s < all_similar_images.size (); s++)
+	{
+		CHECK_AGAINST_RESULT (
+			graphics_utils::change_image_layout (
+				common_graphics::graphics_device,
+				common_graphics::graphics_queue_family_index,
+				scene_images[s],
+				all_similar_images[s].size (),
+				VK_IMAGE_LAYOUT_UNDEFINED,
+				VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+				0,
+				VK_ACCESS_TRANSFER_WRITE_BIT,
+				VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+				VK_PIPELINE_STAGE_TRANSFER_BIT
+			)
+		);
+
+		CHECK_AGAINST_RESULT (
+			graphics_utils::copy_buffer_to_image (
+				common_graphics::graphics_device,
+				common_graphics::command_pool,
+				common_graphics::graphics_queue,
+				buffer_image_offsets[s],
+				*staging_image_buffer,
+				&scene_images[s],
+				VkExtent3D{ (uint32_t)all_similar_images[s][0].width, (uint32_t)all_similar_images[s][0].height, 1 },
+				all_similar_images[s].size ()
+			)
+		);
+
+		CHECK_AGAINST_RESULT (
+			graphics_utils::change_image_layout (
+				common_graphics::graphics_device,
+				common_graphics::graphics_queue_family_index,
+				scene_images[s],
+				all_similar_images[s].size (),
+				VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+				VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+				VK_ACCESS_TRANSFER_WRITE_BIT,
+				VK_ACCESS_SHADER_READ_BIT,
+				VK_PIPELINE_STAGE_TRANSFER_BIT,
+				VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT
+			)
+		);
+	}
+
+	graphics_utils::destroy_buffers_and_buffer_memory (common_graphics::graphics_device, staging_image_buffer, 1, staging_image_buffer_memory);
+
+	VkComponentMapping components = { 0 };
+	VkImageViewCreateInfo image_view_create_info = { 0 };
+	image_view_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+	image_view_create_info.components = components;
+	image_view_create_info.format = VK_FORMAT_R8G8B8A8_UNORM;
+	image_view_create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+
+	VkImageSubresourceRange subresource_range = { 0 };
+	subresource_range.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	subresource_range.layerCount = 1;
+	subresource_range.levelCount = 1;
+	subresource_range.baseMipLevel = 0;
+
+	image_view_create_info.subresourceRange = subresource_range;
+
+	for (uint32_t as = 0; as < all_similar_images.size (); ++as)
+	{
+		for (uint32_t a = 0; a < all_similar_images[as].size (); ++a)
+		{
+			for (auto& mesh : meshes)
+			{
+				for (auto& graphics_primitve : mesh.graphics_primitves)
+				{
+					if (graphics_primitve.material.base_color_texture.texture_image.name.compare (all_similar_images[as][a].name) == 0)
+					{
+						image_view_create_info.image = scene_images[as];
+						image_view_create_info.subresourceRange.baseArrayLayer = a;
+
+						if (vkCreateImageView (
+							common_graphics::graphics_device,
+							&image_view_create_info,
+							nullptr,
+							&graphics_primitve.material.base_color_texture.texture_image.image_view) != VK_SUCCESS)
+						{
+							return egraphics_result::e_against_error_graphics_create_image_view;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return egraphics_result::success;
+}
+
 egraphics_result graphics_utils::create_buffer (VkDevice graphics_device, VkDeviceSize size, VkBufferUsageFlags usage, VkSharingMode sharing_mode, uint32_t graphics_queue_family_index, VkBuffer * out_buffer)
 {
 	VkBufferCreateInfo create_info = { 0 };

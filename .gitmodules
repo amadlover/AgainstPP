@@ -6,11 +6,10 @@
 	path = External/glm
 	url = git@github.com:g-truc/glm.git
 	ignore = all 
-[submodule "External/cgltf"]
-	path = External/cgltf
-	url = git@github.com:jkuhlmann/cgltf.git
-	ignore = all
 [submodule "External/tinygltf"]
 	path = External/tinygltf
 	url = git@github.com:syoyo/tinygltf
 	ignore = all
+[submodule "External/imgui"]
+	path = External/imgui
+	url = git@github.com:ocornut/imgui.git
