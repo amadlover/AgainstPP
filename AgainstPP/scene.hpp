@@ -20,6 +20,8 @@ public:
 
     e_scene_state state;
 
+    static size_t unique_id;
+
 protected:
     virtual egraphics_result update (const std::vector<asset::mesh>& meshes) = 0;
     virtual egraphics_result draw (const std::vector<asset::mesh>& meshes) = 0;

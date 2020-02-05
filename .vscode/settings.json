@@ -5,6 +5,7 @@
         "istream": "cpp",
         "ostream": "cpp",
         "xstring": "cpp",
-        "array": "cpp"
+        "array": "cpp",
+        "functional": "cpp"
     }
 }

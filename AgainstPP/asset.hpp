@@ -60,7 +60,7 @@ namespace asset
 		struct mesh
 		{
 			std::string name;
-			uint32_t id;
+			uint32_t unique_id;
 
 			std::vector<graphics_primitive> graphics_primitves;
 			std::vector<physics_primitive> physics_primitives;
@@ -189,7 +189,7 @@ namespace asset
 	struct mesh
 	{
 		std::string name;
-		uint32_t id;
+		uint32_t unique_id;
 
 		std::vector<graphics_primitive> graphics_primitves;
 		std::vector<physics_primitive> physics_primitives;

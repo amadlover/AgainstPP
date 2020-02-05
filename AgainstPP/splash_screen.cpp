@@ -55,6 +55,7 @@
 splash_screen::splash_screen ()
 {
 	OutputDebugString (L"splash_screen::splash_screen\n");
+	++unique_id;
 }
 
 egraphics_result splash_screen::init ()
