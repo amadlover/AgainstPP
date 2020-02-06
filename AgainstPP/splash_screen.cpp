@@ -55,7 +55,6 @@
 splash_screen::splash_screen () : scene ()
 {
 	OutputDebugString (L"splash_screen::splash_screen\n");
-	++unique_id;
 }
 
 splash_screen::~splash_screen ()

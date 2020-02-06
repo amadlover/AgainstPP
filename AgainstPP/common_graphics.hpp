@@ -34,6 +34,8 @@ public:
 	static egraphics_result init (HINSTANCE hInstance, HWND hWnd);
 	static void exit ();
 
+	static VkInstance instance;
+	static VkPhysicalDevice physical_device;
 	static VkDevice graphics_device;
 	static uint32_t graphics_queue_family_index;
 	static VkQueue graphics_queue;

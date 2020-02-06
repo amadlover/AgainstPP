@@ -139,6 +139,40 @@ game::~game ()
 	OutputDebugString (L"game::~game\n");
 }
 
+void game::process_keyboard_input (WPARAM wParam, LPARAM lParam)
+{
+	keyboard_event.broadcast (wParam, lParam);
+}
+
+egraphics_result game::init (HINSTANCE hInstance, HWND hWnd)
+{
+	OutputDebugString (L"game::init\n");
+
+	IMGUI_CHECKVERSION ();
+	ImGui::CreateContext ();
+	ImGuiIO &io = ImGui::GetIO ();
+	ImGui_ImplWin32_Init (hWnd);
+
+	splash_screen_ptr = std::make_shared <splash_screen> ();
+	splash_screen_ptr->go_to_scene_event.add_binding (std::bind (&game::go_to_scene, this, std::placeholders::_1), unique_id);
+	keyboard_event.add_binding (std::bind (&splash_screen::process_keyboard_input, splash_screen_ptr.get (), std::placeholders::_1, std::placeholders::_2), splash_screen_ptr->unique_id);
+	CHECK_AGAINST_RESULT (common_graphics::init (hInstance, hWnd));
+	
+	CHECK_AGAINST_RESULT (splash_screen_ptr->init ());
+
+	current_scene_ptr = splash_screen_ptr;
+	current_scene_type = e_scene_type::splash_screen;
+
+	return egraphics_result::success;
+}
+
+egraphics_result game::main_loop ()
+{
+	CHECK_AGAINST_RESULT (current_scene_ptr->main_loop ());
+
+	return egraphics_result::success;
+}
+
 egraphics_result game::go_to_scene (e_scene_type new_scene)
 {
 	switch (new_scene)
@@ -172,39 +206,6 @@ egraphics_result game::go_to_scene (e_scene_type new_scene)
 	default:
 		break;
 	}
-
-	return egraphics_result::success;
-}
-
-void game::process_keyboard_input (WPARAM wParam, LPARAM lParam)
-{
-	keyboard_event.broadcast (wParam, lParam);
-}
-
-egraphics_result game::init (HINSTANCE hInstance, HWND hWnd)
-{
-	OutputDebugString (L"game::init\n");
-
-	IMGUI_CHECKVERSION ();
-	ImGui::CreateContext ();
-	ImGuiIO &io = ImGui::GetIO ();
-	ImGui_ImplWin32_Init (hWnd);
-
-	splash_screen_ptr = std::make_shared <splash_screen> ();
-	splash_screen_ptr->go_to_scene_event.add_binding (std::bind (&game::go_to_scene, this, std::placeholders::_1), unique_id);
-	keyboard_event.add_binding (std::bind (&splash_screen::process_keyboard_input, splash_screen_ptr.get (), std::placeholders::_1, std::placeholders::_2), splash_screen_ptr->unique_id);
-	CHECK_AGAINST_RESULT (common_graphics::init (hInstance, hWnd));
-	CHECK_AGAINST_RESULT (splash_screen_ptr->init ());
-
-	current_scene_ptr = splash_screen_ptr;
-	current_scene_type = e_scene_type::splash_screen;
-
-	return egraphics_result::success;
-}
-
-egraphics_result game::main_loop ()
-{
-	CHECK_AGAINST_RESULT (current_scene_ptr->main_loop ());
 
 	return egraphics_result::success;
 }

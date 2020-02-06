@@ -387,6 +387,8 @@ namespace common_graphics
 	}
 }*/
 
+VkInstance common_graphics::instance;
+VkPhysicalDevice common_graphics::physical_device;
 VkDevice common_graphics::graphics_device;
 uint32_t common_graphics::graphics_queue_family_index;
 VkQueue common_graphics::graphics_queue;
@@ -410,9 +412,7 @@ std::vector<const char*> requested_device_extensions;
 
 bool is_validation_needed;
 
-VkInstance instance;
 VkDebugUtilsMessengerEXT debug_utils_messenger;
-VkPhysicalDevice physical_device;
 VkSurfaceKHR surface;
 VkPresentModeKHR chosen_present_mode;
 
@@ -533,7 +533,7 @@ egraphics_result create_instance ()
 	create_info.pApplicationInfo = &application_info;
 	create_info.flags = 0;
 
-	if (vkCreateInstance (&create_info, nullptr, &instance) != VK_SUCCESS)
+	if (vkCreateInstance (&create_info, nullptr, &common_graphics::instance) != VK_SUCCESS)
 	{
 		return egraphics_result::e_against_error_graphics_create_instance;
 	}
@@ -554,7 +554,7 @@ egraphics_result setup_debug_utils_messenger ()
 	create_info.pfnUserCallback = debug_messenger_callback;
 	create_info.flags = 0;
 
-	if (create_debug_utils_messenger (instance, &create_info, nullptr, &debug_utils_messenger) != VK_SUCCESS)
+	if (create_debug_utils_messenger (common_graphics::instance, &create_info, nullptr, &debug_utils_messenger) != VK_SUCCESS)
 	{
 		return egraphics_result::e_against_error_graphics_setup_debug_utils_messenger;
 	}
@@ -565,24 +565,24 @@ egraphics_result setup_debug_utils_messenger ()
 egraphics_result get_physical_device ()
 {
 	uint32_t physical_device_count = 0;
-	vkEnumeratePhysicalDevices (instance, &physical_device_count, nullptr);
+	vkEnumeratePhysicalDevices (common_graphics::instance, &physical_device_count, nullptr);
 	std::vector<VkPhysicalDevice> physical_devices (physical_device_count);
-	vkEnumeratePhysicalDevices (instance, &physical_device_count, physical_devices.data ());
+	vkEnumeratePhysicalDevices (common_graphics::instance, &physical_device_count, physical_devices.data ());
 
 	if (physical_device_count == 0)
 	{
 		return egraphics_result::e_against_error_graphics_get_physical_device;
 	}
 
-	physical_device = physical_devices[0];
+	common_graphics::physical_device = physical_devices[0];
 
 	VkPhysicalDeviceFeatures device_features;
-	vkGetPhysicalDeviceFeatures (physical_device, &device_features);
+	vkGetPhysicalDeviceFeatures (common_graphics::physical_device, &device_features);
 
 	uint32_t queue_family_count = 0;
-	vkGetPhysicalDeviceQueueFamilyProperties (physical_device, &queue_family_count, nullptr);
+	vkGetPhysicalDeviceQueueFamilyProperties (common_graphics::physical_device, &queue_family_count, nullptr);
 	std::vector<VkQueueFamilyProperties> queue_family_properties (queue_family_count);
-	vkGetPhysicalDeviceQueueFamilyProperties (physical_device, &queue_family_count, queue_family_properties.data ());
+	vkGetPhysicalDeviceQueueFamilyProperties (common_graphics::physical_device, &queue_family_count, queue_family_properties.data ());
 
 	for (uint32_t i = 0; i < queue_family_count; i++)
 	{
@@ -593,10 +593,10 @@ egraphics_result get_physical_device ()
 		}
 	}
 
-	vkGetPhysicalDeviceMemoryProperties (physical_device, &common_graphics::physical_device_memory_properties);
+	vkGetPhysicalDeviceMemoryProperties (common_graphics::physical_device, &common_graphics::physical_device_memory_properties);
 
 	VkPhysicalDeviceProperties device_properties;
-	vkGetPhysicalDeviceProperties (physical_device, &device_properties);
+	vkGetPhysicalDeviceProperties (common_graphics::physical_device, &device_properties);
 	common_graphics::physical_device_limits = device_properties.limits;
 
 	return egraphics_result::success;
@@ -610,7 +610,7 @@ egraphics_result create_surface (HINSTANCE HInstance, HWND HWnd)
 	create_info.hinstance = HInstance;
 	create_info.hwnd = HWnd;
 
-	if (vkCreateWin32SurfaceKHR (instance, &create_info, nullptr, &surface) != VK_SUCCESS)
+	if (vkCreateWin32SurfaceKHR (common_graphics::instance, &create_info, nullptr, &surface) != VK_SUCCESS)
 	{
 		return egraphics_result::e_against_error_graphics_create_surface;
 	}
@@ -621,10 +621,10 @@ egraphics_result create_surface (HINSTANCE HInstance, HWND HWnd)
 egraphics_result populate_graphics_device_extensions ()
 {
 	uint32_t extension_count = 0;
-	vkEnumerateDeviceExtensionProperties (physical_device, nullptr, &extension_count, nullptr);
+	vkEnumerateDeviceExtensionProperties (common_graphics::physical_device, nullptr, &extension_count, nullptr);
 
 	std::vector<VkExtensionProperties> extension_properties (extension_count);
-	vkEnumerateDeviceExtensionProperties (physical_device, nullptr, &extension_count, extension_properties.data ());
+	vkEnumerateDeviceExtensionProperties (common_graphics::physical_device, nullptr, &extension_count, extension_properties.data ());
 
 	for (uint32_t e = 0; e < extension_count; e++)
 	{
@@ -663,7 +663,7 @@ egraphics_result create_graphics_device ()
 	create_info.pQueueCreateInfos = &queue_create_info;
 	create_info.flags = 0;
 
-	if (vkCreateDevice (physical_device, &create_info, nullptr, &common_graphics::graphics_device) != VK_SUCCESS)
+	if (vkCreateDevice (common_graphics::physical_device, &create_info, nullptr, &common_graphics::graphics_device) != VK_SUCCESS)
 	{
 		return egraphics_result::e_against_error_graphics_create_graphics_device;
 	}
@@ -676,7 +676,7 @@ egraphics_result create_graphics_device ()
 egraphics_result create_swapchain ()
 {
 	VkBool32 is_surface_supported = false;
-	vkGetPhysicalDeviceSurfaceSupportKHR (physical_device, common_graphics::graphics_queue_family_index, surface, &is_surface_supported);
+	vkGetPhysicalDeviceSurfaceSupportKHR (common_graphics::physical_device, common_graphics::graphics_queue_family_index, surface, &is_surface_supported);
 
 	if (!is_surface_supported)
 	{
@@ -684,13 +684,13 @@ egraphics_result create_swapchain ()
 	}
 
 	VkSurfaceCapabilitiesKHR surface_capabilites;
-	vkGetPhysicalDeviceSurfaceCapabilitiesKHR (physical_device, surface, &surface_capabilites);
+	vkGetPhysicalDeviceSurfaceCapabilitiesKHR (common_graphics::physical_device, surface, &surface_capabilites);
 
 	uint32_t surface_format_count = 0;
-	vkGetPhysicalDeviceSurfaceFormatsKHR (physical_device, surface, &surface_format_count, nullptr);
+	vkGetPhysicalDeviceSurfaceFormatsKHR (common_graphics::physical_device, surface, &surface_format_count, nullptr);
 
 	std::vector<VkSurfaceFormatKHR> surface_formats (surface_format_count);
-	vkGetPhysicalDeviceSurfaceFormatsKHR (physical_device, surface, &surface_format_count, surface_formats.data ());
+	vkGetPhysicalDeviceSurfaceFormatsKHR (common_graphics::physical_device, surface, &surface_format_count, surface_formats.data ());
 
 	for (const auto& surface_format : surface_formats)
 	{
@@ -702,10 +702,10 @@ egraphics_result create_swapchain ()
 	}
 
 	uint32_t present_mode_count = 0;
-	vkGetPhysicalDeviceSurfacePresentModesKHR (physical_device, surface, &present_mode_count, nullptr);
+	vkGetPhysicalDeviceSurfacePresentModesKHR (common_graphics::physical_device, surface, &present_mode_count, nullptr);
 
 	std::vector<VkPresentModeKHR> present_modes (present_mode_count);
-	vkGetPhysicalDeviceSurfacePresentModesKHR (physical_device, surface, &present_mode_count, present_modes.data ());
+	vkGetPhysicalDeviceSurfacePresentModesKHR (common_graphics::physical_device, surface, &present_mode_count, present_modes.data ());
 
 	for (const auto& present_mode : present_modes)
 	{

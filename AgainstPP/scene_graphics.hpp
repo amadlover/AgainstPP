@@ -11,13 +11,13 @@ public:
 	scene_graphics ();
 	~scene_graphics ();
 
-    virtual egraphics_result init (std::vector<asset::mesh>& meshes) = 0;
+	virtual egraphics_result init (std::vector<asset::mesh>& meshes);
 	virtual egraphics_result draw (const std::vector<asset::mesh>& meshes) const;
 	virtual void exit (std::vector<asset::mesh>& meshes);
 
 protected:
-    virtual egraphics_result create_renderpass (VkRenderPass* render_pass);
-    virtual egraphics_result create_framebuffers (std::vector<VkFramebuffer>& swapchain_framebuffers, VkRenderPass* render_pass);
+    virtual egraphics_result create_renderpass ();
+	virtual egraphics_result create_framebuffers ();
 	virtual egraphics_result create_shaders ();
 	virtual egraphics_result create_descriptor_sets (std::vector<asset::mesh>& meshes);
 	virtual egraphics_result create_graphics_pipeline_layout ();

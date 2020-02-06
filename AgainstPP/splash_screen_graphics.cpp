@@ -4,6 +4,10 @@
 #include "graphics_utils.hpp"
 #include "common_graphics.hpp"
 
+#include "imgui.h"
+#include "imgui_impl_vulkan.h"
+#include "imgui_impl_win32.h"
+
 #include <vector>
 
 /*
@@ -811,8 +815,6 @@ egraphics_result splash_screen_graphics::init (std::vector<asset::mesh>& meshes)
 {
 	OutputDebugString (L"splash_screen_graphics::init\n");
 
-	vkDestroyBuffer (common_graphics::graphics_device, VK_NULL_HANDLE, nullptr);
-
 	CHECK_AGAINST_RESULT (
 		graphics_utils::create_vulkan_handles_for_meshes (
 			meshes,
@@ -827,8 +829,8 @@ egraphics_result splash_screen_graphics::init (std::vector<asset::mesh>& meshes)
 		)
 	);
 
-	CHECK_AGAINST_RESULT (create_renderpass (&render_pass));
-	CHECK_AGAINST_RESULT (create_framebuffers (swapchain_framebuffers, &render_pass));
+	CHECK_AGAINST_RESULT (create_renderpass ());
+	CHECK_AGAINST_RESULT (create_framebuffers ());
 	CHECK_AGAINST_RESULT (create_shaders ());
 	CHECK_AGAINST_RESULT (create_descriptor_sets (meshes));
 	CHECK_AGAINST_RESULT (create_graphics_pipeline_layout ());
@@ -837,6 +839,8 @@ egraphics_result splash_screen_graphics::init (std::vector<asset::mesh>& meshes)
 
 	swapchain_framebuffers.shrink_to_fit ();
 	common_graphics::swapchain_command_buffers.shrink_to_fit ();
+
+	CHECK_AGAINST_RESULT (scene_graphics::init (meshes));
 
 	return egraphics_result::success;
 }

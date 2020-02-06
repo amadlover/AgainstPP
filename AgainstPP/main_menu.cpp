@@ -37,7 +37,6 @@
 main_menu::main_menu () : scene ()
 {
 	OutputDebugString (L"main_menu::main_menu\n");
-	++unique_id;
 }
 
 main_menu::~main_menu ()
