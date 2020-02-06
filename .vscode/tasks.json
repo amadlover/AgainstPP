@@ -33,6 +33,7 @@
           "AgainstPP/graphics_utils.cpp",
           "AgainstPP/main_menu.cpp",
           "AgainstPP/scene.cpp",
+          "AgainstPP/scene_graphics.cpp",
           "AgainstPP/splash_screen_graphics.cpp",
           "AgainstPP/splash_screen.cpp",
           "AgainstPP/utils.cpp",
@@ -97,6 +98,7 @@
           "AgainstPP/graphics_utils.cpp",
           "AgainstPP/main_menu.cpp",
           "AgainstPP/scene.cpp",
+          "AgainstPP/scene_graphics.cpp",
           "AgainstPP/splash_screen_graphics.cpp",
           "AgainstPP/splash_screen.cpp",
           "AgainstPP/utils.cpp",
@@ -133,6 +135,18 @@
         "label": "Debug Asset Copy",
         "type": "shell",
         "command": "Copy-Item -Path '${workspaceFolder}/AgainstPP/Assets/*' -Destination '${workspaceFolder}/build32/vscode/debug/' -Recurse -Force"],
+        "group":{
+          "kind": "build",
+          "isDefault": true
+        },
+        "presentation": {
+          "reveal": "always",
+        }
+      },
+      {
+        "label": "Release Asset Copy",
+        "type": "shell",
+        "command": "Copy-Item -Path '${workspaceFolder}/AgainstPP/Assets/*' -Destination '${workspaceFolder}/build32/vscode/release/' -Recurse -Force"],
         "group":{
           "kind": "build",
           "isDefault": true

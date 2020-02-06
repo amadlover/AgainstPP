@@ -4,6 +4,10 @@
 #include "game.hpp"
 #include "error.hpp"
 
+/*#include "imgui.h"
+#include "imgui_impl_win32.h"
+#include "imgui_impl_vulkan.h"*/
+
 game* g = nullptr;
 
 LRESULT CALLBACK window_proc (
@@ -36,32 +40,6 @@ LRESULT CALLBACK window_proc (
 		lParam
 	);
 }
-
-template <typename T>
-struct list_node
-{
-	T data;
-	list_node* previous_node;
-	list_node* next_node;
-};
-
-template <typename T>
-class list 
-{
-public:
-	list () {}
-	~list () {}
-
-	void insert (const T& data)
-	{
-
-	}
-	size_t num_elements;
-private:
-	list_node* root_node;
-	list_node* begin_node;
-	list_node* end_node;
-};
 
 int WINAPI wWinMain (
 	_In_ HINSTANCE hInstance,

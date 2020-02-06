@@ -3,6 +3,7 @@
 #include "asset.hpp"
 #include "actor.hpp"
 #include "error.hpp"
+#include "scene_graphics.hpp"
 
 /*
 namespace splash_screen_graphics
@@ -20,7 +21,7 @@ namespace splash_screen_graphics
 }
 */
 
-class splash_screen_graphics
+class splash_screen_graphics : scene_graphics
 {
 public:
 	splash_screen_graphics ();
@@ -31,8 +32,6 @@ public:
 	void exit (std::vector<asset::mesh>& meshes);
 
 private:
-	egraphics_result create_renderpasses ();
-	egraphics_result create_framebuffers ();
 	egraphics_result create_shaders ();
 	egraphics_result create_descriptor_sets (std::vector<asset::mesh>& meshes);
 	egraphics_result create_graphics_pipeline_layout ();

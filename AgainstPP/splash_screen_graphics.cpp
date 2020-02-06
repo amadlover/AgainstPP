@@ -729,93 +729,6 @@ namespace splash_screen_graphics
 	}
 }*/
 
-egraphics_result splash_screen_graphics::create_renderpasses ()
-{
-	VkAttachmentDescription attachment_description = { 0 };
-
-	attachment_description.format = common_graphics::chosen_surface_format.format;
-	attachment_description.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-	attachment_description.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-	attachment_description.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-	attachment_description.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-	attachment_description.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	attachment_description.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-	attachment_description.samples = VK_SAMPLE_COUNT_1_BIT;
-
-	VkAttachmentReference color_reference;
-	color_reference.attachment = 0;
-	color_reference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-	VkSubpassDescription subpass_description = { 0 };
-
-	subpass_description.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-	subpass_description.inputAttachmentCount = 0;
-	subpass_description.preserveAttachmentCount = 0;
-	subpass_description.colorAttachmentCount = 1;
-	subpass_description.pColorAttachments = &color_reference;
-
-	/*VkSubpassDependency subpass_dependencies[2] = { 0 };
-
-	subpass_dependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
-	subpass_dependencies[0].dstSubpass = 0;
-	subpass_dependencies[0].srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-	subpass_dependencies[0].dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-	subpass_dependencies[0].srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
-	subpass_dependencies[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_MEMORY_WRITE_BIT;
-	subpass_dependencies[0].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
-
-	subpass_dependencies[1].srcSubpass = 0;
-	subpass_dependencies[1].dstSubpass = VK_SUBPASS_EXTERNAL;
-	subpass_dependencies[1].dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-	subpass_dependencies[1].srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-	subpass_dependencies[1].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_MEMORY_WRITE_BIT;
-	subpass_dependencies[1].srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
-	subpass_dependencies[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;*/
-
-	VkRenderPassCreateInfo create_info = { 0 };
-
-	create_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-	create_info.subpassCount = 1;
-	create_info.pSubpasses = &subpass_description;
-	create_info.attachmentCount = 1;
-	create_info.pAttachments = &attachment_description;
-
-	if (vkCreateRenderPass (common_graphics::graphics_device, &create_info, NULL, &render_pass) != VK_SUCCESS)
-	{
-		return egraphics_result::e_against_error_graphics_create_render_pass;
-	}
-
-	return egraphics_result::success;
-}
-
-egraphics_result splash_screen_graphics::create_framebuffers ()
-{
-	VkFramebufferCreateInfo create_info = { 0 };
-
-	create_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-	create_info.renderPass = render_pass;
-	create_info.attachmentCount = 1;
-	create_info.width = common_graphics::surface_extent.width;
-	create_info.height = common_graphics::surface_extent.height;
-	create_info.layers = 1;
-
-	swapchain_framebuffers.resize (common_graphics::swapchain_image_count);
-
-	VkImageView attachment;
-	for (uint32_t i = 0; i < common_graphics::swapchain_image_count; i++)
-	{
-		attachment = common_graphics::swapchain_imageviews[i];
-		create_info.pAttachments = &attachment;
-
-		if (vkCreateFramebuffer (common_graphics::graphics_device, &create_info, NULL, &swapchain_framebuffers[i]) != VK_SUCCESS)
-		{
-			return egraphics_result::e_against_error_graphics_create_framebuffers;
-		}
-	}
-
-	return egraphics_result::success;
-}
-
 egraphics_result splash_screen_graphics::create_shaders ()
 {
 	return egraphics_result::success;
@@ -921,8 +834,8 @@ egraphics_result splash_screen_graphics::init (std::vector<asset::mesh>& meshes)
 		)
 	);
 
-	CHECK_AGAINST_RESULT (create_renderpasses ());
-	CHECK_AGAINST_RESULT (create_framebuffers ());
+	CHECK_AGAINST_RESULT (create_basic_renderpass (&render_pass));
+	CHECK_AGAINST_RESULT (create_basic_framebuffers (swapchain_framebuffers, &render_pass));
 	CHECK_AGAINST_RESULT (create_shaders ());
 	CHECK_AGAINST_RESULT (create_descriptor_sets (meshes));
 	CHECK_AGAINST_RESULT (create_graphics_pipeline_layout ());
