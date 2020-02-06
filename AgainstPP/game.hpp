@@ -37,13 +37,13 @@ public:
 	void exit ();
 
 private:
-	void go_to_scene (e_scene_type new_scene);
+	egraphics_result go_to_scene (e_scene_type new_scene);
 
 	event_two_param<WPARAM, LPARAM> keyboard_event;
 
 	std::shared_ptr<splash_screen> splash_screen_ptr;
 	std::shared_ptr<main_menu> main_menu_ptr;
-	std::shared_ptr<scene> current_scene;
+	std::shared_ptr<scene> current_scene_ptr;
 
 	e_scene_type current_scene_type;
 };

@@ -37,8 +37,6 @@ private:
 	egraphics_result create_descriptor_sets (std::vector<asset::mesh>& meshes);
 	egraphics_result create_graphics_pipeline_layout ();
 	egraphics_result create_graphics_pipeline ();
-	egraphics_result create_sync_objects ();
-	egraphics_result allocate_command_buffers ();
 	egraphics_result update_command_buffers (const std::vector<asset::mesh>& meshes);
 
 	VkRenderPass render_pass;
@@ -50,11 +48,6 @@ private:
 	VkShaderModule fragment_shader_module;
 	VkDescriptorPool descriptor_pool;
 	std::vector<VkDescriptorSetLayout> descriptor_set_layouts;
-	std::vector<VkSemaphore> swapchain_signal_semaphores;
-	VkSemaphore swapchain_wait_semaphore;
-	//std::vector<VkFence> swapchain_fences;
-	std::vector<VkCommandBuffer> swapchain_command_buffers;
-
 	//VkFence acquire_next_image_fence;
 
 	VkBuffer vertex_index_buffer;

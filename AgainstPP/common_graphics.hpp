@@ -47,4 +47,9 @@ public:
 	static std::vector<VkImageView> swapchain_imageviews;
 	static VkCommandPool command_pool;
 	static VkSampler common_sampler;
+
+	static std::vector<VkSemaphore> swapchain_signal_semaphores;
+	static VkSemaphore swapchain_wait_semaphore;
+	static std::vector<VkCommandBuffer> swapchain_command_buffers;
+
 };

@@ -400,6 +400,9 @@ std::vector<VkImage> common_graphics::swapchain_images;
 std::vector<VkImageView> common_graphics::swapchain_imageviews;
 VkCommandPool common_graphics::command_pool;
 VkSampler common_graphics::common_sampler;
+std::vector<VkSemaphore> common_graphics::swapchain_signal_semaphores;
+VkSemaphore common_graphics::swapchain_wait_semaphore;
+std::vector<VkCommandBuffer> common_graphics::swapchain_command_buffers;
 
 std::vector<const char*> requested_instance_layers;
 std::vector<const char*> requested_instance_extensions;
@@ -800,6 +803,45 @@ egraphics_result create_command_pool ()
 	return egraphics_result::success;
 }
 
+egraphics_result create_sync_objects ()
+{
+	VkSemaphoreCreateInfo create_info = { 0 };
+	create_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+	common_graphics::swapchain_signal_semaphores.resize (common_graphics::swapchain_image_count);
+	for (uint32_t i = 0; i < common_graphics::swapchain_image_count; i++)
+	{
+		if (vkCreateSemaphore (common_graphics::graphics_device, &create_info, nullptr, &common_graphics::swapchain_signal_semaphores[i]) != VK_SUCCESS)
+		{
+			return egraphics_result::e_against_error_graphics_create_semaphore;
+		}
+	}
+
+	if (vkCreateSemaphore (common_graphics::graphics_device, &create_info, nullptr, &common_graphics::swapchain_wait_semaphore) != VK_SUCCESS)
+	{
+		return egraphics_result::e_against_error_graphics_create_semaphore;
+	}
+
+	return egraphics_result::success;
+}
+
+egraphics_result allocate_command_buffers ()
+{
+	VkCommandBufferAllocateInfo allocate_info = { 0 };
+	allocate_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+	allocate_info.commandPool = common_graphics::command_pool;
+	allocate_info.commandBufferCount = common_graphics::swapchain_image_count;
+
+	common_graphics::swapchain_command_buffers.resize (common_graphics::swapchain_image_count);
+
+	if (vkAllocateCommandBuffers (common_graphics::graphics_device, &allocate_info, common_graphics::swapchain_command_buffers.data ()) != VK_SUCCESS)
+	{
+		return egraphics_result::e_against_error_graphics_allocate_command_buffer;
+	}
+
+	return egraphics_result::success;
+}
+
 egraphics_result create_sampler ()
 {
 	VkSamplerCreateInfo create_info = { 0 };
@@ -845,7 +887,9 @@ egraphics_result common_graphics::init (HINSTANCE hInstance, HWND hWnd)
 	CHECK_AGAINST_RESULT (create_swapchain ());
 	CHECK_AGAINST_RESULT (create_swapchain_imageviews ());
 	CHECK_AGAINST_RESULT (create_command_pool ());
+	CHECK_AGAINST_RESULT (allocate_command_buffers ());
 	CHECK_AGAINST_RESULT (create_sampler ());
+	CHECK_AGAINST_RESULT (create_sync_objects ());
 
 	swapchain_images.shrink_to_fit ();
 	swapchain_imageviews.shrink_to_fit ();
@@ -855,7 +899,17 @@ egraphics_result common_graphics::init (HINSTANCE hInstance, HWND hWnd)
 
 void common_graphics::exit ()
 {
+
+	for (auto& swapchain_signal_semaphore : swapchain_signal_semaphores)
+	{
+		vkDestroySemaphore (common_graphics::graphics_device, swapchain_signal_semaphore, nullptr);
+	}
+	swapchain_signal_semaphores.clear ();
+	vkDestroySemaphore (common_graphics::graphics_device, swapchain_wait_semaphore, nullptr);
+
 	vkDestroySampler (graphics_device, common_sampler, nullptr);
+
+	vkFreeCommandBuffers (graphics_device, command_pool, swapchain_image_count, swapchain_command_buffers.data ());
 	vkDestroyCommandPool (graphics_device, command_pool, nullptr);
 	vkDestroySwapchainKHR (graphics_device, swapchain, nullptr);
 

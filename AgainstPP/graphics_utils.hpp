@@ -68,7 +68,7 @@ public:
 		VkBuffer* staging_vertex_index_buffer,
 		VkDeviceMemory* staging_vertex_index_memory,
 		VkBuffer* vertex_index_buffer,
-		VkBuffer* vertex_index_memory,
+		VkDeviceMemory* vertex_index_memory,
 		VkBuffer* staging_image_buffer,
 		VkDeviceMemory* staging_image_buffer_memory,
 		std::vector<VkImage>& scene_images,
