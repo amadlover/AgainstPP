@@ -3,5 +3,9 @@
 class entity
 {
 public:
-    static size_t unique_id;
+    entity ();
+    ~entity ();
+    
+    static size_t entity_tag;
+    size_t unique_id;
 };

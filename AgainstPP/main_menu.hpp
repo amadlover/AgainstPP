@@ -3,6 +3,7 @@
 #include "scene.hpp"
 #include "event.hpp"
 #include "asset.hpp"
+#include "main_menu_graphics.hpp"
 
 #include <Windows.h>
 #include <vector>
@@ -27,6 +28,9 @@ public:
 	void exit () override;
 
 protected:
-	egraphics_result update (const std::vector<asset::mesh>& meshes) override;
-	egraphics_result draw (const std::vector<asset::mesh>& meshes) override;
+	egraphics_result update () override;
+	egraphics_result draw () const override;
+
+	main_menu_graphics* graphics;
+	std::vector<asset::mesh> meshes;
 };

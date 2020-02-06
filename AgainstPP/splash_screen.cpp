@@ -52,10 +52,15 @@
 }
 */
 
-splash_screen::splash_screen ()
+splash_screen::splash_screen () : scene ()
 {
 	OutputDebugString (L"splash_screen::splash_screen\n");
 	++unique_id;
+}
+
+splash_screen::~splash_screen ()
+{
+	OutputDebugString (L"splash_screen::~splash_screen\n");
 }
 
 egraphics_result splash_screen::init ()
@@ -93,12 +98,12 @@ void splash_screen::process_keyboard_input (WPARAM wParam, LPARAM lParam)
 	}
 }
 
-egraphics_result splash_screen::update (const std::vector<asset::mesh>& meshes)
+egraphics_result splash_screen::update ()
 {
 	return egraphics_result::success;
 }
 
-egraphics_result splash_screen::draw (const std::vector<asset::mesh>& meshes)
+egraphics_result splash_screen::draw () const
 {
 	CHECK_AGAINST_RESULT (graphics->draw (meshes));
 	return egraphics_result::success;
@@ -106,8 +111,8 @@ egraphics_result splash_screen::draw (const std::vector<asset::mesh>& meshes)
 
 egraphics_result splash_screen::main_loop ()
 {
-	CHECK_AGAINST_RESULT (update (meshes));
-	CHECK_AGAINST_RESULT (draw (meshes));
+	CHECK_AGAINST_RESULT (update ());
+	CHECK_AGAINST_RESULT (draw ());
 
 	return egraphics_result::success;
 }
@@ -119,9 +124,4 @@ void splash_screen::exit ()
 	asset::destroy_meshes (meshes);
 	state = e_scene_state::exited;
 	delete graphics;
-}
-
-splash_screen::~splash_screen ()
-{
-	OutputDebugString (L"splash_screen::~splash_screen\n");
 }

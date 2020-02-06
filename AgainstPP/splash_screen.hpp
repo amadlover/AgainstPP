@@ -35,9 +35,8 @@ public:
 	void exit () override;
 
 protected:
-	egraphics_result update (const std::vector<asset::mesh>& meshes) override;
-	egraphics_result draw (const std::vector<asset::mesh>& meshes) override;
+	egraphics_result update () override;
+	egraphics_result draw () const override;
 
 	splash_screen_graphics* graphics;
-	std::vector<asset::mesh> meshes;
 };

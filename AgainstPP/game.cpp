@@ -7,6 +7,9 @@
 #include "graphics_utils.hpp"
 #include "event.hpp"
 #include "enums.hpp"
+#include "imgui.h"
+#include "imgui_impl_vulkan.h"
+#include "imgui_impl_win32.h"
 
 /*
 namespace game
@@ -126,10 +129,14 @@ namespace game
 }
 */
 
-game::game ()
+game::game () : entity ()
 {
 	OutputDebugString (L"game::game\n");
-	++unique_id;
+}
+
+game::~game ()
+{
+	OutputDebugString (L"game::~game\n");
 }
 
 egraphics_result game::go_to_scene (e_scene_type new_scene)
@@ -178,6 +185,11 @@ egraphics_result game::init (HINSTANCE hInstance, HWND hWnd)
 {
 	OutputDebugString (L"game::init\n");
 
+	IMGUI_CHECKVERSION ();
+	ImGui::CreateContext ();
+	ImGuiIO &io = ImGui::GetIO ();
+	ImGui_ImplWin32_Init (hWnd);
+
 	splash_screen_ptr = std::make_shared <splash_screen> ();
 	splash_screen_ptr->go_to_scene_event.add_binding (std::bind (&game::go_to_scene, this, std::placeholders::_1), unique_id);
 	keyboard_event.add_binding (std::bind (&splash_screen::process_keyboard_input, splash_screen_ptr.get (), std::placeholders::_1, std::placeholders::_2), splash_screen_ptr->unique_id);
@@ -219,10 +231,8 @@ void game::exit ()
 	keyboard_event.remove_binding (current_scene_ptr->unique_id);
 	current_scene_ptr->go_to_scene_event.remove_binding (unique_id);
 
+	ImGui_ImplVulkan_Shutdown ();
 	common_graphics::exit ();
-}
-
-game::~game ()
-{
-	OutputDebugString (L"game::~game\n");
+	ImGui_ImplWin32_Shutdown ();
+	ImGui::DestroyContext ();
 }

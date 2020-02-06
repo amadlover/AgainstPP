@@ -12,8 +12,8 @@
 class scene : public entity
 {
 public:
-    scene () {}
-    ~scene () {}
+    scene ();
+    ~scene ();
 
     virtual egraphics_result init () = 0;
     virtual void process_keyboard_input (WPARAM, LPARAM) = 0;
@@ -24,6 +24,8 @@ public:
     e_scene_state state;
 
 protected:
-    virtual egraphics_result update (const std::vector<asset::mesh>& meshes) = 0;
-    virtual egraphics_result draw (const std::vector<asset::mesh>& meshes) = 0;
+    virtual egraphics_result update () = 0;
+    virtual egraphics_result draw () const = 0;
+
+    std::vector<asset::mesh> meshes;
 };

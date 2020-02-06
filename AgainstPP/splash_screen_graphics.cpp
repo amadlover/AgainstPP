@@ -796,13 +796,6 @@ egraphics_result splash_screen_graphics::update_command_buffers (const std::vect
 splash_screen_graphics::splash_screen_graphics ()
 {
 	OutputDebugString (L"splash_screen_graphics::splash_screen_graphics\n");
-	
-	render_pass = VK_NULL_HANDLE;
-	graphics_pipeline_layout = VK_NULL_HANDLE;
-	graphics_pipeline = VK_NULL_HANDLE;
-	vertex_shader_module = VK_NULL_HANDLE;
-	fragment_shader_module = VK_NULL_HANDLE;
-	descriptor_pool = VK_NULL_HANDLE;
 
 	vertex_index_buffer = VK_NULL_HANDLE;
 	vertex_index_memory = VK_NULL_HANDLE;
@@ -834,8 +827,8 @@ egraphics_result splash_screen_graphics::init (std::vector<asset::mesh>& meshes)
 		)
 	);
 
-	CHECK_AGAINST_RESULT (create_basic_renderpass (&render_pass));
-	CHECK_AGAINST_RESULT (create_basic_framebuffers (swapchain_framebuffers, &render_pass));
+	CHECK_AGAINST_RESULT (create_renderpass (&render_pass));
+	CHECK_AGAINST_RESULT (create_framebuffers (swapchain_framebuffers, &render_pass));
 	CHECK_AGAINST_RESULT (create_shaders ());
 	CHECK_AGAINST_RESULT (create_descriptor_sets (meshes));
 	CHECK_AGAINST_RESULT (create_graphics_pipeline_layout ());
@@ -843,64 +836,7 @@ egraphics_result splash_screen_graphics::init (std::vector<asset::mesh>& meshes)
 	CHECK_AGAINST_RESULT (update_command_buffers (meshes));
 
 	swapchain_framebuffers.shrink_to_fit ();
-	//swapchain_fences.shrink_to_fit ();
 	common_graphics::swapchain_command_buffers.shrink_to_fit ();
-
-	return egraphics_result::success;
-}
-
-egraphics_result splash_screen_graphics::draw (const std::vector<asset::mesh>& meshes)
-{
-	uint32_t image_index;
-	VkResult result = vkAcquireNextImageKHR (
-		common_graphics::graphics_device,
-		common_graphics::swapchain,
-		UINT64_MAX,
-		common_graphics::swapchain_wait_semaphore,
-		VK_NULL_HANDLE,
-		&image_index
-	);
-
-	if (result != VK_SUCCESS)
-	{
-		if (result == VK_SUBOPTIMAL_KHR || result == VK_ERROR_OUT_OF_DATE_KHR)
-		{
-			return egraphics_result::success;
-		}
-		else
-		{
-			return egraphics_result::e_against_error_graphics_acquire_next_image;
-		}
-	}
-
-	VkPipelineStageFlags wait_dst_stage_mask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-	VkSubmitInfo submit_info = { 0 };
-	submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-	submit_info.commandBufferCount = 1;
-	submit_info.pCommandBuffers = &common_graphics::swapchain_command_buffers[image_index];
-	submit_info.pWaitDstStageMask = &wait_dst_stage_mask;
-	submit_info.signalSemaphoreCount = 1;
-	submit_info.pSignalSemaphores = &common_graphics::swapchain_signal_semaphores[image_index];
-	submit_info.waitSemaphoreCount = 1;
-	submit_info.pWaitSemaphores = &common_graphics::swapchain_wait_semaphore;
-	
-	if (vkQueueSubmit (common_graphics::graphics_queue, 1, &submit_info, VK_NULL_HANDLE) != VK_SUCCESS)
-	{
-		return egraphics_result::e_against_error_graphics_queue_submit;
-	}
-
-	VkPresentInfoKHR present_info = { 0 };
-	present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-	present_info.swapchainCount = 1;
-	present_info.pSwapchains = &common_graphics::swapchain;
-	present_info.pImageIndices = &image_index;
-	present_info.waitSemaphoreCount = 1;
-	present_info.pWaitSemaphores = &common_graphics::swapchain_signal_semaphores[image_index];
-
-	if (vkQueuePresentKHR (common_graphics::graphics_queue, &present_info) != VK_SUCCESS)
-	{
-		return egraphics_result::e_against_error_graphics_queue_present;
-	}
 
 	return egraphics_result::success;
 }
@@ -909,52 +845,7 @@ void splash_screen_graphics::exit (std::vector<asset::mesh>& meshes)
 {
 	OutputDebugString (L"splash_screen_graphics::exit\n");
 
-	vkQueueWaitIdle (common_graphics::graphics_queue);
-
-	pipeline_shader_stage_create_infos.clear ();
-
-	vkDestroyShaderModule (common_graphics::graphics_device, vertex_shader_module, nullptr);
-	vertex_shader_module = VK_NULL_HANDLE;
-	vkDestroyShaderModule (common_graphics::graphics_device, fragment_shader_module, nullptr);
-	fragment_shader_module = VK_NULL_HANDLE;
-
-	vkDestroyRenderPass (common_graphics::graphics_device, render_pass, nullptr);
-	render_pass = VK_NULL_HANDLE;
-
-	for (auto& swapchain_framebuffer : swapchain_framebuffers)
-	{
-		vkDestroyFramebuffer (common_graphics::graphics_device, swapchain_framebuffer, nullptr);
-		swapchain_framebuffer = VK_NULL_HANDLE;
-	}
-	swapchain_framebuffers.clear ();
-
-	vkDestroyPipelineLayout (common_graphics::graphics_device, graphics_pipeline_layout, nullptr);
-	vkDestroyPipeline (common_graphics::graphics_device, graphics_pipeline, nullptr);
-
-	/*for (auto& swapchain_fence : swapchain_fences)
-	{
-		vkDestroyFence (common_graphics::graphics_device, swapchain_fence, nullptr);
-		swapchain_fence = VK_NULL_HANDLE;
-	}
-	swapchain_fences.clear ();
-
-	vkDestroyFence (common_graphics::graphics_device, acquire_next_image_fence, nullptr);
-	acquire_next_image_fence = VK_NULL_HANDLE;*/
-
-	for (auto& mesh : meshes)
-	{
-		for (auto& graphics_primitive : mesh.graphics_primitves)
-		{
-			vkDestroyImageView (common_graphics::graphics_device, graphics_primitive.material.base_color_texture.texture_image.image_view, nullptr);
-			graphics_primitive.material.base_color_texture.texture_image.image_view = VK_NULL_HANDLE;
-			
-			if (graphics_primitive.material.base_color_texture.texture_image.descriptor_set != VK_NULL_HANDLE)
-			{
-				vkFreeDescriptorSets (common_graphics::graphics_device, descriptor_pool, 1, &graphics_primitive.material.base_color_texture.texture_image.descriptor_set);
-				graphics_primitive.material.base_color_texture.texture_image.descriptor_set = VK_NULL_HANDLE;
-			}
-		}
-	}
+	scene_graphics::exit (meshes);
 
 	graphics_utils::destroy_buffers_and_buffer_memory (common_graphics::graphics_device, &staging_vertex_index_buffer, 1, &staging_vertex_index_memory);
 	graphics_utils::destroy_buffers_and_buffer_memory (common_graphics::graphics_device, &staging_image_buffer, 1, &staging_image_buffer_memory);
