@@ -161,6 +161,10 @@ void log_error (egraphics_result err)
 		OutputDebugString (L"graphics error: create texture splashscreensampler\n");
 		break;
 
+	case egraphics_result::e_against_error_imgui_init:
+		OutputDebugString (L"graphics error:imgui init\n");
+		break;
+
 	case egraphics_result::e_against_error_system_allocate_memory:
 		OutputDebugString (L"system error: allocate memory\n");
 		break;

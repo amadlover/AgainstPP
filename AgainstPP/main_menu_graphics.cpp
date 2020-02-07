@@ -47,5 +47,5 @@ egraphics_result main_menu_graphics::draw (const std::vector<asset::mesh>& meshe
 
 void main_menu_graphics::exit (std::vector<asset::mesh>& meshes)
 {
-    scene_graphics::exit (meshes);
+    
 }

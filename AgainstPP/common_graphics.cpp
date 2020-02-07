@@ -406,6 +406,11 @@ std::vector<VkSemaphore> common_graphics::swapchain_signal_semaphores;
 VkSemaphore common_graphics::swapchain_wait_semaphore;
 std::vector<VkCommandBuffer> common_graphics::swapchain_command_buffers;
 
+VkDescriptorPool common_graphics::imgui_descriptor_pool;
+VkDescriptorSetLayout common_graphics::imgui_descriptor_set_layout;
+VkPipelineLayout common_graphics::imgui_pipeline_layout;
+VkPipeline common_graphics::imgui_pipeline;
+
 std::vector<const char*> requested_instance_layers;
 std::vector<const char*> requested_instance_extensions;
 std::vector<const char*> requested_device_extensions;
@@ -863,6 +868,39 @@ egraphics_result create_sampler ()
 	return egraphics_result::success;
 }
 
+egraphics_result create_imgui_pipeline ()
+{
+	VkDescriptorPoolSize pool_sizes[] =
+	{
+		{ VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
+		{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
+		{ VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },
+		{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000 },
+		{ VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
+		{ VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 },
+		{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
+		{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
+		{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
+		{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
+		{ VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 }
+	};
+	
+	VkDescriptorPoolCreateInfo pool_info = {};
+	pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+	pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+	pool_info.maxSets = 1000;
+	pool_info.poolSizeCount = 11;
+	pool_info.pPoolSizes = pool_sizes;
+
+	if (vkCreateDescriptorPool (common_graphics::graphics_device, &pool_info, nullptr, &common_graphics::imgui_descriptor_pool) != VK_SUCCESS)
+	{
+		return egraphics_result::e_against_error_graphics_create_descriptor_pool;	
+	}
+
+
+	return egraphics_result::success;
+}
+
 egraphics_result common_graphics::init (HINSTANCE hInstance, HWND hWnd)
 {
 	#ifdef DEBUG
@@ -890,6 +928,7 @@ egraphics_result common_graphics::init (HINSTANCE hInstance, HWND hWnd)
 	CHECK_AGAINST_RESULT (allocate_command_buffers ());
 	CHECK_AGAINST_RESULT (create_sampler ());
 	CHECK_AGAINST_RESULT (create_sync_objects ());
+	CHECK_AGAINST_RESULT (create_imgui_pipeline ());
 
 	swapchain_images.shrink_to_fit ();
 	swapchain_imageviews.shrink_to_fit ();
@@ -899,7 +938,7 @@ egraphics_result common_graphics::init (HINSTANCE hInstance, HWND hWnd)
 
 void common_graphics::exit ()
 {
-
+	vkDestroyDescriptorPool (common_graphics::graphics_device, imgui_descriptor_pool, nullptr);
 	for (auto& swapchain_signal_semaphore : swapchain_signal_semaphores)
 	{
 		vkDestroySemaphore (common_graphics::graphics_device, swapchain_signal_semaphore, nullptr);

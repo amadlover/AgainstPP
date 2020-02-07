@@ -44,6 +44,8 @@ enum egraphics_result
 	e_against_error_graphics_update_uniform_buffer,
 	e_against_error_graphics_create_sampler,
 
+	e_against_error_imgui_init,
+
 	e_against_error_system_allocate_memory,
 	e_against_error_system_create_file,
 	e_against_error_system_open_file
