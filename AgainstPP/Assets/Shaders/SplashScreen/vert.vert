@@ -8,7 +8,7 @@ layout (location = 1) out vec2 out_uv;
 
 void main ()
 {
-	gl_Position = vec4 (in_position, 1);
+	gl_Position = vec4 (in_position.x, in_position.y, 0.2, 1);
 
 	out_color = vec4 (1, 1, 1, 1);
 	out_uv = in_uv;

@@ -274,16 +274,16 @@ egraphics_result splash_screen::create_graphics_pipeline ()
 	rasterization_state.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 	rasterization_state.lineWidth = 1;
 	rasterization_state.polygonMode = VK_POLYGON_MODE_FILL;
-	rasterization_state.rasterizerDiscardEnable = VK_TRUE;
+	//rasterization_state.rasterizerDiscardEnable = VK_TRUE;
 
 	VkVertexInputBindingDescription vertex_binding_descriptions[2] = {};
 	vertex_binding_descriptions[0].binding = 0;
 	vertex_binding_descriptions[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-	vertex_binding_descriptions[0].stride = 0;
+	vertex_binding_descriptions[0].stride = sizeof (float) * 3;;
 
 	vertex_binding_descriptions[1].binding = 1;
 	vertex_binding_descriptions[1].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-	vertex_binding_descriptions[1].stride = 0;
+	vertex_binding_descriptions[1].stride = sizeof (float) * 2;;
 
 	VkVertexInputAttributeDescription vertex_attribute_descriptions[2] = {};
 	vertex_attribute_descriptions[0].binding = 0;
@@ -302,14 +302,16 @@ egraphics_result splash_screen::create_graphics_pipeline ()
 	vertex_input_state.vertexBindingDescriptionCount = 2;
 
 	VkViewport viewport = {};
-	//viewport.y = (float)common_graphics::surface_extent.height;
+	viewport.y = (float)common_graphics::surface_extent.height;
 	viewport.width = (float)common_graphics::surface_extent.width;
-	viewport.height = (float)common_graphics::surface_extent.height;
+	viewport.height = -(float)common_graphics::surface_extent.height;
+	viewport.maxDepth = 1;
 
 	VkRect2D scissor = {};
 	scissor.extent = common_graphics::surface_extent;
 	
 	VkPipelineViewportStateCreateInfo viewport_state = {};
+	viewport_state.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
 	viewport_state.viewportCount = 1;
 	viewport_state.pViewports = &viewport;
 	viewport_state.scissorCount = 1;
