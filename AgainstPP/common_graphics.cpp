@@ -130,7 +130,7 @@ egraphics_result populate_instance_layers_and_extensions ()
 
 egraphics_result create_instance ()
 {
-	VkApplicationInfo application_info = { 0 };
+	VkApplicationInfo application_info = {};
 
 	application_info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
 	application_info.pEngineName = "AGE";
@@ -139,7 +139,7 @@ egraphics_result create_instance ()
 	application_info.engineVersion = VK_MAKE_VERSION (1, 0, 0);
 	application_info.pApplicationName = "Against";
 
-	VkInstanceCreateInfo create_info = { 0 };
+	VkInstanceCreateInfo create_info = {};
 
 	create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 	create_info.enabledExtensionCount = requested_instance_extensions.size ();
@@ -159,7 +159,7 @@ egraphics_result create_instance ()
 
 egraphics_result setup_debug_utils_messenger ()
 {
-	VkDebugUtilsMessengerCreateInfoEXT create_info = { 0 };
+	VkDebugUtilsMessengerCreateInfoEXT create_info = {};
 
 	create_info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
 	create_info.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
@@ -220,7 +220,7 @@ egraphics_result get_physical_device ()
 
 egraphics_result create_surface (HINSTANCE HInstance, HWND HWnd)
 {
-	VkWin32SurfaceCreateInfoKHR create_info = { 0 };
+	VkWin32SurfaceCreateInfoKHR create_info = {};
 
 	create_info.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
 	create_info.hinstance = HInstance;
@@ -258,7 +258,7 @@ egraphics_result create_graphics_device ()
 {
 	float priorities = 1.f;
 
-	VkDeviceQueueCreateInfo queue_create_info = { 0 };
+	VkDeviceQueueCreateInfo queue_create_info = {};
 
 	queue_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
 	queue_create_info.pNext = NULL;
@@ -267,7 +267,7 @@ egraphics_result create_graphics_device ()
 	queue_create_info.queueFamilyIndex = common_graphics::graphics_queue_family_index;
 	queue_create_info.flags = 0;
 
-	VkDeviceCreateInfo create_info = { 0 };
+	VkDeviceCreateInfo create_info = {};
 
 	create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 	create_info.pNext = NULL;
@@ -334,7 +334,7 @@ egraphics_result create_swapchain ()
 
 	common_graphics::surface_extent = surface_capabilites.currentExtent;
 
-	VkSwapchainCreateInfoKHR create_info = { 0 };
+	VkSwapchainCreateInfoKHR create_info = {};
 
 	create_info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
 	create_info.surface = surface;
@@ -384,7 +384,7 @@ egraphics_result create_swapchain_imageviews ()
 	subresource_range.baseArrayLayer = 0;
 	subresource_range.layerCount = 1;
 
-	VkImageViewCreateInfo create_info = { 0 };
+	VkImageViewCreateInfo create_info = {};
 
 	create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 	create_info.format = common_graphics::chosen_surface_format.format;
@@ -406,7 +406,7 @@ egraphics_result create_swapchain_imageviews ()
 
 egraphics_result create_sampler ()
 {
-	VkSamplerCreateInfo create_info = { 0 };
+	VkSamplerCreateInfo create_info = {};
 	
 	create_info.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
 	create_info.minFilter = VK_FILTER_LINEAR;

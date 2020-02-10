@@ -175,9 +175,9 @@ namespace asset
 		tmp_graphics_primitive.material.name = model.materials[primitive.material].name;
 		tmp_graphics_primitive.material.base_color_texture.name = model.textures[model.materials[primitive.material].pbrMetallicRoughness.baseColorTexture.index].name;
 		auto model_image = model.images[model.textures[model.materials[primitive.material].pbrMetallicRoughness.baseColorTexture.index].source];
-		
+
 		image tmp_image;
-		
+
 		tmp_image.name = model_image.name;
 		tmp_image.width = model_image.width;
 		tmp_image.height = model_image.height;
@@ -277,7 +277,7 @@ namespace asset
 	}
 
 	egraphics_result import_meshes (
-		const std::string& file_path, 
+		const std::string& file_path,
 		std::vector<mesh>& meshes
 	)
 	{
@@ -295,10 +295,5 @@ namespace asset
 		import_physics_primitive (model, meshes);
 
 		return egraphics_result::success;
-	}
-
-	void destroy_meshes (std::vector<mesh>& meshes)
-	{
-		meshes.clear ();
 	}
 }

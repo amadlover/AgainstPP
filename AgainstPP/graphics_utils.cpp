@@ -23,7 +23,7 @@ egraphics_result get_memory_type_index (
 
 egraphics_result submit_one_time_cmd (VkQueue graphics_queue, VkCommandBuffer command_buffer)
 {
-	VkSubmitInfo submit_info = { 0 };
+	VkSubmitInfo submit_info = {};
 
 	submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 	submit_info.commandBufferCount = 1;
@@ -41,7 +41,7 @@ egraphics_result submit_one_time_cmd (VkQueue graphics_queue, VkCommandBuffer co
 
 egraphics_result get_one_time_command_buffer (VkDevice graphics_device, VkCommandPool command_pool, VkCommandBuffer* out_buffer)
 {
-	VkCommandBufferAllocateInfo command_buffer_allocate_info = { 0 };
+	VkCommandBufferAllocateInfo command_buffer_allocate_info = {};
 
 	command_buffer_allocate_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 	command_buffer_allocate_info.commandPool = command_pool;
@@ -55,7 +55,7 @@ egraphics_result get_one_time_command_buffer (VkDevice graphics_device, VkComman
 		return egraphics_result::e_against_error_graphics_allocate_command_buffer;
 	}
 
-	VkCommandBufferBeginInfo command_buffer_begin_info = { 0 };
+	VkCommandBufferBeginInfo command_buffer_begin_info = {};
 	command_buffer_begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 	command_buffer_begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
@@ -77,7 +77,7 @@ egraphics_result graphics_utils::create_vulkan_handles_for_meshes (
 	VkBuffer* vertex_index_buffer,
 	VkDeviceMemory* vertex_index_memory,
 	VkBuffer* staging_image_buffer,
-	VkDeviceMemory* staging_image_buffer_memory,
+	VkDeviceMemory* staging_image_memory,
 	std::vector<VkImage>& scene_images,
 	VkDeviceMemory* scene_images_memory
 )
@@ -244,7 +244,7 @@ egraphics_result graphics_utils::create_vulkan_handles_for_meshes (
 			1,
 			common_graphics::physical_device_memory_properties,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
-			staging_image_buffer_memory
+			staging_image_memory
 		)
 	);
 
@@ -259,7 +259,7 @@ egraphics_result graphics_utils::create_vulkan_handles_for_meshes (
 			CHECK_AGAINST_RESULT (
 				graphics_utils::map_data_to_device_memory (
 					common_graphics::graphics_device,
-					*staging_image_buffer_memory,
+					*staging_image_memory,
 					offset,
 					all_similar_images[as][s].pixels.size (),
 					all_similar_images[as][s].pixels.data ()
@@ -330,16 +330,16 @@ egraphics_result graphics_utils::create_vulkan_handles_for_meshes (
 		);
 	}
 
-	graphics_utils::destroy_buffers_and_buffer_memory (common_graphics::graphics_device, staging_image_buffer, 1, staging_image_buffer_memory);
+	graphics_utils::destroy_buffers_and_buffer_memory (common_graphics::graphics_device, staging_image_buffer, 1, staging_image_memory);
 
-	VkComponentMapping components = { 0 };
-	VkImageViewCreateInfo image_view_create_info = { 0 };
+	VkComponentMapping components = {};
+	VkImageViewCreateInfo image_view_create_info = {};
 	image_view_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 	image_view_create_info.components = components;
 	image_view_create_info.format = VK_FORMAT_R8G8B8A8_UNORM;
 	image_view_create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
 
-	VkImageSubresourceRange subresource_range = { 0 };
+	VkImageSubresourceRange subresource_range = {};
 	subresource_range.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 	subresource_range.layerCount = 1;
 	subresource_range.levelCount = 1;
@@ -379,7 +379,7 @@ egraphics_result graphics_utils::create_vulkan_handles_for_meshes (
 
 egraphics_result graphics_utils::create_buffer (VkDevice graphics_device, VkDeviceSize size, VkBufferUsageFlags usage, VkSharingMode sharing_mode, uint32_t graphics_queue_family_index, VkBuffer * out_buffer)
 {
-	VkBufferCreateInfo create_info = { 0 };
+	VkBufferCreateInfo create_info = {};
 
 	create_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 	create_info.size = size;
@@ -397,7 +397,7 @@ egraphics_result graphics_utils::create_buffer (VkDevice graphics_device, VkDevi
 
 egraphics_result graphics_utils::allocate_bind_buffer_memory (VkDevice graphics_device, VkBuffer* buffers, uint32_t buffer_count, VkPhysicalDeviceMemoryProperties physical_device_memory_properties, VkMemoryPropertyFlags required_types, VkDeviceMemory* out_memory)
 {
-	VkMemoryAllocateInfo memory_allocation = { 0 };
+	VkMemoryAllocateInfo memory_allocation = {};
 	memory_allocation.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 
 	std::vector<VkDeviceSize> offsets (buffer_count);
@@ -457,7 +457,7 @@ egraphics_result graphics_utils::create_image (
 	VkImage* out_image
 )
 {
-	VkImageCreateInfo create_info = { 0 };
+	VkImageCreateInfo create_info = {};
 
 	create_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 	create_info.arrayLayers = array_layers;
@@ -483,7 +483,7 @@ egraphics_result graphics_utils::create_image (
 
 egraphics_result graphics_utils::allocate_bind_image_memory (VkDevice graphics_device, VkImage* images, uint32_t image_count, VkPhysicalDeviceMemoryProperties physical_device_memory_properties, VkMemoryPropertyFlags required_types, VkDeviceMemory* out_memory)
 {
-	VkMemoryAllocateInfo memory_allocate_info = { 0 };
+	VkMemoryAllocateInfo memory_allocate_info = {};
 	memory_allocate_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 	std::vector<VkDeviceSize> offsets (image_count);
 
@@ -491,7 +491,7 @@ egraphics_result graphics_utils::allocate_bind_image_memory (VkDevice graphics_d
 	{
 		offsets[i] = memory_allocate_info.allocationSize;
 
-		VkMemoryRequirements memory_requirements = { 0 };
+		VkMemoryRequirements memory_requirements = {};
 		vkGetImageMemoryRequirements (graphics_device, images[i], &memory_requirements);
 		memory_allocate_info.allocationSize += memory_requirements.size;
 		CHECK_AGAINST_RESULT (get_memory_type_index (memory_requirements, physical_device_memory_properties, required_types, &memory_allocate_info.memoryTypeIndex));
@@ -527,7 +527,7 @@ egraphics_result graphics_utils::change_image_layout (
 	VkPipelineStageFlags dst_stage
 )
 {
-	VkCommandBufferAllocateInfo allocate_info = { 0 };
+	VkCommandBufferAllocateInfo allocate_info = {};
 	allocate_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 	allocate_info.commandPool = command_pool;
 	allocate_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
@@ -540,7 +540,7 @@ egraphics_result graphics_utils::change_image_layout (
 		return egraphics_result::e_against_error_graphics_allocate_command_buffer;
 	}
 
-	VkCommandBufferBeginInfo begin_info = { 0 };
+	VkCommandBufferBeginInfo begin_info = {};
 	begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 	begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
@@ -549,14 +549,14 @@ egraphics_result graphics_utils::change_image_layout (
 		return egraphics_result::e_against_error_graphics_begin_command_buffer;
 	}
 
-	VkImageSubresourceRange subresource_range = { 0 };
+	VkImageSubresourceRange subresource_range = {};
 	subresource_range.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 	subresource_range.baseMipLevel = 0;
 	subresource_range.levelCount = 1;
 	subresource_range.baseArrayLayer = 0;
 	subresource_range.layerCount = layer_count;
 
-	VkImageMemoryBarrier image_memory_barrier = { 0 };
+	VkImageMemoryBarrier image_memory_barrier = {};
 	image_memory_barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 	image_memory_barrier.image = image;
 	image_memory_barrier.srcQueueFamilyIndex = graphics_queue_family_index;
@@ -590,7 +590,7 @@ egraphics_result graphics_utils::copy_buffer_to_buffer (
 	VkCommandBuffer command_buffer;
 	CHECK_AGAINST_RESULT (get_one_time_command_buffer (graphics_device, command_pool, &command_buffer));
 
-	VkBufferCopy buffer_copy = { 0 };
+	VkBufferCopy buffer_copy = {};
 	buffer_copy.size = size;
 
 	vkCmdCopyBuffer (command_buffer, src_buffer, dst_buffer, 1, &buffer_copy);
@@ -618,11 +618,11 @@ egraphics_result graphics_utils::copy_buffer_to_image (
 	VkCommandBuffer command_buffer;
 	CHECK_AGAINST_RESULT (get_one_time_command_buffer (graphics_device, command_pool, &command_buffer));
 
-	VkImageSubresourceLayers subresource_layers = { 0 };
+	VkImageSubresourceLayers subresource_layers = {};
 	subresource_layers.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 	subresource_layers.layerCount = layer_count;
 	
-	VkBufferImageCopy buffer_image_copy = { 0 };
+	VkBufferImageCopy buffer_image_copy = {};
 	buffer_image_copy.bufferOffset = offset;
 	buffer_image_copy.imageExtent = extent;
 	buffer_image_copy.imageSubresource = subresource_layers;
@@ -652,7 +652,7 @@ egraphics_result graphics_utils::copy_image_to_image (
 	VkCommandBuffer command_buffer;
 	CHECK_AGAINST_RESULT (get_one_time_command_buffer (graphics_device, command_pool, &command_buffer));
 
-	VkImageCopy image_copy = { 0 };
+	VkImageCopy image_copy = {};
 	image_copy.extent = extent;
 
 	vkCmdCopyImage (
@@ -690,7 +690,7 @@ egraphics_result graphics_utils::create_shader (const char* file_path, VkDevice 
 	file.read ((char*)buff.get (), size);
 	file.close ();
 
-	VkPipelineShaderStageCreateInfo shader_stage_c_i = { 0 };
+	VkPipelineShaderStageCreateInfo shader_stage_c_i = {};
 
 	shader_stage_c_i.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	shader_stage_c_i.stage = shader_stage;

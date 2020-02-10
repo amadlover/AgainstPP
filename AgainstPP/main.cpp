@@ -44,7 +44,7 @@ int WINAPI wWinMain (
 	_In_ int cmd_show
 )
 {
-	WNDCLASS WC = { 0 };
+	WNDCLASS WC = {};
 
 	WC.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
 	WC.lpfnWndProc = window_proc;

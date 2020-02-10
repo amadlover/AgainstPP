@@ -56,6 +56,5 @@ egraphics_result main_menu::draw () const
 void main_menu::exit ()
 {
 	OutputDebugString (L"main_menu::exit\n");
-	asset::destroy_meshes (meshes);
 	state = e_scene_state::exited;
 }

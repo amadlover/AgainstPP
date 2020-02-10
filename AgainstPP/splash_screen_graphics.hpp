@@ -38,5 +38,5 @@ private:
 	VkDeviceMemory scene_images_memory;
 
 	VkBuffer staging_image_buffer;
-	VkDeviceMemory staging_image_buffer_memory;
+	VkDeviceMemory staging_image_memory;
 };

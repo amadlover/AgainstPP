@@ -110,5 +110,4 @@ namespace asset
 	};
 
 	egraphics_result import_meshes (const std::string& file_path, std::vector<mesh>& meshes);
-	void destroy_meshes (std::vector<mesh>& meshes);
 }

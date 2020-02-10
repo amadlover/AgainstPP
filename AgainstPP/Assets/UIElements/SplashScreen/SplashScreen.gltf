@@ -8,165 +8,41 @@
         {
             "name" : "Scene",
             "nodes" : [
-                0,
-                1
+                0
             ]
         }
     ],
     "nodes" : [
         {
             "mesh" : 0,
-            "name" : "Cube"
-        },
-        {
-            "mesh" : 1,
-            "name" : "CS_Cube_00"
+            "name" : "Plane"
         }
     ],
     "materials" : [
         {
             "doubleSided" : true,
-            "name" : "Top",
+            "name" : "Material",
             "pbrMetallicRoughness" : {
                 "baseColorTexture" : {
                     "index" : 0,
                     "texCoord" : 0
                 },
                 "metallicFactor" : 0,
-                "roughnessFactor" : 0.5
-            }
-        },
-        {
-            "doubleSided" : true,
-            "name" : "Front",
-            "pbrMetallicRoughness" : {
-                "baseColorTexture" : {
-                    "index" : 1,
-                    "texCoord" : 0
-                },
-                "metallicFactor" : 0,
-                "roughnessFactor" : 0.5
-            }
-        },
-        {
-            "doubleSided" : true,
-            "name" : "Right",
-            "pbrMetallicRoughness" : {
-                "baseColorTexture" : {
-                    "index" : 2,
-                    "texCoord" : 0
-                },
-                "metallicFactor" : 0,
-                "roughnessFactor" : 0.5
-            }
-        },
-        {
-            "doubleSided" : true,
-            "name" : "Down",
-            "pbrMetallicRoughness" : {
-                "baseColorTexture" : {
-                    "index" : 3,
-                    "texCoord" : 0
-                },
-                "metallicFactor" : 0,
-                "roughnessFactor" : 0.5
-            }
-        },
-        {
-            "doubleSided" : true,
-            "name" : "Left",
-            "pbrMetallicRoughness" : {
-                "baseColorTexture" : {
-                    "index" : 4,
-                    "texCoord" : 0
-                },
-                "metallicFactor" : 0,
-                "roughnessFactor" : 0.5
-            }
-        },
-        {
-            "doubleSided" : true,
-            "name" : "Back",
-            "pbrMetallicRoughness" : {
-                "baseColorTexture" : {
-                    "index" : 5,
-                    "texCoord" : 0
-                },
-                "metallicFactor" : 0,
-                "roughnessFactor" : 0.5
+                "roughnessFactor" : 0.4000000059604645
             }
         }
     ],
     "meshes" : [
         {
-            "name" : "Cube",
+            "name" : "Plane",
             "primitives" : [
                 {
                     "attributes" : {
                         "POSITION" : 0,
-                        "NORMAL" : 1,
-                        "TEXCOORD_0" : 2
+                        "TEXCOORD_0" : 1
                     },
-                    "indices" : 3,
+                    "indices" : 2,
                     "material" : 0
-                },
-                {
-                    "attributes" : {
-                        "POSITION" : 4,
-                        "NORMAL" : 5,
-                        "TEXCOORD_0" : 6
-                    },
-                    "indices" : 3,
-                    "material" : 1
-                },
-                {
-                    "attributes" : {
-                        "POSITION" : 7,
-                        "NORMAL" : 8,
-                        "TEXCOORD_0" : 9
-                    },
-                    "indices" : 3,
-                    "material" : 2
-                },
-                {
-                    "attributes" : {
-                        "POSITION" : 10,
-                        "NORMAL" : 11,
-                        "TEXCOORD_0" : 12
-                    },
-                    "indices" : 3,
-                    "material" : 3
-                },
-                {
-                    "attributes" : {
-                        "POSITION" : 13,
-                        "NORMAL" : 14,
-                        "TEXCOORD_0" : 15
-                    },
-                    "indices" : 3,
-                    "material" : 4
-                },
-                {
-                    "attributes" : {
-                        "POSITION" : 16,
-                        "NORMAL" : 17,
-                        "TEXCOORD_0" : 18
-                    },
-                    "indices" : 3,
-                    "material" : 5
-                }
-            ]
-        },
-        {
-            "name" : "Cube.001",
-            "primitives" : [
-                {
-                    "attributes" : {
-                        "POSITION" : 19,
-                        "NORMAL" : 20,
-                        "TEXCOORD_0" : 21
-                    },
-                    "indices" : 22
                 }
             ]
         }
@@ -174,53 +50,13 @@
     "textures" : [
         {
             "source" : 0
-        },
-        {
-            "source" : 1
-        },
-        {
-            "source" : 2
-        },
-        {
-            "source" : 3
-        },
-        {
-            "source" : 4
-        },
-        {
-            "source" : 5
         }
     ],
     "images" : [
         {
             "mimeType" : "image/png",
-            "name" : "top",
-            "uri" : "top.png"
-        },
-        {
-            "mimeType" : "image/png",
-            "name" : "front",
-            "uri" : "front.png"
-        },
-        {
-            "mimeType" : "image/png",
-            "name" : "right",
-            "uri" : "right.png"
-        },
-        {
-            "mimeType" : "image/png",
-            "name" : "down",
-            "uri" : "down.png"
-        },
-        {
-            "mimeType" : "image/png",
-            "name" : "left",
-            "uri" : "left.png"
-        },
-        {
-            "mimeType" : "image/png",
-            "name" : "back",
-            "uri" : "back.png"
+            "name" : "SplashScreen.tga",
+            "uri" : "SplashScreen_tga.png"
         }
     ],
     "accessors" : [
@@ -229,14 +65,14 @@
             "componentType" : 5126,
             "count" : 4,
             "max" : [
-                1,
-                1,
-                1
+                0.5,
+                0.5,
+                0
             ],
             "min" : [
-                -1,
-                1,
-                -1
+                -0.5,
+                -0.5,
+                0
             ],
             "type" : "VEC3"
         },
@@ -244,192 +80,12 @@
             "bufferView" : 1,
             "componentType" : 5126,
             "count" : 4,
-            "type" : "VEC3"
+            "type" : "VEC2"
         },
         {
             "bufferView" : 2,
-            "componentType" : 5126,
-            "count" : 4,
-            "type" : "VEC2"
-        },
-        {
-            "bufferView" : 3,
             "componentType" : 5123,
             "count" : 6,
-            "type" : "SCALAR"
-        },
-        {
-            "bufferView" : 4,
-            "componentType" : 5126,
-            "count" : 4,
-            "max" : [
-                1,
-                1,
-                -1
-            ],
-            "min" : [
-                -1,
-                -1,
-                -1
-            ],
-            "type" : "VEC3"
-        },
-        {
-            "bufferView" : 5,
-            "componentType" : 5126,
-            "count" : 4,
-            "type" : "VEC3"
-        },
-        {
-            "bufferView" : 6,
-            "componentType" : 5126,
-            "count" : 4,
-            "type" : "VEC2"
-        },
-        {
-            "bufferView" : 7,
-            "componentType" : 5126,
-            "count" : 4,
-            "max" : [
-                1,
-                1,
-                1
-            ],
-            "min" : [
-                1,
-                -1,
-                -1
-            ],
-            "type" : "VEC3"
-        },
-        {
-            "bufferView" : 8,
-            "componentType" : 5126,
-            "count" : 4,
-            "type" : "VEC3"
-        },
-        {
-            "bufferView" : 9,
-            "componentType" : 5126,
-            "count" : 4,
-            "type" : "VEC2"
-        },
-        {
-            "bufferView" : 10,
-            "componentType" : 5126,
-            "count" : 4,
-            "max" : [
-                1,
-                -1,
-                1
-            ],
-            "min" : [
-                -1,
-                -1,
-                -1
-            ],
-            "type" : "VEC3"
-        },
-        {
-            "bufferView" : 11,
-            "componentType" : 5126,
-            "count" : 4,
-            "type" : "VEC3"
-        },
-        {
-            "bufferView" : 12,
-            "componentType" : 5126,
-            "count" : 4,
-            "type" : "VEC2"
-        },
-        {
-            "bufferView" : 13,
-            "componentType" : 5126,
-            "count" : 4,
-            "max" : [
-                -1,
-                1,
-                1
-            ],
-            "min" : [
-                -1,
-                -1,
-                -1
-            ],
-            "type" : "VEC3"
-        },
-        {
-            "bufferView" : 14,
-            "componentType" : 5126,
-            "count" : 4,
-            "type" : "VEC3"
-        },
-        {
-            "bufferView" : 15,
-            "componentType" : 5126,
-            "count" : 4,
-            "type" : "VEC2"
-        },
-        {
-            "bufferView" : 16,
-            "componentType" : 5126,
-            "count" : 4,
-            "max" : [
-                1,
-                1,
-                1
-            ],
-            "min" : [
-                -1,
-                -1,
-                1
-            ],
-            "type" : "VEC3"
-        },
-        {
-            "bufferView" : 17,
-            "componentType" : 5126,
-            "count" : 4,
-            "type" : "VEC3"
-        },
-        {
-            "bufferView" : 18,
-            "componentType" : 5126,
-            "count" : 4,
-            "type" : "VEC2"
-        },
-        {
-            "bufferView" : 19,
-            "componentType" : 5126,
-            "count" : 24,
-            "max" : [
-                1,
-                1,
-                1
-            ],
-            "min" : [
-                -1,
-                -1,
-                -1
-            ],
-            "type" : "VEC3"
-        },
-        {
-            "bufferView" : 20,
-            "componentType" : 5126,
-            "count" : 24,
-            "type" : "VEC3"
-        },
-        {
-            "bufferView" : 21,
-            "componentType" : 5126,
-            "count" : 24,
-            "type" : "VEC2"
-        },
-        {
-            "bufferView" : 22,
-            "componentType" : 5123,
-            "count" : 36,
             "type" : "SCALAR"
         }
     ],
@@ -441,118 +97,18 @@
         },
         {
             "buffer" : 0,
-            "byteLength" : 48,
+            "byteLength" : 32,
             "byteOffset" : 48
         },
         {
             "buffer" : 0,
-            "byteLength" : 32,
-            "byteOffset" : 96
-        },
-        {
-            "buffer" : 0,
             "byteLength" : 12,
-            "byteOffset" : 128
-        },
-        {
-            "buffer" : 0,
-            "byteLength" : 48,
-            "byteOffset" : 140
-        },
-        {
-            "buffer" : 0,
-            "byteLength" : 48,
-            "byteOffset" : 188
-        },
-        {
-            "buffer" : 0,
-            "byteLength" : 32,
-            "byteOffset" : 236
-        },
-        {
-            "buffer" : 0,
-            "byteLength" : 48,
-            "byteOffset" : 268
-        },
-        {
-            "buffer" : 0,
-            "byteLength" : 48,
-            "byteOffset" : 316
-        },
-        {
-            "buffer" : 0,
-            "byteLength" : 32,
-            "byteOffset" : 364
-        },
-        {
-            "buffer" : 0,
-            "byteLength" : 48,
-            "byteOffset" : 396
-        },
-        {
-            "buffer" : 0,
-            "byteLength" : 48,
-            "byteOffset" : 444
-        },
-        {
-            "buffer" : 0,
-            "byteLength" : 32,
-            "byteOffset" : 492
-        },
-        {
-            "buffer" : 0,
-            "byteLength" : 48,
-            "byteOffset" : 524
-        },
-        {
-            "buffer" : 0,
-            "byteLength" : 48,
-            "byteOffset" : 572
-        },
-        {
-            "buffer" : 0,
-            "byteLength" : 32,
-            "byteOffset" : 620
-        },
-        {
-            "buffer" : 0,
-            "byteLength" : 48,
-            "byteOffset" : 652
-        },
-        {
-            "buffer" : 0,
-            "byteLength" : 48,
-            "byteOffset" : 700
-        },
-        {
-            "buffer" : 0,
-            "byteLength" : 32,
-            "byteOffset" : 748
-        },
-        {
-            "buffer" : 0,
-            "byteLength" : 288,
-            "byteOffset" : 780
-        },
-        {
-            "buffer" : 0,
-            "byteLength" : 288,
-            "byteOffset" : 1068
-        },
-        {
-            "buffer" : 0,
-            "byteLength" : 192,
-            "byteOffset" : 1356
-        },
-        {
-            "buffer" : 0,
-            "byteLength" : 72,
-            "byteOffset" : 1548
+            "byteOffset" : 80
         }
     ],
     "buffers" : [
         {
-            "byteLength" : 1620,
+            "byteLength" : 92,
             "uri" : "SplashScreen.bin"
         }
     ]
