@@ -1,11 +1,20 @@
 #pragma once
 
-#include <cstdint>
+#include "asset.hpp"
+#include <glm/mat4x4.hpp>
 
-namespace actor
+class actor
 {
-	struct actor
-	{
-		uint32_t asset_id;
-	};
-}
+public:
+    actor ();
+    actor (asset::mesh* mesh);
+    ~actor ();
+
+    egraphics_result update ();
+    egraphics_result draw ();
+
+    glm::mat4 transformation_matrix;
+
+private:
+    asset::mesh* mesh;
+};

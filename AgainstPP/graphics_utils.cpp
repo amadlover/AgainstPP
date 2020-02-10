@@ -690,6 +690,16 @@ egraphics_result graphics_utils::create_shader (const char* file_path, VkDevice 
 	file.read ((char*)buff.get (), size);
 	file.close ();
 
+	VkShaderModuleCreateInfo shader_module_create_info = {};
+	shader_module_create_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+	shader_module_create_info.codeSize = size;
+	shader_module_create_info.pCode = reinterpret_cast<uint32_t*>(buff.get ());
+
+	if (vkCreateShaderModule (graphics_device, &shader_module_create_info, nullptr, shader_module) != VK_SUCCESS)
+	{
+		return egraphics_result::e_against_error_graphics_create_shader_module;
+	}
+
 	VkPipelineShaderStageCreateInfo shader_stage_c_i = {};
 
 	shader_stage_c_i.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;

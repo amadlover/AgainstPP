@@ -49,6 +49,7 @@ protected:
 
 	std::vector<asset::mesh> meshes;
 	std::vector<VkImage> scene_images;
+	std::vector<actor> actors;
 	
 	VkBuffer staging_vertex_index_buffer;
 	VkDeviceMemory staging_vertex_index_memory;

@@ -29,7 +29,8 @@ splash_screen::splash_screen () : scene ()
 	
 	vertex_index_buffer = VK_NULL_HANDLE;
 	vertex_index_memory = VK_NULL_HANDLE;
-	
+
+	scene_images_memory = VK_NULL_HANDLE;
 }
 
 splash_screen::~splash_screen ()
@@ -172,25 +173,168 @@ egraphics_result splash_screen::create_descriptors ()
 {
 	VkDescriptorPoolSize pool_size[2] = { {},{} };
 	pool_size[0].descriptorCount = 1;
-	pool_size[0].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+	pool_size[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 	pool_size[1].descriptorCount = 1;
-	pool_size[1].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	pool_size[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 
-	VkDescriptorPoolCreateInfo descriptor_pool_create_info = {};
-	descriptor_pool_create_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-	descriptor_pool_create_info.poolSizeCount = 2;
-	descriptor_pool_create_info.pPoolSizes = pool_size;
-	descriptor_pool_create_info.maxSets = 1;
-	
-	if (vkCreateDescriptorPool (common_graphics::graphics_device, &descriptor_pool_create_info, nullptr, &descriptor_pool) != VK_SUCCESS)
+	VkDescriptorPoolCreateInfo pool_create_info = {};
+	pool_create_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+	pool_create_info.poolSizeCount = 2;
+	pool_create_info.pPoolSizes = pool_size;
+	pool_create_info.maxSets = 1;
+	pool_create_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+
+	if (vkCreateDescriptorPool (common_graphics::graphics_device, &pool_create_info, nullptr, &descriptor_pool) != VK_SUCCESS)
 	{
 		return egraphics_result::e_against_error_graphics_create_descriptor_pool;
 	}
+
+	VkDescriptorSetLayoutBinding set_layout_binding = {};
+	set_layout_binding.binding = 0;
+	set_layout_binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+	set_layout_binding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+	set_layout_binding.descriptorCount = 1;
+
+	VkDescriptorSetLayoutCreateInfo set_layout_create_info = {};
+	set_layout_create_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+	set_layout_create_info.bindingCount = 1;
+	set_layout_create_info.pBindings = &set_layout_binding;
+
+	if (vkCreateDescriptorSetLayout (common_graphics::graphics_device, &set_layout_create_info, nullptr, &descriptor_set_layout) != VK_SUCCESS)
+	{
+		return egraphics_result::e_against_error_graphics_create_descriptor_set_layout;
+	}
+
+	for (auto& mesh : meshes)
+	{
+		for (auto& graphics_primitive : mesh.graphics_primitves)
+		{
+			VkDescriptorSetAllocateInfo set_allocate_info = {};
+			set_allocate_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+			set_allocate_info.descriptorPool = descriptor_pool;
+			set_allocate_info.descriptorSetCount = 1;
+			set_allocate_info.pSetLayouts = &descriptor_set_layout;
+
+			vkAllocateDescriptorSets (common_graphics::graphics_device, &set_allocate_info, &graphics_primitive.material.base_color_texture.texture_image.descriptor_set);
+
+			VkDescriptorImageInfo image_info = {};
+			image_info.imageView = graphics_primitive.material.base_color_texture.texture_image.image_view;
+			image_info.sampler = common_graphics::common_sampler;
+			image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+			VkWriteDescriptorSet descriptor_write = {};
+			descriptor_write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descriptor_write.descriptorCount = 1;
+			descriptor_write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+			descriptor_write.dstSet = graphics_primitive.material.base_color_texture.texture_image.descriptor_set;
+			descriptor_write.dstBinding = 0;
+			descriptor_write.pImageInfo = &image_info;
+
+			vkUpdateDescriptorSets (common_graphics::graphics_device, 1, &descriptor_write, 0, nullptr);
+		}
+	}
+
 	return egraphics_result::success;
 }
 
 egraphics_result splash_screen::create_graphics_pipeline ()
 {
+	VkPipelineLayoutCreateInfo layout_create_info = {};
+	layout_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+	layout_create_info.setLayoutCount = 1;
+	layout_create_info.pSetLayouts = &descriptor_set_layout;
+
+	if (vkCreatePipelineLayout (common_graphics::graphics_device, &layout_create_info, nullptr, &graphics_pipeline_layout) != VK_SUCCESS)
+	{
+		return egraphics_result::e_against_error_graphics_create_graphics_pipeline_layout;
+	}
+
+	VkPipelineColorBlendAttachmentState color_blend_state_attachment = {};
+	color_blend_state_attachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+
+	VkPipelineColorBlendStateCreateInfo color_blend_state = {};
+	color_blend_state.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+	color_blend_state.attachmentCount = 1;
+	color_blend_state.pAttachments = &color_blend_state_attachment;
+
+	VkPipelineDepthStencilStateCreateInfo depth_stencil_state = {};
+	depth_stencil_state.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+
+	VkPipelineInputAssemblyStateCreateInfo input_assembly_state = {};
+	input_assembly_state.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+	input_assembly_state.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+
+	VkPipelineMultisampleStateCreateInfo multi_sample_state = {};
+	multi_sample_state.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+	multi_sample_state.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+
+	VkPipelineRasterizationStateCreateInfo rasterization_state = {};
+	rasterization_state.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+	rasterization_state.cullMode = VK_CULL_MODE_BACK_BIT;
+	rasterization_state.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+	rasterization_state.lineWidth = 1;
+	rasterization_state.polygonMode = VK_POLYGON_MODE_FILL;
+	rasterization_state.rasterizerDiscardEnable = VK_TRUE;
+
+	VkVertexInputBindingDescription vertex_binding_descriptions[2] = {};
+	vertex_binding_descriptions[0].binding = 0;
+	vertex_binding_descriptions[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+	vertex_binding_descriptions[0].stride = 0;
+
+	vertex_binding_descriptions[1].binding = 1;
+	vertex_binding_descriptions[1].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+	vertex_binding_descriptions[1].stride = 0;
+
+	VkVertexInputAttributeDescription vertex_attribute_descriptions[2] = {};
+	vertex_attribute_descriptions[0].binding = 0;
+	vertex_attribute_descriptions[0].location = 0;
+	vertex_attribute_descriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
+	
+	vertex_attribute_descriptions[1].binding = 1;
+	vertex_attribute_descriptions[1].location = 1;
+	vertex_attribute_descriptions[1].format = VK_FORMAT_R32G32_SFLOAT;
+
+	VkPipelineVertexInputStateCreateInfo vertex_input_state = {};
+	vertex_input_state.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+	vertex_input_state.pVertexAttributeDescriptions = vertex_attribute_descriptions;
+	vertex_input_state.pVertexBindingDescriptions = vertex_binding_descriptions;
+	vertex_input_state.vertexAttributeDescriptionCount = 2;
+	vertex_input_state.vertexBindingDescriptionCount = 2;
+
+	VkViewport viewport = {};
+	//viewport.y = (float)common_graphics::surface_extent.height;
+	viewport.width = (float)common_graphics::surface_extent.width;
+	viewport.height = (float)common_graphics::surface_extent.height;
+
+	VkRect2D scissor = {};
+	scissor.extent = common_graphics::surface_extent;
+	
+	VkPipelineViewportStateCreateInfo viewport_state = {};
+	viewport_state.viewportCount = 1;
+	viewport_state.pViewports = &viewport;
+	viewport_state.scissorCount = 1;
+	viewport_state.pScissors = &scissor;
+
+	VkGraphicsPipelineCreateInfo pipeline_create_info = {};
+	pipeline_create_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+	pipeline_create_info.layout = graphics_pipeline_layout;
+	pipeline_create_info.pColorBlendState = &color_blend_state;
+	pipeline_create_info.pDepthStencilState = &depth_stencil_state;
+	pipeline_create_info.pDynamicState = nullptr;
+	pipeline_create_info.pInputAssemblyState = &input_assembly_state;
+	pipeline_create_info.pMultisampleState = &multi_sample_state;
+	pipeline_create_info.pRasterizationState = &rasterization_state;
+	pipeline_create_info.pTessellationState = nullptr;
+	pipeline_create_info.stageCount = 2;
+	pipeline_create_info.renderPass = render_pass;
+	pipeline_create_info.pVertexInputState = &vertex_input_state;
+	pipeline_create_info.pViewportState = &viewport_state;
+	pipeline_create_info.pStages = shader_stages_create_infos;
+	
+	if (vkCreateGraphicsPipelines (common_graphics::graphics_device, VK_NULL_HANDLE, 1, &pipeline_create_info, nullptr, &graphics_pipeline) != VK_SUCCESS)
+	{
+		return egraphics_result::e_against_error_graphics_create_graphics_pipeline;
+	}
 	return egraphics_result::success;
 }
 
@@ -210,7 +354,6 @@ egraphics_result splash_screen::allocate_command_buffers ()
 
 	return egraphics_result::success;
 }
-
 
 egraphics_result splash_screen::update_command_buffers ()
 {
@@ -237,6 +380,21 @@ egraphics_result splash_screen::update_command_buffers ()
 		}
 
 		vkCmdBeginRenderPass (swapchain_command_buffers[i], &render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
+		
+		vkCmdBindPipeline (swapchain_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline);
+
+		for (const auto& mesh : meshes)
+		{
+			for (const auto& graphics_primtive : mesh.graphics_primitves)
+			{
+				vkCmdBindDescriptorSets (swapchain_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_layout, 0, 1, &graphics_primtive.material.base_color_texture.texture_image.descriptor_set, 0, nullptr);
+				vkCmdBindVertexBuffers (swapchain_command_buffers[i], 0, 1, &vertex_index_buffer, &graphics_primtive.positions_offset);
+				vkCmdBindVertexBuffers (swapchain_command_buffers[i], 1, 1, &vertex_index_buffer, &graphics_primtive.uv0s_offset);
+				vkCmdBindIndexBuffer (swapchain_command_buffers[i], vertex_index_buffer, graphics_primtive.indices_offset, graphics_primtive.indices_type);
+				vkCmdDrawIndexed (swapchain_command_buffers[i], graphics_primtive.indices_count, 1, 0, 0, 0);
+			}
+		}
+
 		vkCmdEndRenderPass (swapchain_command_buffers[i]);
 
 		if (vkEndCommandBuffer (swapchain_command_buffers[i]) != VK_SUCCESS)
@@ -408,8 +566,29 @@ void splash_screen::exit ()
 		{
 			vkDestroyImageView (common_graphics::graphics_device, graphics_primitive.material.base_color_texture.texture_image.image_view, nullptr);
 			graphics_primitive.material.base_color_texture.texture_image.image_view = VK_NULL_HANDLE;
+
+			vkFreeDescriptorSets (common_graphics::graphics_device, descriptor_pool, 1, &graphics_primitive.material.base_color_texture.texture_image.descriptor_set);
+			graphics_primitive.material.base_color_texture.texture_image.descriptor_set = VK_NULL_HANDLE;
 		}
 	}
+
+	vkDestroyDescriptorSetLayout (common_graphics::graphics_device, descriptor_set_layout, nullptr);
+	descriptor_set_layout = VK_NULL_HANDLE;
+
+	vkDestroyDescriptorPool (common_graphics::graphics_device, descriptor_pool, nullptr);
+	descriptor_pool = VK_NULL_HANDLE;
+
+	vkDestroyShaderModule (common_graphics::graphics_device, vertex_shader_module, nullptr);
+	vertex_shader_module = VK_NULL_HANDLE;
+
+	vkDestroyShaderModule (common_graphics::graphics_device, fragment_shader_module, nullptr);
+	fragment_shader_module = VK_NULL_HANDLE;
+
+	vkDestroyPipelineLayout (common_graphics::graphics_device, graphics_pipeline_layout, nullptr);
+	graphics_pipeline_layout = VK_NULL_HANDLE;
+
+	vkDestroyPipeline (common_graphics::graphics_device, graphics_pipeline, nullptr);
+	graphics_pipeline = VK_NULL_HANDLE;
 
 	graphics_utils::destroy_buffers_and_buffer_memory (common_graphics::graphics_device, &staging_vertex_index_buffer, 1, &staging_vertex_index_memory);
 	graphics_utils::destroy_buffers_and_buffer_memory (common_graphics::graphics_device, &vertex_index_buffer, 1, &vertex_index_memory);

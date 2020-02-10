@@ -1,8 +1,9 @@
 #pragma once
 
-#include <string>
 #include "error.hpp"
+#include "entity.hpp"
 
+#include <string>
 #include <vector>
 #include <vulkan/vulkan.h>
 
@@ -58,6 +59,7 @@ namespace asset
 			buffer = VK_NULL_HANDLE;
 			buffer_memory = VK_NULL_HANDLE;
 			indices_type = VK_INDEX_TYPE_UINT16;
+			indices_count = 0;
 		}
 
 		std::vector<uint8_t> positions;
@@ -67,6 +69,8 @@ namespace asset
 		std::vector<uint8_t> indices;
 		VkIndexType indices_type;
 		material material;
+
+		uint32_t indices_count;
 
 		VkBuffer* buffer;
 		VkDeviceMemory* buffer_memory;
@@ -88,10 +92,13 @@ namespace asset
 			buffer = VK_NULL_HANDLE;
 			buffer_memory = VK_NULL_HANDLE;
 			indices_type = VK_INDEX_TYPE_UINT16;
+			indices_count = 0;
 		}
 		std::vector<uint8_t> positions;
 		std::vector<uint8_t> indices;
 		VkIndexType indices_type;
+
+		uint32_t indices_count;
 
 		VkBuffer* buffer;
 		VkDeviceMemory* buffer_memory;
@@ -100,10 +107,12 @@ namespace asset
 		VkDeviceSize indices_offset;
 	};
 
-	struct mesh
+	class mesh : public entity
 	{
+	public:
+		mesh () : entity () {}
+		~mesh () {}
 		std::string name;
-		uint32_t unique_id;
 
 		std::vector<graphics_primitive> graphics_primitves;
 		std::vector<physics_primitive> physics_primitives;

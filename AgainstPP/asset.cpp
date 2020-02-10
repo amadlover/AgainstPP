@@ -105,6 +105,7 @@ namespace asset
 		auto accessor = model.accessors[primitive.indices];
 		auto buffer_view = model.bufferViews[accessor.bufferView];
 
+		physics_primitive.indices_count = accessor.count;
 		physics_primitive.indices.reserve (buffer_view.byteLength);
 		for (uint32_t i = 0; i < buffer_view.byteLength; i++)
 		{
@@ -137,6 +138,7 @@ namespace asset
 		auto accessor = model.accessors[primitive.indices];
 		auto buffer_view = model.bufferViews[accessor.bufferView];
 
+		graphics_primitive.indices_count = accessor.count;
 		graphics_primitive.indices.reserve (buffer_view.byteLength);
 		for (uint32_t i = 0; i < buffer_view.byteLength; i++)
 		{
