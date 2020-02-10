@@ -149,6 +149,10 @@ void log_error (egraphics_result err)
 		OutputDebugString (L"graphics error: queue submit\n");
 		break;
 
+	case egraphics_result::e_against_error_graphics_queue_wait_idle:
+		OutputDebugString (L"graphics error: queue wait idle\n");
+		break;
+
 	case egraphics_result::e_against_error_graphics_queue_present:
 		OutputDebugString (L"graphics error: queue present\n");
 		break;

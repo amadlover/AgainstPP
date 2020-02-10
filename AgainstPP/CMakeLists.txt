@@ -20,9 +20,9 @@ set (IMGUI_CPP ${CMAKE_SOURCE_DIR}/External/imgui/imgui.cpp ${CMAKE_SOURCE_DIR}/
 set (HPP "entity.hpp" "actor.hpp" "asset.hpp" "common_graphics.hpp" "enums.hpp" "error.hpp" "event.hpp" "game.hpp" "graphics_utils.hpp" "scene.hpp" "main_menu.hpp" "splash_screen.hpp" "utils.hpp")
 set (CPP "entity.cpp" "actor.cpp" "asset.cpp" "common_graphics.cpp" "error.cpp" "game.cpp" "graphics_utils.cpp" "main.cpp" "scene.cpp" "main_menu.cpp" "splash_screen.cpp" "utils.cpp")
 
-set (GLSL "Assets/Shaders/UI.vert" "Assets/Shaders/UI.frag" "Assets/Shaders/pbr.vert" "Assets/Shaders/pbr.frag")
+set (GLSL "Assets/Shaders/SplashScreen/vert.vert" "Assets/Shaders/SplashScreen/frag.frag")
 
-source_group ("Shaders" GLSL)
+source_group ("Shaders" ${GLSL})
 
 add_executable (AgainstPP WIN32 ${HPP} ${CPP})
 add_compile_definitions (AgainstPP _CRT_SECURE_NO_WARNINGS UNICODE WIN32_LEAN_AND_MEAN VK_USE_PLATFORM_WIN32_KHR _HAS_EXCEPTIONS=0)

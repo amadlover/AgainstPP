@@ -40,6 +40,7 @@ enum egraphics_result
 	e_against_error_graphics_create_fence,
 	e_against_error_graphics_reset_fence,
 	e_against_error_graphics_queue_submit,
+	e_against_error_graphics_queue_wait_idle,
 	e_against_error_graphics_queue_present,
 	e_against_error_graphics_update_uniform_buffer,
 	e_against_error_graphics_create_sampler,

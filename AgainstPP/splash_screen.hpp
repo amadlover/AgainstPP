@@ -7,6 +7,7 @@
 #include "event.hpp"
 #include "scene.hpp"
 
+#include <chrono>
 
 class splash_screen : public scene
 {
@@ -23,6 +24,7 @@ protected:
 	egraphics_result update () override;
 	egraphics_result draw () const override;
 
+	egraphics_result create_fade_in_uniform_buffer ();
 	egraphics_result create_shaders ();
 	egraphics_result create_render_pass ();
 	egraphics_result create_framebuffers ();
@@ -40,7 +42,7 @@ protected:
 	std::vector<VkSemaphore> swapchain_signal_semaphores;
 	VkSemaphore wait_semaphore;
 	VkDescriptorPool descriptor_pool;
-	VkDescriptorSetLayout descriptor_set_layout;
+	VkDescriptorSetLayout image_descriptor_set_layout;
 	VkPipelineLayout graphics_pipeline_layout;
 	VkPipeline graphics_pipeline;
 	VkPipelineShaderStageCreateInfo shader_stages_create_infos[2];
@@ -58,4 +60,15 @@ protected:
 	VkBuffer staging_image_buffer;
 	VkDeviceMemory staging_image_memory;
 	VkDeviceMemory scene_images_memory;
+
+	float fade_in;
+	std::chrono::time_point<std::chrono::steady_clock> start_time;
+	std::chrono::duration<float> scene_change_threshold;
+	VkDescriptorSetLayout fade_in_descriptor_set_layout;
+	VkDescriptorSet fade_in_descriptor_set;
+	VkBuffer fade_in_uniform_buffer;
+	VkDeviceMemory fade_in_device_memory;
+	void* fade_in_data_ptr;
+
+	bool is_scene_changed;
 };

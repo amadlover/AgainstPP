@@ -13,7 +13,7 @@ splash_screen::splash_screen () : scene ()
 	wait_semaphore = VK_NULL_HANDLE;
 	
 	descriptor_pool = VK_NULL_HANDLE;
-	descriptor_set_layout = VK_NULL_HANDLE;
+	image_descriptor_set_layout = VK_NULL_HANDLE;
 	
 	graphics_pipeline_layout = VK_NULL_HANDLE;
 	graphics_pipeline = VK_NULL_HANDLE;
@@ -31,11 +31,46 @@ splash_screen::splash_screen () : scene ()
 	vertex_index_memory = VK_NULL_HANDLE;
 
 	scene_images_memory = VK_NULL_HANDLE;
+
+	scene_change_threshold = std::chrono::duration<float> (3);
+	is_scene_changed = false;
 }
 
 splash_screen::~splash_screen ()
 {
 	OutputDebugString (L"splash_screen::~splash_screen\n");
+}
+
+egraphics_result splash_screen::create_fade_in_uniform_buffer ()
+{
+	CHECK_AGAINST_RESULT (
+		graphics_utils::create_buffer (
+			common_graphics::graphics_device,
+			sizeof (float),
+			VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+			VK_SHARING_MODE_EXCLUSIVE,
+			common_graphics::graphics_queue_family_index,
+			&fade_in_uniform_buffer
+		)
+	);
+
+	CHECK_AGAINST_RESULT (
+		graphics_utils::allocate_bind_buffer_memory (
+			common_graphics::graphics_device,
+			&fade_in_uniform_buffer,
+			1,
+			common_graphics::physical_device_memory_properties,
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+			&fade_in_device_memory
+		)
+	);
+
+	if (vkMapMemory (common_graphics::graphics_device, fade_in_device_memory, 0, sizeof (float), 0, &fade_in_data_ptr) != VK_SUCCESS)
+	{
+		return egraphics_result::e_against_error_graphics_map_memory;
+	}
+
+	return egraphics_result::success;
 }
 
 egraphics_result splash_screen::create_shaders ()
@@ -181,7 +216,7 @@ egraphics_result splash_screen::create_descriptors ()
 	pool_create_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 	pool_create_info.poolSizeCount = 2;
 	pool_create_info.pPoolSizes = pool_size;
-	pool_create_info.maxSets = 1;
+	pool_create_info.maxSets = 2;
 	pool_create_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
 
 	if (vkCreateDescriptorPool (common_graphics::graphics_device, &pool_create_info, nullptr, &descriptor_pool) != VK_SUCCESS)
@@ -189,18 +224,18 @@ egraphics_result splash_screen::create_descriptors ()
 		return egraphics_result::e_against_error_graphics_create_descriptor_pool;
 	}
 
-	VkDescriptorSetLayoutBinding set_layout_binding = {};
-	set_layout_binding.binding = 0;
-	set_layout_binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-	set_layout_binding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	set_layout_binding.descriptorCount = 1;
+	VkDescriptorSetLayoutBinding image_set_layout_binding = {};
+	image_set_layout_binding.binding = 0;
+	image_set_layout_binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+	image_set_layout_binding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+	image_set_layout_binding.descriptorCount = 1;
 
-	VkDescriptorSetLayoutCreateInfo set_layout_create_info = {};
-	set_layout_create_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-	set_layout_create_info.bindingCount = 1;
-	set_layout_create_info.pBindings = &set_layout_binding;
+	VkDescriptorSetLayoutCreateInfo image_set_layout_create_info = {};
+	image_set_layout_create_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+	image_set_layout_create_info.bindingCount = 1;
+	image_set_layout_create_info.pBindings = &image_set_layout_binding;
 
-	if (vkCreateDescriptorSetLayout (common_graphics::graphics_device, &set_layout_create_info, nullptr, &descriptor_set_layout) != VK_SUCCESS)
+	if (vkCreateDescriptorSetLayout (common_graphics::graphics_device, &image_set_layout_create_info, nullptr, &image_descriptor_set_layout) != VK_SUCCESS)
 	{
 		return egraphics_result::e_against_error_graphics_create_descriptor_set_layout;
 	}
@@ -209,40 +244,94 @@ egraphics_result splash_screen::create_descriptors ()
 	{
 		for (auto& graphics_primitive : mesh.graphics_primitves)
 		{
-			VkDescriptorSetAllocateInfo set_allocate_info = {};
-			set_allocate_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-			set_allocate_info.descriptorPool = descriptor_pool;
-			set_allocate_info.descriptorSetCount = 1;
-			set_allocate_info.pSetLayouts = &descriptor_set_layout;
+			VkDescriptorSetAllocateInfo image_set_allocate_info = {};
+			image_set_allocate_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+			image_set_allocate_info.descriptorPool = descriptor_pool;
+			image_set_allocate_info.descriptorSetCount = 1;
+			image_set_allocate_info.pSetLayouts = &image_descriptor_set_layout;
 
-			vkAllocateDescriptorSets (common_graphics::graphics_device, &set_allocate_info, &graphics_primitive.material.base_color_texture.texture_image.descriptor_set);
+			if (vkAllocateDescriptorSets (common_graphics::graphics_device, &image_set_allocate_info, &graphics_primitive.material.base_color_texture.texture_image.descriptor_set) != VK_SUCCESS)
+			{
+				return egraphics_result::e_against_error_graphics_allocate_descriptor_set;
+			}
 
 			VkDescriptorImageInfo image_info = {};
 			image_info.imageView = graphics_primitive.material.base_color_texture.texture_image.image_view;
 			image_info.sampler = common_graphics::common_sampler;
 			image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
-			VkWriteDescriptorSet descriptor_write = {};
-			descriptor_write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptor_write.descriptorCount = 1;
-			descriptor_write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-			descriptor_write.dstSet = graphics_primitive.material.base_color_texture.texture_image.descriptor_set;
-			descriptor_write.dstBinding = 0;
-			descriptor_write.pImageInfo = &image_info;
+			VkWriteDescriptorSet image_descriptor_write = {};
+			image_descriptor_write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			image_descriptor_write.descriptorCount = 1;
+			image_descriptor_write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+			image_descriptor_write.dstSet = graphics_primitive.material.base_color_texture.texture_image.descriptor_set;
+			image_descriptor_write.dstBinding = 0;
+			image_descriptor_write.pImageInfo = &image_info;
 
-			vkUpdateDescriptorSets (common_graphics::graphics_device, 1, &descriptor_write, 0, nullptr);
+			vkUpdateDescriptorSets (common_graphics::graphics_device, 1, &image_descriptor_write, 0, nullptr);
 		}
 	}
+
+	VkDescriptorSetLayoutBinding fade_in_set_layout_binding = {};
+	fade_in_set_layout_binding.binding = 0;
+	fade_in_set_layout_binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+	fade_in_set_layout_binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	fade_in_set_layout_binding.descriptorCount = 1;
+
+	VkDescriptorSetLayoutCreateInfo fade_in_set_layout_create_info = {};
+	fade_in_set_layout_create_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+	fade_in_set_layout_create_info.bindingCount = 1;
+	fade_in_set_layout_create_info.pBindings = &fade_in_set_layout_binding;
+
+	if (vkCreateDescriptorSetLayout (common_graphics::graphics_device, &fade_in_set_layout_create_info, nullptr, &fade_in_descriptor_set_layout) != VK_SUCCESS)
+	{
+		return egraphics_result::e_against_error_graphics_create_descriptor_set_layout;
+	}
+
+	VkDescriptorSetAllocateInfo fade_in_set_allocate_info = {};
+	fade_in_set_allocate_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+	fade_in_set_allocate_info.descriptorPool = descriptor_pool;
+	fade_in_set_allocate_info.descriptorSetCount = 1;
+	fade_in_set_allocate_info.pSetLayouts = &fade_in_descriptor_set_layout;
+
+	if (vkAllocateDescriptorSets (common_graphics::graphics_device, &fade_in_set_allocate_info, &fade_in_descriptor_set) != VK_SUCCESS)
+	{
+		return egraphics_result::e_against_error_graphics_allocate_descriptor_set;
+	}
+
+	VkDescriptorBufferInfo buffer_info = {};
+	buffer_info.buffer = fade_in_uniform_buffer;
+	buffer_info.offset = 0;
+	buffer_info.range = VK_WHOLE_SIZE;
+
+	VkWriteDescriptorSet fade_in_descriptor_write = {};
+	fade_in_descriptor_write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+	fade_in_descriptor_write.descriptorCount = 1;
+	fade_in_descriptor_write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	fade_in_descriptor_write.dstSet = fade_in_descriptor_set;
+	fade_in_descriptor_write.dstBinding = 0;
+	fade_in_descriptor_write.pBufferInfo = &buffer_info;
+
+	vkUpdateDescriptorSets (common_graphics::graphics_device, 1, &fade_in_descriptor_write, 0, nullptr);
 
 	return egraphics_result::success;
 }
 
 egraphics_result splash_screen::create_graphics_pipeline ()
 {
+	VkPushConstantRange push_constant_range = {};
+	push_constant_range.offset = 0;
+	push_constant_range.size = sizeof (float);
+	push_constant_range.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+	VkDescriptorSetLayout set_layouts[2] = { image_descriptor_set_layout, fade_in_descriptor_set_layout };
+
 	VkPipelineLayoutCreateInfo layout_create_info = {};
 	layout_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-	layout_create_info.setLayoutCount = 1;
-	layout_create_info.pSetLayouts = &descriptor_set_layout;
+	layout_create_info.setLayoutCount = 2;
+	layout_create_info.pSetLayouts = set_layouts;
+	layout_create_info.pushConstantRangeCount = 0;
+	//layout_create_info.pPushConstantRanges = &push_constant_range;
 
 	if (vkCreatePipelineLayout (common_graphics::graphics_device, &layout_create_info, nullptr, &graphics_pipeline_layout) != VK_SUCCESS)
 	{
@@ -274,7 +363,6 @@ egraphics_result splash_screen::create_graphics_pipeline ()
 	rasterization_state.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 	rasterization_state.lineWidth = 1;
 	rasterization_state.polygonMode = VK_POLYGON_MODE_FILL;
-	//rasterization_state.rasterizerDiscardEnable = VK_TRUE;
 
 	VkVertexInputBindingDescription vertex_binding_descriptions[2] = {};
 	vertex_binding_descriptions[0].binding = 0;
@@ -384,6 +472,8 @@ egraphics_result splash_screen::update_command_buffers ()
 		vkCmdBeginRenderPass (swapchain_command_buffers[i], &render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
 		
 		vkCmdBindPipeline (swapchain_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline);
+		//vkCmdPushConstants (swapchain_command_buffers[i], graphics_pipeline_layout, VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof (float), &fade_in);
+		vkCmdBindDescriptorSets (swapchain_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_layout, 1, 1, &fade_in_descriptor_set, 0, nullptr);
 
 		for (const auto& mesh : meshes)
 		{
@@ -435,6 +525,7 @@ egraphics_result splash_screen::init ()
 		)
 	);
 	
+	CHECK_AGAINST_RESULT (create_fade_in_uniform_buffer ());
 	CHECK_AGAINST_RESULT (create_shaders ());
 	CHECK_AGAINST_RESULT (create_render_pass ());
 	CHECK_AGAINST_RESULT (create_framebuffers ());
@@ -445,6 +536,8 @@ egraphics_result splash_screen::init ()
 	CHECK_AGAINST_RESULT (update_command_buffers ());
 
 	state = e_scene_state::inited;
+
+	start_time = std::chrono::steady_clock::now ();
 
 	return egraphics_result::success;
 }
@@ -468,6 +561,19 @@ void splash_screen::process_keyboard_input (WPARAM wParam, LPARAM lParam)
 
 egraphics_result splash_screen::update ()
 {
+	auto current_time = std::chrono::steady_clock::now ();
+	auto duration = std::chrono::duration<float> (current_time - start_time).count ();
+	
+	if (duration > scene_change_threshold.count ())
+	{
+		go_to_scene_event.broadcast (e_scene_type::main_menu);
+		is_scene_changed = true;
+		return egraphics_result::success;
+	}
+
+	auto fade_in = duration / scene_change_threshold.count ();
+	std::memcpy (fade_in_data_ptr, &fade_in, sizeof (float));
+
 	return egraphics_result::success;
 }
 
@@ -530,6 +636,10 @@ egraphics_result splash_screen::draw () const
 egraphics_result splash_screen::main_loop ()
 {
 	CHECK_AGAINST_RESULT (update ());
+	if (is_scene_changed)
+	{
+		return egraphics_result::success;
+	}
 	CHECK_AGAINST_RESULT (draw ());
 
 	return egraphics_result::success;
@@ -574,8 +684,11 @@ void splash_screen::exit ()
 		}
 	}
 
-	vkDestroyDescriptorSetLayout (common_graphics::graphics_device, descriptor_set_layout, nullptr);
-	descriptor_set_layout = VK_NULL_HANDLE;
+	vkDestroyDescriptorSetLayout (common_graphics::graphics_device, image_descriptor_set_layout, nullptr);
+	image_descriptor_set_layout = VK_NULL_HANDLE;
+
+	vkDestroyDescriptorSetLayout (common_graphics::graphics_device, fade_in_descriptor_set_layout, nullptr);
+	fade_in_descriptor_set_layout = VK_NULL_HANDLE;
 
 	vkDestroyDescriptorPool (common_graphics::graphics_device, descriptor_pool, nullptr);
 	descriptor_pool = VK_NULL_HANDLE;
@@ -596,6 +709,9 @@ void splash_screen::exit ()
 	graphics_utils::destroy_buffers_and_buffer_memory (common_graphics::graphics_device, &vertex_index_buffer, 1, &vertex_index_memory);
 	graphics_utils::destroy_buffers_and_buffer_memory (common_graphics::graphics_device, &staging_image_buffer, 1, &staging_image_memory);
 	graphics_utils::destroy_images_and_image_memory (common_graphics::graphics_device, scene_images.data (), scene_images.size (), &scene_images_memory);
+
+	vkUnmapMemory (common_graphics::graphics_device, fade_in_device_memory);
+	graphics_utils::destroy_buffers_and_buffer_memory (common_graphics::graphics_device, &fade_in_uniform_buffer, 1, &fade_in_device_memory);
 
 	meshes.clear ();
 	scene_images.clear ();
