@@ -5,17 +5,6 @@
 #include <functional>
 #include <Windows.h>
 
-/*namespace event
-{
-	typedef void (*go_to_scene_fp)(e_scene_type scene);
-
-	struct event
-	{
-		go_to_scene_fp go_to_scene;
-	};
-}
-*/
-
 #include <functional>
 
 class event_no_param

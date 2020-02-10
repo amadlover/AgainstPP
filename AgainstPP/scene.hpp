@@ -26,6 +26,4 @@ public:
 protected:
     virtual egraphics_result update () = 0;
     virtual egraphics_result draw () const = 0;
-
-    std::vector<asset::mesh> meshes;
 };

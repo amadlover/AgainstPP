@@ -4,10 +4,6 @@
 #include "game.hpp"
 #include "error.hpp"
 
-/*#include "imgui.h"
-#include "imgui_impl_win32.h"
-#include "imgui_impl_vulkan.h"*/
-
 game* g = nullptr;
 
 LRESULT CALLBACK window_proc (
@@ -129,28 +125,6 @@ int WINAPI wWinMain (
 	g->exit ();
 	DestroyWindow (hWnd);
 	delete g;
-
-	/*try
-	{
-		std::unique_ptr<game> g (game::get_instance (hInstance, cmd_show));
-		g->main_loop ();
-	}
-	catch (const char* s)
-	{
-		wchar_t Buff[64];
-		swprintf (Buff, 64, L"%hs\n", s);
-		OutputDebugString (Buff);
-	}
-	catch (egraphics_error e)
-	{
-		log_error (e);
-	}
-	catch (std::runtime_error e)
-	{
-		wchar_t Buff[64];
-		swprintf (Buff, 64, L"%hs\n", e.what ());
-		OutputDebugString (Buff);
-	}*/
 
 	return 0;
 }

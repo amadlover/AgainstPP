@@ -7,21 +7,6 @@
 #include "event.hpp"
 #include "scene.hpp"
 
-/*namespace splash_screen
-{
-	struct splash_screen
-	{
-		std::vector<asset::mesh::mesh> meshes;
-		std::vector<asset::image::image> images;
-
-		std::vector<actor::actor> actors;
-	};
-
-	void init (common_graphics::common_graphics* common_graphics_obj_ptr, event::event* ptr);
-	void process_keyboard_input (WPARAM wParam, LPARAM lParam);
-	void draw ();
-	void exit ();
-}*/
 
 class splash_screen : public scene
 {
@@ -38,5 +23,19 @@ protected:
 	egraphics_result update () override;
 	egraphics_result draw () const override;
 
-	splash_screen_graphics* graphics;
+	egraphics_result create_render_pass ();
+	egraphics_result create_framebuffers ();
+	egraphics_result create_command_pool ();
+	egraphics_result allocate_command_buffers ();
+	egraphics_result create_sync_objects ();
+	egraphics_result update_command_buffers ();
+
+	std::vector<VkFramebuffer> swapchain_framebuffers;
+	VkCommandPool command_pool;
+	std::vector<VkCommandBuffer> swapchain_command_buffers;
+	VkRenderPass render_pass;
+	std::vector<VkSemaphore> swapchain_signal_semaphores;
+	VkSemaphore wait_semaphore;
+
+	std::vector<asset::mesh> meshes;
 };
