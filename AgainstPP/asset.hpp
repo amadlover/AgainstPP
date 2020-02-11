@@ -107,15 +107,23 @@ namespace asset
 		VkDeviceSize indices_offset;
 	};
 
-	class mesh : public entity
+	enum mesh_type
 	{
-	public:
+		skybox,
+		ui_button,
+		static_mesh
+	};
+
+	struct mesh : public entity
+	{
 		mesh () : entity () {}
 		~mesh () {}
 		std::string name;
 
 		std::vector<graphics_primitive> graphics_primitves;
 		std::vector<physics_primitive> physics_primitives;
+
+		mesh_type type;
 	};
 
 	egraphics_result import_meshes (const std::string& file_path, std::vector<mesh>& meshes);

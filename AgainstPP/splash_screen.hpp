@@ -1,8 +1,6 @@
 #pragma once
 
 #include "common_graphics.hpp"
-#include "splash_screen_graphics.hpp"
-#include "actor.hpp"
 #include "asset.hpp"
 #include "event.hpp"
 #include "scene.hpp"
@@ -42,7 +40,8 @@ protected:
 	std::vector<VkSemaphore> swapchain_signal_semaphores;
 	VkSemaphore wait_semaphore;
 	VkDescriptorPool descriptor_pool;
-	VkDescriptorSetLayout image_descriptor_set_layout;
+	VkDescriptorSetLayout descriptor_set_layout;
+	VkDescriptorSet descriptor_set;
 	VkPipelineLayout graphics_pipeline_layout;
 	VkPipeline graphics_pipeline;
 	VkPipelineShaderStageCreateInfo shader_stages_create_infos[2];
@@ -51,7 +50,6 @@ protected:
 
 	std::vector<asset::mesh> meshes;
 	std::vector<VkImage> scene_images;
-	std::vector<actor> actors;
 	
 	VkBuffer staging_vertex_index_buffer;
 	VkDeviceMemory staging_vertex_index_memory;
@@ -64,8 +62,6 @@ protected:
 	float fade_in;
 	std::chrono::time_point<std::chrono::steady_clock> start_time;
 	std::chrono::duration<float> scene_change_threshold;
-	VkDescriptorSetLayout fade_in_descriptor_set_layout;
-	VkDescriptorSet fade_in_descriptor_set;
 	VkBuffer fade_in_uniform_buffer;
 	VkDeviceMemory fade_in_device_memory;
 	void* fade_in_data_ptr;

@@ -22,5 +22,21 @@ protected:
 	egraphics_result update () override;
 	egraphics_result draw () const override;
 
+	egraphics_result create_command_pool ();
+
+	VkCommandPool command_pool; 
+	VkDescriptorPool descriptor_pool;
+	VkDescriptorSetLayout descriptor_set_layout;
+	VkDescriptorSet descriptor_set;
+
 	std::vector<asset::mesh> meshes;
+	std::vector<VkImage> scene_images;
+
+	VkBuffer vertex_index_buffer;
+	VkDeviceMemory vertex_index_memory;
+	VkBuffer staging_vertex_index_buffer;
+	VkDeviceMemory staging_vertex_index_memory;
+	VkBuffer staging_image_buffer;
+	VkDeviceMemory staging_image_memory;
+	VkDeviceMemory scene_images_memory;
 };
