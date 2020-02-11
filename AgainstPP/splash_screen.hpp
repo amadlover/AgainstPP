@@ -23,7 +23,6 @@ protected:
 	egraphics_result draw () const override;
 
 	egraphics_result create_fade_in_uniform_buffer ();
-	egraphics_result create_shaders ();
 	egraphics_result create_render_pass ();
 	egraphics_result create_framebuffers ();
 	egraphics_result create_command_pool ();
@@ -33,15 +32,15 @@ protected:
 	egraphics_result create_graphics_pipeline ();
 	egraphics_result update_command_buffers ();
 
-	std::vector<VkFramebuffer> swapchain_framebuffers;
+	std::vector<VkFramebuffer> framebuffers;
 	VkCommandPool command_pool;
-	std::vector<VkCommandBuffer> swapchain_command_buffers;
+	std::vector<VkCommandBuffer> command_buffers;
 	VkRenderPass render_pass;
-	std::vector<VkSemaphore> swapchain_signal_semaphores;
+	std::vector<VkSemaphore> signal_semaphores;
 	VkSemaphore wait_semaphore;
 	VkDescriptorPool descriptor_pool;
-	VkDescriptorSetLayout descriptor_set_layout;
-	VkDescriptorSet descriptor_set;
+	VkDescriptorSetLayout skybox_descriptor_set_layout;
+	VkDescriptorSet skybox_descriptor_set;
 	VkPipelineLayout graphics_pipeline_layout;
 	VkPipeline graphics_pipeline;
 	VkPipelineShaderStageCreateInfo shader_stages_create_infos[2];

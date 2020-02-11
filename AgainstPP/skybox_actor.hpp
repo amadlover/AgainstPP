@@ -15,6 +15,8 @@ public:
 
     glm::mat4 transformation_matrix;
 
+    VkImageView get_image_view () const;
+
 private:
     asset::mesh* mesh;
 };

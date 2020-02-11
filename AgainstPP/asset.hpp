@@ -18,7 +18,7 @@ namespace asset
 			bpp = 0;
 			offset = 0;
 			image_view = VK_NULL_HANDLE;
-			descriptor_set = VK_NULL_HANDLE;
+			skybox_descriptor_set = VK_NULL_HANDLE;
 		}
 		std::string name;
 
@@ -31,7 +31,7 @@ namespace asset
 		VkDeviceSize offset;
 
 		VkImageView image_view;
-		VkDescriptorSet descriptor_set;
+		VkDescriptorSet skybox_descriptor_set;
 	};
 
 	struct texture

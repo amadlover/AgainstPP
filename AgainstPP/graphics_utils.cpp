@@ -684,16 +684,16 @@ egraphics_result graphics_utils::create_shader (const char* file_path, VkDevice 
 
 	uint32_t size = (uint32_t)(file.tellg ());
 
-	std::unique_ptr<char[]> buff (new char[size * sizeof (uint32_t)]);
+	std::vector<char>buff (size);
 
 	file.seekg (0, std::ios::beg);
-	file.read ((char*)buff.get (), size);
+	file.read (buff.data (), size);
 	file.close ();
 
 	VkShaderModuleCreateInfo shader_module_create_info = {};
 	shader_module_create_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-	shader_module_create_info.codeSize = size;
-	shader_module_create_info.pCode = reinterpret_cast<uint32_t*>(buff.get ());
+	shader_module_create_info.codeSize = buff.size ();
+	shader_module_create_info.pCode = reinterpret_cast<uint32_t*> (buff.data ());
 
 	if (vkCreateShaderModule (graphics_device, &shader_module_create_info, nullptr, shader_module) != VK_SUCCESS)
 	{

@@ -13,7 +13,7 @@ splash_screen::splash_screen () : scene ()
 	wait_semaphore = VK_NULL_HANDLE;
 	
 	descriptor_pool = VK_NULL_HANDLE;
-	descriptor_set_layout = VK_NULL_HANDLE;
+	skybox_descriptor_set_layout = VK_NULL_HANDLE;
 	
 	graphics_pipeline_layout = VK_NULL_HANDLE;
 	graphics_pipeline = VK_NULL_HANDLE;
@@ -73,31 +73,6 @@ egraphics_result splash_screen::create_fade_in_uniform_buffer ()
 	return egraphics_result::success;
 }
 
-egraphics_result splash_screen::create_shaders ()
-{
-	CHECK_AGAINST_RESULT (
-		graphics_utils::create_shader (
-			utils::get_full_path ("\\Shaders\\SplashScreen\\vert.spv").c_str (),
-			common_graphics::graphics_device,
-			VK_SHADER_STAGE_VERTEX_BIT,
-			&vertex_shader_module,
-			&shader_stages_create_infos[0]
-		)
-	);
-
-	CHECK_AGAINST_RESULT (
-		graphics_utils::create_shader (
-			utils::get_full_path ("\\Shaders\\SplashScreen\\frag.spv").c_str (),
-			common_graphics::graphics_device,
-			VK_SHADER_STAGE_FRAGMENT_BIT,
-			&fragment_shader_module,
-			&shader_stages_create_infos[1]
-		)
-	);
-
-	return egraphics_result::success;
-}
-
 egraphics_result splash_screen::create_render_pass ()
 {
 	VkAttachmentDescription attachment_description = {};
@@ -150,7 +125,7 @@ egraphics_result splash_screen::create_framebuffers ()
 	create_info.height = common_graphics::surface_extent.height;
 	create_info.layers = 1;
 
-	swapchain_framebuffers.resize (common_graphics::swapchain_image_count);
+	framebuffers.resize (common_graphics::swapchain_image_count);
 
 	VkImageView attachment;
 	for (uint32_t i = 0; i < common_graphics::swapchain_image_count; i++)
@@ -158,7 +133,7 @@ egraphics_result splash_screen::create_framebuffers ()
 		attachment = common_graphics::swapchain_imageviews[i];
 		create_info.pAttachments = &attachment;
 
-		if (vkCreateFramebuffer (common_graphics::graphics_device, &create_info, NULL, &swapchain_framebuffers[i]) != VK_SUCCESS)
+		if (vkCreateFramebuffer (common_graphics::graphics_device, &create_info, NULL, &framebuffers[i]) != VK_SUCCESS)
 		{
 			return egraphics_result::e_against_error_graphics_create_framebuffers;
 		}
@@ -187,10 +162,10 @@ egraphics_result splash_screen::create_sync_objects ()
 	VkSemaphoreCreateInfo create_info = {};
 	create_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
-	swapchain_signal_semaphores.resize (common_graphics::swapchain_image_count);
+	signal_semaphores.resize (common_graphics::swapchain_image_count);
 	for (uint32_t i = 0; i < common_graphics::swapchain_image_count; i++)
 	{
-		if (vkCreateSemaphore (common_graphics::graphics_device, &create_info, nullptr, &swapchain_signal_semaphores[i]) != VK_SUCCESS)
+		if (vkCreateSemaphore (common_graphics::graphics_device, &create_info, nullptr, &signal_semaphores[i]) != VK_SUCCESS)
 		{
 			return egraphics_result::e_against_error_graphics_create_semaphore;
 		}
@@ -239,7 +214,7 @@ egraphics_result splash_screen::create_descriptors ()
 	set_layout_create_info.bindingCount = 2;
 	set_layout_create_info.pBindings = set_layout_bindings;
 
-	if (vkCreateDescriptorSetLayout (common_graphics::graphics_device, &set_layout_create_info, nullptr, &descriptor_set_layout) != VK_SUCCESS)
+	if (vkCreateDescriptorSetLayout (common_graphics::graphics_device, &set_layout_create_info, nullptr, &skybox_descriptor_set_layout) != VK_SUCCESS)
 	{
 		return egraphics_result::e_against_error_graphics_create_descriptor_set_layout;
 	}
@@ -248,9 +223,9 @@ egraphics_result splash_screen::create_descriptors ()
 	set_allocate_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
 	set_allocate_info.descriptorPool = descriptor_pool;
 	set_allocate_info.descriptorSetCount = 1;
-	set_allocate_info.pSetLayouts = &descriptor_set_layout;
+	set_allocate_info.pSetLayouts = &skybox_descriptor_set_layout;
 
-	if (vkAllocateDescriptorSets (common_graphics::graphics_device, &set_allocate_info, &descriptor_set) != VK_SUCCESS)
+	if (vkAllocateDescriptorSets (common_graphics::graphics_device, &set_allocate_info, &skybox_descriptor_set) != VK_SUCCESS)
 	{
 		return egraphics_result::e_against_error_graphics_allocate_descriptor_set;
 	}
@@ -268,7 +243,7 @@ egraphics_result splash_screen::create_descriptors ()
 			image_descriptor_write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 			image_descriptor_write.descriptorCount = 1;
 			image_descriptor_write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-			image_descriptor_write.dstSet = descriptor_set;
+			image_descriptor_write.dstSet = skybox_descriptor_set;
 			image_descriptor_write.dstBinding = 1;
 			image_descriptor_write.pImageInfo = &image_info;
 
@@ -285,7 +260,7 @@ egraphics_result splash_screen::create_descriptors ()
 	fade_in_descriptor_write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 	fade_in_descriptor_write.descriptorCount = 1;
 	fade_in_descriptor_write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	fade_in_descriptor_write.dstSet = descriptor_set;
+	fade_in_descriptor_write.dstSet = skybox_descriptor_set;
 	fade_in_descriptor_write.dstBinding = 0;
 	fade_in_descriptor_write.pBufferInfo = &buffer_info;
 
@@ -296,10 +271,30 @@ egraphics_result splash_screen::create_descriptors ()
 
 egraphics_result splash_screen::create_graphics_pipeline ()
 {
+	CHECK_AGAINST_RESULT (
+		graphics_utils::create_shader (
+			utils::get_full_path ("\\Shaders\\SplashScreen\\vert.spv").c_str (),
+			common_graphics::graphics_device,
+			VK_SHADER_STAGE_VERTEX_BIT,
+			&vertex_shader_module,
+			&shader_stages_create_infos[0]
+		)
+	);
+
+	CHECK_AGAINST_RESULT (
+		graphics_utils::create_shader (
+			utils::get_full_path ("\\Shaders\\SplashScreen\\frag.spv").c_str (),
+			common_graphics::graphics_device,
+			VK_SHADER_STAGE_FRAGMENT_BIT,
+			&fragment_shader_module,
+			&shader_stages_create_infos[1]
+		)
+	);
+
 	VkPipelineLayoutCreateInfo layout_create_info = {};
 	layout_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 	layout_create_info.setLayoutCount = 1;
-	layout_create_info.pSetLayouts = &descriptor_set_layout;
+	layout_create_info.pSetLayouts = &skybox_descriptor_set_layout;
 
 	if (vkCreatePipelineLayout (common_graphics::graphics_device, &layout_create_info, nullptr, &graphics_pipeline_layout) != VK_SUCCESS)
 	{
@@ -403,9 +398,9 @@ egraphics_result splash_screen::allocate_command_buffers ()
 	allocate_info.commandPool = command_pool;
 	allocate_info.commandBufferCount = common_graphics::swapchain_image_count;
 
-	swapchain_command_buffers.resize (common_graphics::swapchain_image_count);
+	command_buffers.resize (common_graphics::swapchain_image_count);
 
-	if (vkAllocateCommandBuffers (common_graphics::graphics_device, &allocate_info, swapchain_command_buffers.data ()) != VK_SUCCESS)
+	if (vkAllocateCommandBuffers (common_graphics::graphics_device, &allocate_info, command_buffers.data ()) != VK_SUCCESS)
 	{
 		return egraphics_result::e_against_error_graphics_allocate_command_buffer;
 	}
@@ -431,31 +426,31 @@ egraphics_result splash_screen::update_command_buffers ()
 
 	for (uint32_t i = 0; i < common_graphics::swapchain_image_count; i++)
 	{
-		render_pass_begin_info.framebuffer = swapchain_framebuffers[i];
-		if (vkBeginCommandBuffer (swapchain_command_buffers[i], &command_buffer_begin_info) != VK_SUCCESS)
+		render_pass_begin_info.framebuffer = framebuffers[i];
+		if (vkBeginCommandBuffer (command_buffers[i], &command_buffer_begin_info) != VK_SUCCESS)
 		{
 			return egraphics_result::e_against_error_graphics_begin_command_buffer;
 		}
 
-		vkCmdBeginRenderPass (swapchain_command_buffers[i], &render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
+		vkCmdBeginRenderPass (command_buffers[i], &render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
 		
-		vkCmdBindPipeline (swapchain_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline);
-		vkCmdBindDescriptorSets (swapchain_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_layout, 0, 1, &descriptor_set, 0, nullptr);
+		vkCmdBindPipeline (command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline);
+		vkCmdBindDescriptorSets (command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_layout, 0, 1, &skybox_descriptor_set, 0, nullptr);
 
 		for (const auto& mesh : meshes)
 		{
 			for (const auto& graphics_primitive : mesh.graphics_primitves)
 			{
-				vkCmdBindVertexBuffers (swapchain_command_buffers[i], 0, 1, &vertex_index_buffer, &graphics_primitive.positions_offset);
-				vkCmdBindVertexBuffers (swapchain_command_buffers[i], 1, 1, &vertex_index_buffer, &graphics_primitive.uv0s_offset);
-				vkCmdBindIndexBuffer (swapchain_command_buffers[i], vertex_index_buffer, graphics_primitive.indices_offset, graphics_primitive.indices_type);
-				vkCmdDrawIndexed (swapchain_command_buffers[i], graphics_primitive.indices_count, 1, 0, 0, 0);
+				vkCmdBindVertexBuffers (command_buffers[i], 0, 1, &vertex_index_buffer, &graphics_primitive.positions_offset);
+				vkCmdBindVertexBuffers (command_buffers[i], 1, 1, &vertex_index_buffer, &graphics_primitive.uv0s_offset);
+				vkCmdBindIndexBuffer (command_buffers[i], vertex_index_buffer, graphics_primitive.indices_offset, graphics_primitive.indices_type);
+				vkCmdDrawIndexed (command_buffers[i], graphics_primitive.indices_count, 1, 0, 0, 0);
 			}
 		}
 
-		vkCmdEndRenderPass (swapchain_command_buffers[i]);
+		vkCmdEndRenderPass (command_buffers[i]);
 
-		if (vkEndCommandBuffer (swapchain_command_buffers[i]) != VK_SUCCESS)
+		if (vkEndCommandBuffer (command_buffers[i]) != VK_SUCCESS)
 		{
 			return egraphics_result::e_against_error_graphics_end_command_buffer;
 		}
@@ -492,7 +487,6 @@ egraphics_result splash_screen::init ()
 	);
 	
 	CHECK_AGAINST_RESULT (create_fade_in_uniform_buffer ());
-	CHECK_AGAINST_RESULT (create_shaders ());
 	CHECK_AGAINST_RESULT (create_render_pass ());
 	CHECK_AGAINST_RESULT (create_framebuffers ());
 	CHECK_AGAINST_RESULT (allocate_command_buffers ());
@@ -571,10 +565,10 @@ egraphics_result splash_screen::draw () const
 	VkSubmitInfo submit_info = {};
 	submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 	submit_info.commandBufferCount = 1;
-	submit_info.pCommandBuffers = &swapchain_command_buffers[image_index];
+	submit_info.pCommandBuffers = &command_buffers[image_index];
 	submit_info.pWaitDstStageMask = &wait_dst_stage_mask;
 	submit_info.signalSemaphoreCount = 1;
-	submit_info.pSignalSemaphores = &swapchain_signal_semaphores[image_index];
+	submit_info.pSignalSemaphores = &signal_semaphores[image_index];
 	submit_info.waitSemaphoreCount = 1;
 	submit_info.pWaitSemaphores = &wait_semaphore;
 
@@ -589,7 +583,7 @@ egraphics_result splash_screen::draw () const
 	present_info.pSwapchains = &common_graphics::swapchain;
 	present_info.pImageIndices = &image_index;
 	present_info.waitSemaphoreCount = 1;
-	present_info.pWaitSemaphores = &swapchain_signal_semaphores[image_index];
+	present_info.pWaitSemaphores = &signal_semaphores[image_index];
 
 	if (vkQueuePresentKHR (common_graphics::graphics_queue, &present_info) != VK_SUCCESS)
 	{
@@ -617,26 +611,27 @@ void splash_screen::exit ()
 
 	vkQueueWaitIdle (common_graphics::graphics_queue);
 
-	for (auto& swapchain_signal_semaphore : swapchain_signal_semaphores)
+	for (auto& swapchain_signal_semaphore : signal_semaphores)
 	{
 		vkDestroySemaphore (common_graphics::graphics_device, swapchain_signal_semaphore, nullptr);
 	}
-	swapchain_signal_semaphores.clear ();
+	signal_semaphores.clear ();
 	vkDestroySemaphore (common_graphics::graphics_device, wait_semaphore, nullptr);
 	wait_semaphore = VK_NULL_HANDLE;
 
-	vkFreeCommandBuffers (common_graphics::graphics_device, command_pool, swapchain_command_buffers.size (), swapchain_command_buffers.data ());
+	vkFreeCommandBuffers (common_graphics::graphics_device, command_pool, command_buffers.size (), command_buffers.data ());
+	command_buffers.clear ();
 	vkDestroyCommandPool (common_graphics::graphics_device, command_pool, nullptr);
 	command_pool = VK_NULL_HANDLE;
 
 	vkDestroyRenderPass (common_graphics::graphics_device, render_pass, nullptr);
 	render_pass = VK_NULL_HANDLE;
 
-	for (auto& swapchain_framebuffer : swapchain_framebuffers)
+	for (auto& swapchain_framebuffer : framebuffers)
 	{
 		vkDestroyFramebuffer (common_graphics::graphics_device, swapchain_framebuffer, nullptr);
 	}
-	swapchain_framebuffers.clear ();
+	framebuffers.clear ();
 
 	for (auto& mesh : meshes)
 	{
@@ -644,14 +639,11 @@ void splash_screen::exit ()
 		{
 			vkDestroyImageView (common_graphics::graphics_device, graphics_primitive.material.base_color_texture.texture_image.image_view, nullptr);
 			graphics_primitive.material.base_color_texture.texture_image.image_view = VK_NULL_HANDLE;
-
-	//		vkFreeDescriptorSets (common_graphics::graphics_device, descriptor_pool, 1, &graphics_primitive.material.base_color_texture.texture_image.descriptor_set);
-			//graphics_primitive.material.base_color_texture.texture_image.descriptor_set = VK_NULL_HANDLE;
 		}
 	}
 
-	vkDestroyDescriptorSetLayout (common_graphics::graphics_device, descriptor_set_layout, nullptr);
-	descriptor_set_layout = VK_NULL_HANDLE;
+	vkDestroyDescriptorSetLayout (common_graphics::graphics_device, skybox_descriptor_set_layout, nullptr);
+	skybox_descriptor_set_layout = VK_NULL_HANDLE;
 
 	vkDestroyDescriptorPool (common_graphics::graphics_device, descriptor_pool, nullptr);
 	descriptor_pool = VK_NULL_HANDLE;
