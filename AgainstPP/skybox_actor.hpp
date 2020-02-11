@@ -1,6 +1,7 @@
 #pragma once
 
 #include "asset.hpp"
+
 #include <glm/mat4x4.hpp>
 
 class skybox
@@ -15,8 +16,5 @@ public:
 
     glm::mat4 transformation_matrix;
 
-    VkImageView get_image_view () const;
-
-private:
     asset::mesh* mesh;
 };

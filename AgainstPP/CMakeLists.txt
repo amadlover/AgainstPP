@@ -25,7 +25,7 @@ set (GLSL "Assets/Shaders/SplashScreen/vert.vert" "Assets/Shaders/SplashScreen/f
 source_group ("Shaders" ${GLSL})
 
 add_executable (AgainstPP WIN32 ${HPP} ${CPP})
-add_compile_definitions (AgainstPP _CRT_SECURE_NO_WARNINGS UNICODE WIN32_LEAN_AND_MEAN VK_USE_PLATFORM_WIN32_KHR _HAS_EXCEPTIONS=0)
+add_compile_definitions (AgainstPP _CRT_SECURE_NO_WARNINGS UNICODE WIN32_LEAN_AND_MEAN VK_USE_PLATFORM_WIN32_KHR _HAS_EXCEPTIONS=0 GLM_FORCE_RADIANS GLM_FORCE_DEPTH_ZERO_TO_ONE)
 target_link_libraries (AgainstPP vulkan-1)
 target_link_libraries (AgainstPP Shlwapi)
 

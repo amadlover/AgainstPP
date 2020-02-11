@@ -2,6 +2,9 @@
 #include "graphics_utils.hpp"
 #include "utils.hpp"
 
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 main_menu::main_menu () : scene ()
 {
 	OutputDebugString (L"main_menu::main_menu\n");
@@ -143,7 +146,7 @@ egraphics_result main_menu::create_descriptor_set ()
 	VkDescriptorImageInfo image_info = {};
 	image_info.sampler = common_graphics::common_sampler;
 	image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-	image_info.imageView = skybox_actor.get_image_view ();
+	image_info.imageView = skybox_actor.mesh->graphics_primitves[0].material.base_color_texture.texture_image.image_view;
 
 	VkWriteDescriptorSet descriptor_writes[2] = {};
 	descriptor_writes[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -217,7 +220,7 @@ egraphics_result main_menu::create_graphics_pipeline ()
 
 	VkPipelineRasterizationStateCreateInfo rasterization_state = {};
 	rasterization_state.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-	rasterization_state.cullMode = VK_CULL_MODE_BACK_BIT;
+	rasterization_state.cullMode = VK_CULL_MODE_FRONT_BIT;
 	rasterization_state.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 	rasterization_state.lineWidth = 1;
 	rasterization_state.polygonMode = VK_POLYGON_MODE_FILL;
@@ -422,6 +425,15 @@ egraphics_result main_menu::update_command_buffers ()
 		}
 
 		vkCmdBeginRenderPass (command_buffers[i], &render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
+
+		vkCmdBindPipeline (command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline);
+		vkCmdBindDescriptorSets (command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_layout, 0, 1, &skybox_descriptor_set, 0, nullptr);
+
+		vkCmdBindVertexBuffers (command_buffers[i], 0, 1, &vertex_index_buffer, &skybox_actor.mesh->graphics_primitves[0].positions_offset);
+		vkCmdBindVertexBuffers (command_buffers[i], 1, 1, &vertex_index_buffer, &skybox_actor.mesh->graphics_primitves[0].uv0s_offset);
+		vkCmdBindIndexBuffer (command_buffers[i], vertex_index_buffer, skybox_actor.mesh->graphics_primitves[0].indices_offset, skybox_actor.mesh->graphics_primitves[0].indices_type);
+		vkCmdDrawIndexed (command_buffers[i], skybox_actor.mesh->graphics_primitves[0].indices_count, 1, 0, 0, 0);
+
 		vkCmdEndRenderPass (command_buffers[i]);
 
 		if (vkEndCommandBuffer (command_buffers[i]) != VK_SUCCESS)
@@ -504,6 +516,12 @@ egraphics_result main_menu::main_loop ()
 
 egraphics_result main_menu::update ()
 {
+	glm::mat4 model_view = glm::mat4 (1.f);
+	glm::mat4 projection = glm::perspective (35.f, 1.f, 0.1f, 1000.f);
+	glm::mat4 model_view_projection = projection * model_view;
+
+	std::memcpy (uniform_buffer_data_ptr, glm::value_ptr (model_view_projection), sizeof (glm::mat4));
+
 	return egraphics_result::success;
 }
 
