@@ -7,6 +7,8 @@
 #include <vector>
 #include <vulkan/vulkan.h>
 
+#include <glm/mat4x4.hpp>
+
 namespace asset
 {
 	struct image
@@ -119,6 +121,8 @@ namespace asset
 		mesh () : entity () {}
 		~mesh () {}
 		std::string name;
+
+		glm::mat4 transformation_matrix;
 
 		std::vector<graphics_primitive> graphics_primitves;
 		std::vector<physics_primitive> physics_primitives;

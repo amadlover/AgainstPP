@@ -2,25 +2,16 @@
 
 skybox_actor::skybox_actor ()
 {
-
+    transformation_matrix = glm::mat4 (1.f);
 }
 
 skybox_actor::skybox_actor (asset::mesh* mesh)
 {
     this->mesh = mesh;
+    transformation_matrix = mesh->transformation_matrix;
 }
 
 skybox_actor::~skybox_actor ()
 {
 
-}
-
-egraphics_result skybox_actor::update ()
-{
-    return egraphics_result::success;
-}
-
-egraphics_result skybox_actor::draw ()
-{
-    return egraphics_result::success;
 }

@@ -5,6 +5,7 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 
 #include "tiny_gltf.h"
+#include <glm/gtc/type_ptr.hpp>	
 
 namespace asset
 {
@@ -258,6 +259,20 @@ namespace asset
 
 			mesh tmp_mesh;
 			tmp_mesh.name = node.name;
+			if (node.matrix.size () > 0)
+			{
+				tmp_mesh.transformation_matrix = glm::make_mat4 (node.matrix.data ());
+			}
+			else 
+			{
+				glm::mat4 transformation_matrix = glm::mat4 (1.f);
+				if (node.translation.size () > 0)
+				{
+					transformation_matrix = glm::translate (transformation_matrix, glm::make_vec3 (reinterpret_cast<float*>(node.translation.data ())));
+				}
+
+				tmp_mesh.transformation_matrix = transformation_matrix;
+			}
 
 			auto asset = model.meshes[node.mesh];
 
@@ -292,7 +307,7 @@ namespace asset
 		{
 			throw std::runtime_error (error);
 		}
-
+		
 		import_graphics_primitives (model, meshes);
 		import_physics_primitive (model, meshes);
 

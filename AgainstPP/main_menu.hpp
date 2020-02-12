@@ -26,7 +26,7 @@ protected:
 	egraphics_result update () override;
 	egraphics_result draw () const override;
 
-	egraphics_result create_uniform_buffer ();
+	egraphics_result create_transforms_buffer ();
 	egraphics_result create_command_pool ();
 	egraphics_result create_descriptor_set ();
 	egraphics_result create_graphics_pipeline ();
@@ -35,6 +35,8 @@ protected:
 	egraphics_result create_sync_objects ();
 	egraphics_result allocate_command_buffers ();
 	egraphics_result update_command_buffers ();
+	egraphics_result init_cameras ();
+	egraphics_result update_actor_transforms ();
 
 	VkCommandPool command_pool; 
 	VkDescriptorPool descriptor_pool;
@@ -57,11 +59,11 @@ protected:
 	std::unique_ptr<skybox_actor> skybox;
 	std::vector<ui_actor> ui_actors;
 
-	camera perspective_camera;
+	camera scene_camera;
 	camera ui_camera;
 
-	VkBuffer uniform_buffer;
-	VkBuffer uniform_buffer_memory;
+	VkBuffer transformation_buffer;
+	VkBuffer transformation_memory;
 	VkBuffer vertex_index_buffer;
 	VkDeviceMemory vertex_index_memory;
 	VkBuffer staging_vertex_index_buffer;
@@ -70,5 +72,5 @@ protected:
 	VkDeviceMemory staging_image_memory;
 	VkDeviceMemory scene_images_memory;
 
-	void* uniform_buffer_data_ptr;
+	void* transform_buffer_data_ptr;
 };
