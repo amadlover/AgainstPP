@@ -29,12 +29,10 @@ main_menu::main_menu () : scene ()
 	uniform_buffer = VK_NULL_HANDLE;
 	uniform_buffer_memory = VK_NULL_HANDLE;
 
-	graphics_pipeline_layout = VK_NULL_HANDLE;
-	graphics_pipeline = VK_NULL_HANDLE;
+	skybox_graphics_pipeline_layout = VK_NULL_HANDLE;
+	skybox_graphics_pipeline = VK_NULL_HANDLE;
 
 	wait_semaphore = VK_NULL_HANDLE;
-
-	dump = 0;
 }
 
 main_menu::~main_menu ()
@@ -148,7 +146,7 @@ egraphics_result main_menu::create_descriptor_set ()
 	VkDescriptorImageInfo image_info = {};
 	image_info.sampler = common_graphics::common_sampler;
 	image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-	image_info.imageView = skybox_actor.mesh->graphics_primitves[0].material.base_color_texture.texture_image.image_view;
+	image_info.imageView = skybox->mesh->graphics_primitves[0].material.base_color_texture.texture_image.image_view;
 
 	VkWriteDescriptorSet descriptor_writes[2] = {};
 	descriptor_writes[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -177,7 +175,7 @@ egraphics_result main_menu::create_graphics_pipeline ()
 			common_graphics::graphics_device,
 			VK_SHADER_STAGE_VERTEX_BIT,
 			&skybox_vertex_shader_module,
-			&shader_stage_create_infos[0]
+			&skybox_shader_stage_create_infos[0]
 		)
 	);
 
@@ -187,7 +185,7 @@ egraphics_result main_menu::create_graphics_pipeline ()
 			common_graphics::graphics_device,
 			VK_SHADER_STAGE_FRAGMENT_BIT,
 			&skybox_fragment_shader_module,
-			&shader_stage_create_infos[1]
+			&skybox_shader_stage_create_infos[1]
 		)
 	);
 
@@ -196,7 +194,7 @@ egraphics_result main_menu::create_graphics_pipeline ()
 	layout_create_info.setLayoutCount = 1;
 	layout_create_info.pSetLayouts = &skybox_descriptor_set_layout;
 
-	if (vkCreatePipelineLayout (common_graphics::graphics_device, &layout_create_info, nullptr, &graphics_pipeline_layout) != VK_SUCCESS)
+	if (vkCreatePipelineLayout (common_graphics::graphics_device, &layout_create_info, nullptr, &skybox_graphics_pipeline_layout) != VK_SUCCESS)
 	{
 		return egraphics_result::e_against_error_graphics_create_graphics_pipeline_layout;
 	}
@@ -270,7 +268,7 @@ egraphics_result main_menu::create_graphics_pipeline ()
 
 	VkGraphicsPipelineCreateInfo pipeline_create_info = {};
 	pipeline_create_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-	pipeline_create_info.layout = graphics_pipeline_layout;
+	pipeline_create_info.layout = skybox_graphics_pipeline_layout;
 	pipeline_create_info.pColorBlendState = &color_blend_state;
 	pipeline_create_info.pDepthStencilState = &depth_stencil_state;
 	pipeline_create_info.pDynamicState = nullptr;
@@ -282,9 +280,9 @@ egraphics_result main_menu::create_graphics_pipeline ()
 	pipeline_create_info.renderPass = render_pass;
 	pipeline_create_info.pVertexInputState = &vertex_input_state;
 	pipeline_create_info.pViewportState = &viewport_state;
-	pipeline_create_info.pStages = shader_stage_create_infos;
+	pipeline_create_info.pStages = skybox_shader_stage_create_infos;
 
-	if (vkCreateGraphicsPipelines (common_graphics::graphics_device, VK_NULL_HANDLE, 1, &pipeline_create_info, nullptr, &graphics_pipeline) != VK_SUCCESS)
+	if (vkCreateGraphicsPipelines (common_graphics::graphics_device, VK_NULL_HANDLE, 1, &pipeline_create_info, nullptr, &skybox_graphics_pipeline) != VK_SUCCESS)
 	{
 		return egraphics_result::e_against_error_graphics_create_graphics_pipeline;
 	}
@@ -428,13 +426,13 @@ egraphics_result main_menu::update_command_buffers ()
 
 		vkCmdBeginRenderPass (command_buffers[i], &render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
 
-		vkCmdBindPipeline (command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline);
-		vkCmdBindDescriptorSets (command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_layout, 0, 1, &skybox_descriptor_set, 0, nullptr);
+		vkCmdBindPipeline (command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, skybox_graphics_pipeline);
+		vkCmdBindDescriptorSets (command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, skybox_graphics_pipeline_layout, 0, 1, &skybox_descriptor_set, 0, nullptr);
 
-		vkCmdBindVertexBuffers (command_buffers[i], 0, 1, &vertex_index_buffer, &skybox_actor.mesh->graphics_primitves[0].positions_offset);
-		vkCmdBindVertexBuffers (command_buffers[i], 1, 1, &vertex_index_buffer, &skybox_actor.mesh->graphics_primitves[0].uv0s_offset);
-		vkCmdBindIndexBuffer (command_buffers[i], vertex_index_buffer, skybox_actor.mesh->graphics_primitves[0].indices_offset, skybox_actor.mesh->graphics_primitves[0].indices_type);
-		vkCmdDrawIndexed (command_buffers[i], skybox_actor.mesh->graphics_primitves[0].indices_count, 1, 0, 0, 0);
+		vkCmdBindVertexBuffers (command_buffers[i], 0, 1, &vertex_index_buffer, &skybox->mesh->graphics_primitves[0].positions_offset);
+		vkCmdBindVertexBuffers (command_buffers[i], 1, 1, &vertex_index_buffer, &skybox->mesh->graphics_primitves[0].uv0s_offset);
+		vkCmdBindIndexBuffer (command_buffers[i], vertex_index_buffer, skybox->mesh->graphics_primitves[0].indices_offset, skybox->mesh->graphics_primitves[0].indices_type);
+		vkCmdDrawIndexed (command_buffers[i], skybox->mesh->graphics_primitves[0].indices_count, 1, 0, 0, 0);
 
 		vkCmdEndRenderPass (command_buffers[i]);
 
@@ -472,7 +470,7 @@ egraphics_result main_menu::init ()
 	{
 		if (mesh.name.find ("skybox") != std::string::npos)
 		{
-			skybox_actor = skybox (&mesh);
+			skybox = std::make_unique<skybox_actor> (&mesh);
 			break;
 		}
 	}
@@ -485,6 +483,11 @@ egraphics_result main_menu::init ()
 	CHECK_AGAINST_RESULT (create_sync_objects ());
 	CHECK_AGAINST_RESULT (allocate_command_buffers ());
 	CHECK_AGAINST_RESULT (update_command_buffers ());
+
+	perspective_camera.projection_matrix = glm::perspective (glm::radians (45.f), 1.77f, 0.1f, 1000.f);
+	perspective_camera.transformation_matrix = glm::mat4 (1.f);
+
+	std::memcpy (uniform_buffer_data_ptr, glm::value_ptr (perspective_camera.projection_matrix * perspective_camera.transformation_matrix), sizeof (glm::mat4));
 
 	state = e_scene_state::inited;
 
@@ -518,11 +521,6 @@ egraphics_result main_menu::main_loop ()
 
 egraphics_result main_menu::update ()
 {
-	perspective_camera.projection_matrix = glm::perspective (glm::radians (35.f), 1.77f, 0.1f, 1000.f);
-	perspective_camera.transformation_matrix = glm::mat4 (1.f);
-	perspective_camera.transformation_matrix = glm::rotate (perspective_camera.transformation_matrix, (float)++dump / (float)10000, glm::vec3 (0, 1, 0));
-
-	std::memcpy (uniform_buffer_data_ptr, glm::value_ptr (perspective_camera.projection_matrix * perspective_camera.transformation_matrix), sizeof (glm::mat4));
 
 	return egraphics_result::success;
 }
@@ -589,11 +587,11 @@ void main_menu::exit ()
 
 	vkQueueWaitIdle (common_graphics::graphics_queue);
 
-	vkDestroyPipelineLayout (common_graphics::graphics_device, graphics_pipeline_layout, nullptr);
-	graphics_pipeline_layout = VK_NULL_HANDLE;
+	vkDestroyPipelineLayout (common_graphics::graphics_device, skybox_graphics_pipeline_layout, nullptr);
+	skybox_graphics_pipeline_layout = VK_NULL_HANDLE;
 
-	vkDestroyPipeline (common_graphics::graphics_device, graphics_pipeline, nullptr);
-	graphics_pipeline = VK_NULL_HANDLE;
+	vkDestroyPipeline (common_graphics::graphics_device, skybox_graphics_pipeline, nullptr);
+	skybox_graphics_pipeline = VK_NULL_HANDLE;
 
 	vkDestroyRenderPass (common_graphics::graphics_device, render_pass, nullptr);
 	render_pass = VK_NULL_HANDLE;

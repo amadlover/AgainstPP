@@ -3,11 +3,13 @@
 #include "scene.hpp"
 #include "event.hpp"
 #include "asset.hpp"
-#include "skybox_actor.hpp"
 #include "camera.hpp"
+#include "skybox_actor.hpp"
+#include "ui_actor.hpp"
 
 #include <Windows.h>
 #include <vector>
+#include <memory>
 
 class main_menu : public scene
 {
@@ -40,11 +42,11 @@ protected:
 	VkDescriptorSet skybox_descriptor_set;
 	VkRenderPass render_pass;
 	std::vector<VkFramebuffer> framebuffers;
-	VkPipelineShaderStageCreateInfo shader_stage_create_infos[2];
+	VkPipelineShaderStageCreateInfo skybox_shader_stage_create_infos[2];
 	VkShaderModule skybox_vertex_shader_module;
 	VkShaderModule skybox_fragment_shader_module;
-	VkPipelineLayout graphics_pipeline_layout;
-	VkPipeline graphics_pipeline;
+	VkPipelineLayout skybox_graphics_pipeline_layout;
+	VkPipeline skybox_graphics_pipeline;
 	VkSemaphore wait_semaphore;
 	std::vector<VkSemaphore> signal_semaphores;
 	std::vector<VkCommandBuffer> command_buffers;
@@ -52,7 +54,9 @@ protected:
 	std::vector<asset::mesh> meshes;
 	std::vector<VkImage> scene_images;
 
-	skybox skybox_actor;
+	std::unique_ptr<skybox_actor> skybox;
+	std::vector<ui_actor> ui_actors;
+
 	camera perspective_camera;
 	camera ui_camera;
 
@@ -67,6 +71,4 @@ protected:
 	VkDeviceMemory scene_images_memory;
 
 	void* uniform_buffer_data_ptr;
-
-	uint32_t dump;
 };

@@ -41,8 +41,8 @@ protected:
 	VkDescriptorPool descriptor_pool;
 	VkDescriptorSetLayout skybox_descriptor_set_layout;
 	VkDescriptorSet skybox_descriptor_set;
-	VkPipelineLayout graphics_pipeline_layout;
-	VkPipeline graphics_pipeline;
+	VkPipelineLayout skybox_graphics_pipeline_layout;
+	VkPipeline skybox_graphics_pipeline;
 	VkPipelineShaderStageCreateInfo shader_stages_create_infos[2];
 	VkShaderModule vertex_shader_module;
 	VkShaderModule fragment_shader_module;

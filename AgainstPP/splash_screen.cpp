@@ -15,8 +15,8 @@ splash_screen::splash_screen () : scene ()
 	descriptor_pool = VK_NULL_HANDLE;
 	skybox_descriptor_set_layout = VK_NULL_HANDLE;
 	
-	graphics_pipeline_layout = VK_NULL_HANDLE;
-	graphics_pipeline = VK_NULL_HANDLE;
+	skybox_graphics_pipeline_layout = VK_NULL_HANDLE;
+	skybox_graphics_pipeline = VK_NULL_HANDLE;
 	
 	vertex_shader_module = VK_NULL_HANDLE;
 	fragment_shader_module = VK_NULL_HANDLE;
@@ -296,7 +296,7 @@ egraphics_result splash_screen::create_graphics_pipeline ()
 	layout_create_info.setLayoutCount = 1;
 	layout_create_info.pSetLayouts = &skybox_descriptor_set_layout;
 
-	if (vkCreatePipelineLayout (common_graphics::graphics_device, &layout_create_info, nullptr, &graphics_pipeline_layout) != VK_SUCCESS)
+	if (vkCreatePipelineLayout (common_graphics::graphics_device, &layout_create_info, nullptr, &skybox_graphics_pipeline_layout) != VK_SUCCESS)
 	{
 		return egraphics_result::e_against_error_graphics_create_graphics_pipeline_layout;
 	}
@@ -370,7 +370,7 @@ egraphics_result splash_screen::create_graphics_pipeline ()
 
 	VkGraphicsPipelineCreateInfo pipeline_create_info = {};
 	pipeline_create_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-	pipeline_create_info.layout = graphics_pipeline_layout;
+	pipeline_create_info.layout = skybox_graphics_pipeline_layout;
 	pipeline_create_info.pColorBlendState = &color_blend_state;
 	pipeline_create_info.pDepthStencilState = &depth_stencil_state;
 	pipeline_create_info.pDynamicState = nullptr;
@@ -384,7 +384,7 @@ egraphics_result splash_screen::create_graphics_pipeline ()
 	pipeline_create_info.pViewportState = &viewport_state;
 	pipeline_create_info.pStages = shader_stages_create_infos;
 	
-	if (vkCreateGraphicsPipelines (common_graphics::graphics_device, VK_NULL_HANDLE, 1, &pipeline_create_info, nullptr, &graphics_pipeline) != VK_SUCCESS)
+	if (vkCreateGraphicsPipelines (common_graphics::graphics_device, VK_NULL_HANDLE, 1, &pipeline_create_info, nullptr, &skybox_graphics_pipeline) != VK_SUCCESS)
 	{
 		return egraphics_result::e_against_error_graphics_create_graphics_pipeline;
 	}
@@ -434,8 +434,8 @@ egraphics_result splash_screen::update_command_buffers ()
 
 		vkCmdBeginRenderPass (command_buffers[i], &render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
 		
-		vkCmdBindPipeline (command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline);
-		vkCmdBindDescriptorSets (command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_layout, 0, 1, &skybox_descriptor_set, 0, nullptr);
+		vkCmdBindPipeline (command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, skybox_graphics_pipeline);
+		vkCmdBindDescriptorSets (command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, skybox_graphics_pipeline_layout, 0, 1, &skybox_descriptor_set, 0, nullptr);
 
 		for (const auto& mesh : meshes)
 		{
@@ -654,11 +654,11 @@ void splash_screen::exit ()
 	vkDestroyShaderModule (common_graphics::graphics_device, fragment_shader_module, nullptr);
 	fragment_shader_module = VK_NULL_HANDLE;
 
-	vkDestroyPipelineLayout (common_graphics::graphics_device, graphics_pipeline_layout, nullptr);
-	graphics_pipeline_layout = VK_NULL_HANDLE;
+	vkDestroyPipelineLayout (common_graphics::graphics_device, skybox_graphics_pipeline_layout, nullptr);
+	skybox_graphics_pipeline_layout = VK_NULL_HANDLE;
 
-	vkDestroyPipeline (common_graphics::graphics_device, graphics_pipeline, nullptr);
-	graphics_pipeline = VK_NULL_HANDLE;
+	vkDestroyPipeline (common_graphics::graphics_device, skybox_graphics_pipeline, nullptr);
+	skybox_graphics_pipeline = VK_NULL_HANDLE;
 
 	graphics_utils::destroy_buffers_and_buffer_memory (common_graphics::graphics_device, &staging_vertex_index_buffer, 1, &staging_vertex_index_memory);
 	graphics_utils::destroy_buffers_and_buffer_memory (common_graphics::graphics_device, &vertex_index_buffer, 1, &vertex_index_memory);

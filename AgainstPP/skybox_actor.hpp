@@ -4,12 +4,12 @@
 
 #include <glm/mat4x4.hpp>
 
-class skybox
+class skybox_actor
 {
 public:
-    skybox ();
-    skybox (asset::mesh* mesh);
-    ~skybox ();
+    skybox_actor ();
+    skybox_actor (asset::mesh* mesh);
+    ~skybox_actor ();
 
     egraphics_result update ();
     egraphics_result draw ();
