@@ -33,6 +33,8 @@ main_menu::main_menu () : scene ()
 	graphics_pipeline = VK_NULL_HANDLE;
 
 	wait_semaphore = VK_NULL_HANDLE;
+
+	dump = 0;
 }
 
 main_menu::~main_menu ()
@@ -220,7 +222,7 @@ egraphics_result main_menu::create_graphics_pipeline ()
 
 	VkPipelineRasterizationStateCreateInfo rasterization_state = {};
 	rasterization_state.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-	rasterization_state.cullMode = VK_CULL_MODE_FRONT_BIT;
+	rasterization_state.cullMode = VK_CULL_MODE_BACK_BIT;
 	rasterization_state.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 	rasterization_state.lineWidth = 1;
 	rasterization_state.polygonMode = VK_POLYGON_MODE_FILL;
@@ -516,11 +518,11 @@ egraphics_result main_menu::main_loop ()
 
 egraphics_result main_menu::update ()
 {
-	glm::mat4 model_view = glm::mat4 (1.f);
-	glm::mat4 projection = glm::perspective (35.f, 1.f, 0.1f, 1000.f);
-	glm::mat4 model_view_projection = projection * model_view;
+	perspective_camera.projection_matrix = glm::perspective (glm::radians (35.f), 1.77f, 0.1f, 1000.f);
+	perspective_camera.transformation_matrix = glm::mat4 (1.f);
+	perspective_camera.transformation_matrix = glm::rotate (perspective_camera.transformation_matrix, (float)++dump / (float)10000, glm::vec3 (0, 1, 0));
 
-	std::memcpy (uniform_buffer_data_ptr, glm::value_ptr (model_view_projection), sizeof (glm::mat4));
+	std::memcpy (uniform_buffer_data_ptr, glm::value_ptr (perspective_camera.projection_matrix * perspective_camera.transformation_matrix), sizeof (glm::mat4));
 
 	return egraphics_result::success;
 }
@@ -609,6 +611,9 @@ void main_menu::exit ()
 		signal_semaphore = VK_NULL_HANDLE;
 	}
 	signal_semaphores.clear ();
+
+	vkDestroySemaphore (common_graphics::graphics_device, wait_semaphore, nullptr);
+	wait_semaphore = VK_NULL_HANDLE;
 
 	vkDestroyShaderModule (common_graphics::graphics_device, skybox_vertex_shader_module, nullptr);
 	skybox_vertex_shader_module = VK_NULL_HANDLE;

@@ -4,6 +4,7 @@
 #include "event.hpp"
 #include "asset.hpp"
 #include "skybox_actor.hpp"
+#include "camera.hpp"
 
 #include <Windows.h>
 #include <vector>
@@ -52,6 +53,8 @@ protected:
 	std::vector<VkImage> scene_images;
 
 	skybox skybox_actor;
+	camera perspective_camera;
+	camera ui_camera;
 
 	VkBuffer uniform_buffer;
 	VkBuffer uniform_buffer_memory;
@@ -64,4 +67,6 @@ protected:
 	VkDeviceMemory scene_images_memory;
 
 	void* uniform_buffer_data_ptr;
+
+	uint32_t dump;
 };
