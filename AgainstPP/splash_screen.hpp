@@ -39,8 +39,8 @@ protected:
 	std::vector<VkSemaphore> signal_semaphores;
 	VkSemaphore wait_semaphore;
 	VkDescriptorPool descriptor_pool;
-	VkDescriptorSetLayout skybox_descriptor_set_layout;
-	VkDescriptorSet skybox_descriptor_set;
+	VkDescriptorSetLayout texture_descriptor_set_layout;
+	VkDescriptorSet texture_descriptor_set;
 	VkPipelineLayout skybox_graphics_pipeline_layout;
 	VkPipeline skybox_graphics_pipeline;
 	VkPipelineShaderStageCreateInfo shader_stages_create_infos[2];

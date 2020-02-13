@@ -13,7 +13,7 @@ splash_screen::splash_screen () : scene ()
 	wait_semaphore = VK_NULL_HANDLE;
 	
 	descriptor_pool = VK_NULL_HANDLE;
-	skybox_descriptor_set_layout = VK_NULL_HANDLE;
+	texture_descriptor_set_layout = VK_NULL_HANDLE;
 	
 	skybox_graphics_pipeline_layout = VK_NULL_HANDLE;
 	skybox_graphics_pipeline = VK_NULL_HANDLE;
@@ -214,7 +214,7 @@ egraphics_result splash_screen::create_descriptors ()
 	set_layout_create_info.bindingCount = 2;
 	set_layout_create_info.pBindings = set_layout_bindings;
 
-	if (vkCreateDescriptorSetLayout (common_graphics::graphics_device, &set_layout_create_info, nullptr, &skybox_descriptor_set_layout) != VK_SUCCESS)
+	if (vkCreateDescriptorSetLayout (common_graphics::graphics_device, &set_layout_create_info, nullptr, &texture_descriptor_set_layout) != VK_SUCCESS)
 	{
 		return egraphics_result::e_against_error_graphics_create_descriptor_set_layout;
 	}
@@ -223,9 +223,9 @@ egraphics_result splash_screen::create_descriptors ()
 	set_allocate_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
 	set_allocate_info.descriptorPool = descriptor_pool;
 	set_allocate_info.descriptorSetCount = 1;
-	set_allocate_info.pSetLayouts = &skybox_descriptor_set_layout;
+	set_allocate_info.pSetLayouts = &texture_descriptor_set_layout;
 
-	if (vkAllocateDescriptorSets (common_graphics::graphics_device, &set_allocate_info, &skybox_descriptor_set) != VK_SUCCESS)
+	if (vkAllocateDescriptorSets (common_graphics::graphics_device, &set_allocate_info, &texture_descriptor_set) != VK_SUCCESS)
 	{
 		return egraphics_result::e_against_error_graphics_allocate_descriptor_set;
 	}
@@ -243,7 +243,7 @@ egraphics_result splash_screen::create_descriptors ()
 			image_descriptor_write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 			image_descriptor_write.descriptorCount = 1;
 			image_descriptor_write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-			image_descriptor_write.dstSet = skybox_descriptor_set;
+			image_descriptor_write.dstSet = texture_descriptor_set;
 			image_descriptor_write.dstBinding = 1;
 			image_descriptor_write.pImageInfo = &image_info;
 
@@ -260,7 +260,7 @@ egraphics_result splash_screen::create_descriptors ()
 	fade_in_descriptor_write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 	fade_in_descriptor_write.descriptorCount = 1;
 	fade_in_descriptor_write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	fade_in_descriptor_write.dstSet = skybox_descriptor_set;
+	fade_in_descriptor_write.dstSet = texture_descriptor_set;
 	fade_in_descriptor_write.dstBinding = 0;
 	fade_in_descriptor_write.pBufferInfo = &buffer_info;
 
@@ -294,7 +294,7 @@ egraphics_result splash_screen::create_graphics_pipeline ()
 	VkPipelineLayoutCreateInfo layout_create_info = {};
 	layout_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 	layout_create_info.setLayoutCount = 1;
-	layout_create_info.pSetLayouts = &skybox_descriptor_set_layout;
+	layout_create_info.pSetLayouts = &texture_descriptor_set_layout;
 
 	if (vkCreatePipelineLayout (common_graphics::graphics_device, &layout_create_info, nullptr, &skybox_graphics_pipeline_layout) != VK_SUCCESS)
 	{
@@ -435,7 +435,7 @@ egraphics_result splash_screen::update_command_buffers ()
 		vkCmdBeginRenderPass (command_buffers[i], &render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
 		
 		vkCmdBindPipeline (command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, skybox_graphics_pipeline);
-		vkCmdBindDescriptorSets (command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, skybox_graphics_pipeline_layout, 0, 1, &skybox_descriptor_set, 0, nullptr);
+		vkCmdBindDescriptorSets (command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, skybox_graphics_pipeline_layout, 0, 1, &texture_descriptor_set, 0, nullptr);
 
 		for (const auto& mesh : meshes)
 		{
@@ -642,8 +642,8 @@ void splash_screen::exit ()
 		}
 	}
 
-	vkDestroyDescriptorSetLayout (common_graphics::graphics_device, skybox_descriptor_set_layout, nullptr);
-	skybox_descriptor_set_layout = VK_NULL_HANDLE;
+	vkDestroyDescriptorSetLayout (common_graphics::graphics_device, texture_descriptor_set_layout, nullptr);
+	texture_descriptor_set_layout = VK_NULL_HANDLE;
 
 	vkDestroyDescriptorPool (common_graphics::graphics_device, descriptor_pool, nullptr);
 	descriptor_pool = VK_NULL_HANDLE;

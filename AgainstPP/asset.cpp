@@ -268,7 +268,8 @@ namespace asset
 				glm::mat4 transformation_matrix = glm::mat4 (1.f);
 				if (node.translation.size () > 0)
 				{
-					transformation_matrix = glm::translate (transformation_matrix, glm::make_vec3 (reinterpret_cast<float*>(node.translation.data ())));
+					glm::vec3 v = glm::make_vec3 (node.translation.data ());
+					transformation_matrix = glm::translate (transformation_matrix, v);
 				}
 
 				tmp_mesh.transformation_matrix = transformation_matrix;

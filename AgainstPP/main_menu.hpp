@@ -40,8 +40,8 @@ protected:
 
 	VkCommandPool command_pool; 
 	VkDescriptorPool descriptor_pool;
-	VkDescriptorSetLayout skybox_descriptor_set_layout;
-	VkDescriptorSet skybox_descriptor_set;
+	VkDescriptorSetLayout texture_descriptor_set_layout;
+	VkDescriptorSet texture_descriptor_set;
 	VkRenderPass render_pass;
 	std::vector<VkFramebuffer> framebuffers;
 	VkPipelineShaderStageCreateInfo skybox_shader_stage_create_infos[2];
@@ -52,6 +52,9 @@ protected:
 	VkSemaphore wait_semaphore;
 	std::vector<VkSemaphore> signal_semaphores;
 	std::vector<VkCommandBuffer> command_buffers;
+
+	VkDescriptorSetLayout transform_descriptor_set_layout;
+	VkDescriptorSet transform_descriptor_set;
 
 	std::vector<asset::mesh> meshes;
 	std::vector<VkImage> scene_images;
@@ -73,4 +76,5 @@ protected:
 	VkDeviceMemory scene_images_memory;
 
 	void* transform_buffer_data_ptr;
+	uint8_t* transform_data;
 };

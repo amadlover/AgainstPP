@@ -17,7 +17,7 @@ public:
     VkDeviceSize transform_buffer_aligned_size;
     VkDeviceSize transform_buffer_aligned_offset;
 
-    void* transform_buffer_data_ptr;
+    glm::mat4* transform_buffer_data_ptr;
 
     asset::mesh* mesh;
 };

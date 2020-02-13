@@ -4,6 +4,7 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 main_menu::main_menu () : scene ()
 {
@@ -12,8 +13,8 @@ main_menu::main_menu () : scene ()
 	render_pass = VK_NULL_HANDLE;
 	command_pool = VK_NULL_HANDLE;
 	descriptor_pool = VK_NULL_HANDLE;
-	skybox_descriptor_set_layout = VK_NULL_HANDLE;
-	skybox_descriptor_set = VK_NULL_HANDLE;
+	texture_descriptor_set_layout = VK_NULL_HANDLE;
+	texture_descriptor_set = VK_NULL_HANDLE;
 	skybox_vertex_shader_module = VK_NULL_HANDLE;
 	skybox_fragment_shader_module = VK_NULL_HANDLE;
 
@@ -31,6 +32,9 @@ main_menu::main_menu () : scene ()
 
 	skybox_graphics_pipeline_layout = VK_NULL_HANDLE;
 	skybox_graphics_pipeline = VK_NULL_HANDLE;
+
+	transform_descriptor_set_layout = VK_NULL_HANDLE;
+	transform_descriptor_set = VK_NULL_HANDLE;
 
 	wait_semaphore = VK_NULL_HANDLE;
 }
@@ -61,6 +65,7 @@ egraphics_result main_menu::create_transforms_buffer ()
 		total_size += aligned_matrix_size;
 	}
 
+
 	CHECK_AGAINST_RESULT (
 		graphics_utils::create_buffer (
 			common_graphics::graphics_device,
@@ -88,12 +93,13 @@ egraphics_result main_menu::create_transforms_buffer ()
 		return egraphics_result::e_against_error_graphics_map_memory;
 	}
 
-	skybox->transform_buffer_data_ptr = transform_buffer_data_ptr;
+	transform_data = static_cast<uint8_t*>(_aligned_malloc (static_cast<size_t>(total_size), static_cast<size_t>(aligned_matrix_size)));
+	/*skybox->transform_buffer_data_ptr = transform_data;
 
-	for (auto& uia : ui_actors)
+	for (uint32_t i = 0; i < ui_actors.size (); i++)
 	{
-		uia.transform_buffer_data_ptr = static_cast<void*>((static_cast<char*>(skybox->transform_buffer_data_ptr) + aligned_matrix_size));
-	}
+		ui_actors[i].transform_buffer_data_ptr = transform_data + 1 + i;
+	}*/
 
 	return egraphics_result::success;
 }
@@ -125,7 +131,7 @@ egraphics_result main_menu::create_descriptor_set ()
 	pool_create_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 	pool_create_info.poolSizeCount = 2;
 	pool_create_info.pPoolSizes = pool_sizes;
-	pool_create_info.maxSets = 1;
+	pool_create_info.maxSets = 2;
 	pool_create_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
 
 	if (vkCreateDescriptorPool (common_graphics::graphics_device, &pool_create_info, nullptr, &descriptor_pool) != VK_SUCCESS)
@@ -138,17 +144,23 @@ egraphics_result main_menu::create_descriptor_set ()
 	set_layout_bindings[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 	set_layout_bindings[0].descriptorCount = 1;
 	set_layout_bindings[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-	set_layout_bindings[1].binding = 1;
+	set_layout_bindings[1].binding = 0;
 	set_layout_bindings[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 	set_layout_bindings[1].descriptorCount = 1;
 	set_layout_bindings[1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
 	VkDescriptorSetLayoutCreateInfo set_layout_create_info = {};
 	set_layout_create_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-	set_layout_create_info.bindingCount = 2;
-	set_layout_create_info.pBindings = set_layout_bindings;
+	set_layout_create_info.bindingCount = 1;
+	set_layout_create_info.pBindings = &set_layout_bindings[0];
+	
+	if (vkCreateDescriptorSetLayout (common_graphics::graphics_device, &set_layout_create_info, nullptr, &transform_descriptor_set_layout) != VK_SUCCESS)
+	{
+		return egraphics_result::e_against_error_graphics_create_descriptor_set_layout;
+	}
 
-	if (vkCreateDescriptorSetLayout (common_graphics::graphics_device, &set_layout_create_info, nullptr, &skybox_descriptor_set_layout) != VK_SUCCESS)
+	set_layout_create_info.pBindings = &set_layout_bindings[1];
+	if (vkCreateDescriptorSetLayout (common_graphics::graphics_device, &set_layout_create_info, nullptr, &texture_descriptor_set_layout) != VK_SUCCESS)
 	{
 		return egraphics_result::e_against_error_graphics_create_descriptor_set_layout;
 	}
@@ -157,9 +169,15 @@ egraphics_result main_menu::create_descriptor_set ()
 	set_allocate_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
 	set_allocate_info.descriptorPool = descriptor_pool;
 	set_allocate_info.descriptorSetCount = 1;
-	set_allocate_info.pSetLayouts = &skybox_descriptor_set_layout;
+	set_allocate_info.pSetLayouts = &transform_descriptor_set_layout;
+	
+	if (vkAllocateDescriptorSets (common_graphics::graphics_device, &set_allocate_info, &transform_descriptor_set) != VK_SUCCESS)
+	{
+		return egraphics_result::e_against_error_graphics_allocate_descriptor_set;
+	}
 
-	if (vkAllocateDescriptorSets (common_graphics::graphics_device, &set_allocate_info, &skybox_descriptor_set) != VK_SUCCESS)
+	set_allocate_info.pSetLayouts = &texture_descriptor_set_layout;
+	if (vkAllocateDescriptorSets (common_graphics::graphics_device, &set_allocate_info, &texture_descriptor_set) != VK_SUCCESS)
 	{
 		return egraphics_result::e_against_error_graphics_allocate_descriptor_set;
 	}
@@ -178,14 +196,14 @@ egraphics_result main_menu::create_descriptor_set ()
 	descriptor_writes[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 	descriptor_writes[0].descriptorCount = 1;
 	descriptor_writes[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-	descriptor_writes[0].dstSet = skybox_descriptor_set;
+	descriptor_writes[0].dstSet = transform_descriptor_set;
 	descriptor_writes[0].dstBinding = 0;
 	descriptor_writes[0].pBufferInfo = &uniform_buffer_info;
 	descriptor_writes[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 	descriptor_writes[1].descriptorCount = 1;
 	descriptor_writes[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	descriptor_writes[1].dstSet = skybox_descriptor_set;
-	descriptor_writes[1].dstBinding = 1;
+	descriptor_writes[1].dstSet = texture_descriptor_set;
+	descriptor_writes[1].dstBinding = 0;
 	descriptor_writes[1].pImageInfo = &image_info;
 
 	vkUpdateDescriptorSets (common_graphics::graphics_device, 2, descriptor_writes, 0, nullptr);
@@ -215,10 +233,11 @@ egraphics_result main_menu::create_graphics_pipeline ()
 		)
 	);
 
+	VkDescriptorSetLayout layouts[2] = { transform_descriptor_set_layout, texture_descriptor_set_layout };
 	VkPipelineLayoutCreateInfo layout_create_info = {};
 	layout_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-	layout_create_info.setLayoutCount = 1;
-	layout_create_info.pSetLayouts = &skybox_descriptor_set_layout;
+	layout_create_info.setLayoutCount = 2;
+	layout_create_info.pSetLayouts = layouts;
 
 	if (vkCreatePipelineLayout (common_graphics::graphics_device, &layout_create_info, nullptr, &skybox_graphics_pipeline_layout) != VK_SUCCESS)
 	{
@@ -455,16 +474,18 @@ egraphics_result main_menu::update_command_buffers ()
 		vkCmdBindPipeline (command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, skybox_graphics_pipeline);
 		
 		uint32_t dynamic_offset = 0;
-		vkCmdBindDescriptorSets (command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, skybox_graphics_pipeline_layout, 0, 1, &skybox_descriptor_set, 1, &dynamic_offset);
+		vkCmdBindDescriptorSets (command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, skybox_graphics_pipeline_layout, 0, 1, &transform_descriptor_set, 1, &dynamic_offset);
+		vkCmdBindDescriptorSets (command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, skybox_graphics_pipeline_layout, 1, 1, &texture_descriptor_set, 0, nullptr);
 		vkCmdBindVertexBuffers (command_buffers[i], 0, 1, &vertex_index_buffer, &skybox->mesh->graphics_primitves[0].positions_offset);
 		vkCmdBindVertexBuffers (command_buffers[i], 1, 1, &vertex_index_buffer, &skybox->mesh->graphics_primitves[0].uv0s_offset);
 		vkCmdBindIndexBuffer (command_buffers[i], vertex_index_buffer, skybox->mesh->graphics_primitves[0].indices_offset, skybox->mesh->graphics_primitves[0].indices_type);
 		vkCmdDrawIndexed (command_buffers[i], skybox->mesh->graphics_primitves[0].indices_count, 1, 0, 0, 0);
 
-		for (const auto& uia : ui_actors)
+		for (uint32_t a = 0; a < ui_actors.size (); a++)
 		{
+			ui_actor uia = ui_actors[a];
 			uint32_t dynamic_offset = static_cast<uint32_t>(uia.transform_buffer_aligned_offset);
-			vkCmdBindDescriptorSets (command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, skybox_graphics_pipeline_layout, 0, 1, &skybox_descriptor_set, 1, &dynamic_offset);
+			vkCmdBindDescriptorSets (command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, skybox_graphics_pipeline_layout, 0, 1, &transform_descriptor_set, 1, &dynamic_offset);
 			vkCmdBindVertexBuffers (command_buffers[i], 0, 1, &vertex_index_buffer, &uia.mesh->graphics_primitves[0].positions_offset);
 			vkCmdBindVertexBuffers (command_buffers[i], 1, 1, &vertex_index_buffer, &uia.mesh->graphics_primitves[0].uv0s_offset);
 			vkCmdBindIndexBuffer (command_buffers[i], vertex_index_buffer, uia.mesh->graphics_primitves[0].indices_offset, uia.mesh->graphics_primitves[0].indices_type);
@@ -484,24 +505,40 @@ egraphics_result main_menu::update_command_buffers ()
 
 egraphics_result main_menu::init_cameras ()
 {
-	scene_camera.projection_matrix = glm::perspective (glm::radians (45.f), 1.77f, 0.1f, 1000.f);
-	scene_camera.transformation_matrix = glm::translate (glm::mat4 (1.f), glm::vec3 (0, 0, 0));
+	scene_camera.projection_matrix = glm::perspective (glm::radians (45.f), 1.77f, 0.1f, 1100.f);
+	scene_camera.transformation_matrix = glm::translate (glm::mat4 (1.f), glm::vec3 (0, 0, -10));
 	
-	ui_camera.projection_matrix = glm::ortho (-10.f, 10.f, -10.f, 10.f, 0.1f, 10.f);
-	ui_camera.transformation_matrix = glm::mat4 (1.f);
+	ui_camera.projection_matrix = glm::ortho (-3.44f, 3.44f, -2.f, 2.f, 0.1f, 10.f);
+	ui_camera.transformation_matrix = glm::translate (glm::mat4 (1.f), glm::vec3 (0, 0, -5));
 
 	return egraphics_result::success;
 }
 
 egraphics_result main_menu::update_actor_transforms ()
 {
-	std::memcpy (skybox->transform_buffer_data_ptr, glm::value_ptr (scene_camera.transformation_matrix * skybox->transformation_matrix), static_cast<size_t> (skybox->transform_buffer_aligned_size));
+	std::memcpy (transform_data, glm::value_ptr (scene_camera.projection_matrix * scene_camera.transformation_matrix * skybox->transformation_matrix), static_cast<size_t> (skybox->transform_buffer_aligned_size));
+	wchar_t Buff[256];
+	swprintf (Buff, 256, L"%hs\n", glm::to_string (scene_camera.projection_matrix * scene_camera.transformation_matrix * skybox->transformation_matrix).c_str ());
+	OutputDebugString (Buff);
+	OutputDebugString (L"========\n");
 
-	for (auto& uia : ui_actors)
+	for (uint32_t i = 0 ; i < ui_actors.size (); i++)
 	{
-		std::memcpy (uia.transform_buffer_data_ptr, glm::value_ptr (ui_camera.transformation_matrix * uia.transformation_matrix), static_cast<size_t> (uia.transform_buffer_aligned_size));
+		std::memcpy (transform_data + (256 * (i + 1)), glm::value_ptr (ui_camera.projection_matrix * ui_camera.transformation_matrix * ui_actors[i].transformation_matrix), static_cast<size_t> (ui_actors[i].transform_buffer_aligned_size));
+		swprintf (Buff, 256, L"%hs\n", glm::to_string (ui_camera.projection_matrix * ui_camera.transformation_matrix * ui_actors[i].transformation_matrix).c_str ());
+		OutputDebugString (Buff);
+		OutputDebugString (L"========\n");
 	}
 
+	/*int* ones = new int[256];
+	for (int i = 0; i < 256; i++) {
+		ones[i] = 555;
+	}
+	std::memcpy ((void*)transform_data, (void*)ones, 1024);
+	std::memcpy (transform_buffer_data_ptr, transform_data, 1024);
+
+	delete[] ones;*/
+	std::memcpy (transform_buffer_data_ptr, transform_data, 1024);
 	return egraphics_result::success;
 }
 
@@ -683,11 +720,15 @@ void main_menu::exit ()
 	vkDestroyCommandPool (common_graphics::graphics_device, command_pool, nullptr);
 	command_pool = VK_NULL_HANDLE;
 
-	vkFreeDescriptorSets (common_graphics::graphics_device, descriptor_pool, 1, &skybox_descriptor_set);
-	skybox_descriptor_set = VK_NULL_HANDLE;
+	VkDescriptorSet sets[2] = { transform_descriptor_set, texture_descriptor_set };
+	vkFreeDescriptorSets (common_graphics::graphics_device, descriptor_pool, 2, sets);
+	texture_descriptor_set = VK_NULL_HANDLE;
 
-	vkDestroyDescriptorSetLayout (common_graphics::graphics_device, skybox_descriptor_set_layout, nullptr);
-	skybox_descriptor_set_layout = VK_NULL_HANDLE;
+	vkDestroyDescriptorSetLayout (common_graphics::graphics_device, texture_descriptor_set_layout, nullptr);
+	texture_descriptor_set_layout = VK_NULL_HANDLE;
+
+	vkDestroyDescriptorSetLayout (common_graphics::graphics_device, transform_descriptor_set_layout, nullptr);
+	transform_descriptor_set_layout = VK_NULL_HANDLE;
 
 	vkDestroyDescriptorPool (common_graphics::graphics_device, descriptor_pool, nullptr);
 	descriptor_pool = VK_NULL_HANDLE;
@@ -710,6 +751,8 @@ void main_menu::exit ()
 
 	meshes.clear ();
 	scene_images.clear ();
+
+	_aligned_free (transform_data);
 
 	state = e_scene_state::exited;
 }
