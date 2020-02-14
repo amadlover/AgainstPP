@@ -762,6 +762,7 @@ void main_menu::exit ()
 
 	meshes.clear ();
 	scene_images.clear ();
+	ui_actors.clear ();
 
 	if (transform_data != nullptr)
 	{
