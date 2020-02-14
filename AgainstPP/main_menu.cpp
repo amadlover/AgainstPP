@@ -37,6 +37,8 @@ main_menu::main_menu () : scene ()
 	transform_descriptor_set = VK_NULL_HANDLE;
 
 	wait_semaphore = VK_NULL_HANDLE;
+
+	transform_data = nullptr;
 }
 
 main_menu::~main_menu ()
@@ -94,12 +96,12 @@ egraphics_result main_menu::create_transforms_buffer ()
 	}
 
 	transform_data = static_cast<uint8_t*>(_aligned_malloc (static_cast<size_t>(total_size), static_cast<size_t>(aligned_matrix_size)));
-	/*skybox->transform_buffer_data_ptr = transform_data;
+	skybox->transform_buffer_data_ptr = transform_data;
 
 	for (uint32_t i = 0; i < ui_actors.size (); i++)
 	{
-		ui_actors[i].transform_buffer_data_ptr = transform_data + 1 + i;
-	}*/
+		//ui_actors[i].transform_buffer_data_ptr = transform_data + 1 + i;
+	}
 
 	return egraphics_result::success;
 }
@@ -517,27 +519,12 @@ egraphics_result main_menu::init_cameras ()
 egraphics_result main_menu::update_actor_transforms ()
 {
 	std::memcpy (transform_data, glm::value_ptr (scene_camera.projection_matrix * scene_camera.transformation_matrix * skybox->transformation_matrix), static_cast<size_t> (skybox->transform_buffer_aligned_size));
-	wchar_t Buff[256];
-	swprintf (Buff, 256, L"%hs\n", glm::to_string (scene_camera.projection_matrix * scene_camera.transformation_matrix * skybox->transformation_matrix).c_str ());
-	OutputDebugString (Buff);
-	OutputDebugString (L"========\n");
 
 	for (uint32_t i = 0 ; i < ui_actors.size (); i++)
 	{
 		std::memcpy (transform_data + (256 * (i + 1)), glm::value_ptr (ui_camera.projection_matrix * ui_camera.transformation_matrix * ui_actors[i].transformation_matrix), static_cast<size_t> (ui_actors[i].transform_buffer_aligned_size));
-		swprintf (Buff, 256, L"%hs\n", glm::to_string (ui_camera.projection_matrix * ui_camera.transformation_matrix * ui_actors[i].transformation_matrix).c_str ());
-		OutputDebugString (Buff);
-		OutputDebugString (L"========\n");
 	}
 
-	/*int* ones = new int[256];
-	for (int i = 0; i < 256; i++) {
-		ones[i] = 555;
-	}
-	std::memcpy ((void*)transform_data, (void*)ones, 1024);
-	std::memcpy (transform_buffer_data_ptr, transform_data, 1024);
-
-	delete[] ones;*/
 	std::memcpy (transform_buffer_data_ptr, transform_data, 1024);
 	return egraphics_result::success;
 }
@@ -715,15 +702,21 @@ void main_menu::exit ()
 	vkDestroyShaderModule (common_graphics::graphics_device, skybox_fragment_shader_module, nullptr);
 	skybox_fragment_shader_module = VK_NULL_HANDLE;
 
-	vkFreeCommandBuffers (common_graphics::graphics_device, command_pool, command_buffers.size (), command_buffers.data ());
+	if (command_pool != VK_NULL_HANDLE)
+	{
+		vkFreeCommandBuffers (common_graphics::graphics_device, command_pool, command_buffers.size (), command_buffers.data ());
+	}
 	command_buffers.clear ();
 	vkDestroyCommandPool (common_graphics::graphics_device, command_pool, nullptr);
 	command_pool = VK_NULL_HANDLE;
 
-	VkDescriptorSet sets[2] = { transform_descriptor_set, texture_descriptor_set };
-	vkFreeDescriptorSets (common_graphics::graphics_device, descriptor_pool, 2, sets);
-	texture_descriptor_set = VK_NULL_HANDLE;
-
+	if (descriptor_pool != VK_NULL_HANDLE)
+	{
+		VkDescriptorSet sets[2] = { transform_descriptor_set, texture_descriptor_set };
+		vkFreeDescriptorSets (common_graphics::graphics_device, descriptor_pool, 2, sets);
+		transform_descriptor_set = VK_NULL_HANDLE;
+		texture_descriptor_set = VK_NULL_HANDLE;
+	}
 	vkDestroyDescriptorSetLayout (common_graphics::graphics_device, texture_descriptor_set_layout, nullptr);
 	texture_descriptor_set_layout = VK_NULL_HANDLE;
 
@@ -745,14 +738,20 @@ void main_menu::exit ()
 	graphics_utils::destroy_buffers_and_buffer_memory (common_graphics::graphics_device, &staging_vertex_index_buffer, 1, &staging_vertex_index_memory);
 	graphics_utils::destroy_buffers_and_buffer_memory (common_graphics::graphics_device, &vertex_index_buffer, 1, &vertex_index_memory);
 	graphics_utils::destroy_buffers_and_buffer_memory (common_graphics::graphics_device, &staging_image_buffer, 1, &staging_image_memory);
-	vkUnmapMemory (common_graphics::graphics_device, transformation_memory);
+	if (transformation_memory != VK_NULL_HANDLE)
+	{
+		vkUnmapMemory (common_graphics::graphics_device, transformation_memory);
+	}
 	graphics_utils::destroy_buffers_and_buffer_memory (common_graphics::graphics_device, &transformation_buffer, 1, &transformation_memory);
 	graphics_utils::destroy_images_and_image_memory (common_graphics::graphics_device, scene_images.data (), scene_images.size (), &scene_images_memory);
 
 	meshes.clear ();
 	scene_images.clear ();
 
-	_aligned_free (transform_data);
+	if (transform_data != nullptr)
+	{
+		_aligned_free (transform_data);
+	}
 
 	state = e_scene_state::exited;
 }

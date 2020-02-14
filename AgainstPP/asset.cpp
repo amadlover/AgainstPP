@@ -6,6 +6,7 @@
 
 #include "tiny_gltf.h"
 #include <glm/gtc/type_ptr.hpp>	
+#include <glm/gtx/quaternion.hpp>
 
 namespace asset
 {
@@ -268,8 +269,20 @@ namespace asset
 				glm::mat4 transformation_matrix = glm::mat4 (1.f);
 				if (node.translation.size () > 0)
 				{
-					glm::vec3 v = glm::make_vec3 (node.translation.data ());
-					transformation_matrix = glm::translate (transformation_matrix, v);
+					glm::vec3 t = glm::make_vec3 (node.translation.data ());
+					transformation_matrix = glm::translate (transformation_matrix, t);
+				}
+				
+				if (node.rotation.size () > 0)
+				{
+					glm::quat q = glm::make_quat (node.rotation.data ());
+					transformation_matrix *= glm::toMat4 (q);
+				}
+
+				if (node.scale.size () > 0) 
+				{
+					glm::vec3 s = glm::make_vec3 (node.scale.data ());
+					transformation_matrix = glm::scale (transformation_matrix, s);
 				}
 
 				tmp_mesh.transformation_matrix = transformation_matrix;

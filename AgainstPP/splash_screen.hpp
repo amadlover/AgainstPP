@@ -65,5 +65,5 @@ protected:
 	VkDeviceMemory fade_in_device_memory;
 	void* fade_in_data_ptr;
 
-	bool is_scene_changed;
+	float scene_duration;
 };

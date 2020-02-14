@@ -33,7 +33,6 @@ splash_screen::splash_screen () : scene ()
 	scene_images_memory = VK_NULL_HANDLE;
 
 	scene_change_threshold = std::chrono::duration<float> (3);
-	is_scene_changed = false;
 }
 
 splash_screen::~splash_screen ()
@@ -522,16 +521,9 @@ void splash_screen::process_keyboard_input (WPARAM wParam, LPARAM lParam)
 egraphics_result splash_screen::update ()
 {
 	auto current_time = std::chrono::steady_clock::now ();
-	auto duration = std::chrono::duration<float> (current_time - start_time).count ();
+	scene_duration = std::chrono::duration<float> (current_time - start_time).count ();
 	
-	if (duration > scene_change_threshold.count ())
-	{
-		go_to_scene_event.broadcast (e_scene_type::main_menu);
-		is_scene_changed = true;
-		return egraphics_result::success;
-	}
-
-	auto fade_in = duration / scene_change_threshold.count ();
+	auto fade_in = scene_duration / scene_change_threshold.count ();
 	std::memcpy (fade_in_data_ptr, &fade_in, sizeof (float));
 
 	return egraphics_result::success;
@@ -596,12 +588,14 @@ egraphics_result splash_screen::draw () const
 egraphics_result splash_screen::main_loop ()
 {
 	CHECK_AGAINST_RESULT (update ());
-	if (is_scene_changed)
-	{
-		return egraphics_result::success;
-	}
 	CHECK_AGAINST_RESULT (draw ());
 
+	if (scene_duration > scene_change_threshold.count ())
+	{
+		go_to_scene_event.broadcast (e_scene_type::main_menu);
+		return egraphics_result::success;
+	}
+	
 	return egraphics_result::success;
 }
 
@@ -619,7 +613,10 @@ void splash_screen::exit ()
 	vkDestroySemaphore (common_graphics::graphics_device, wait_semaphore, nullptr);
 	wait_semaphore = VK_NULL_HANDLE;
 
-	vkFreeCommandBuffers (common_graphics::graphics_device, command_pool, command_buffers.size (), command_buffers.data ());
+	if (command_pool != VK_NULL_HANDLE)
+	{
+		vkFreeCommandBuffers (common_graphics::graphics_device, command_pool, command_buffers.size (), command_buffers.data ());
+	}
 	command_buffers.clear ();
 	vkDestroyCommandPool (common_graphics::graphics_device, command_pool, nullptr);
 	command_pool = VK_NULL_HANDLE;
@@ -665,7 +662,10 @@ void splash_screen::exit ()
 	graphics_utils::destroy_buffers_and_buffer_memory (common_graphics::graphics_device, &staging_image_buffer, 1, &staging_image_memory);
 	graphics_utils::destroy_images_and_image_memory (common_graphics::graphics_device, scene_images.data (), scene_images.size (), &scene_images_memory);
 
-	vkUnmapMemory (common_graphics::graphics_device, fade_in_device_memory);
+	if (fade_in_device_memory != VK_NULL_HANDLE)
+	{
+		vkUnmapMemory (common_graphics::graphics_device, fade_in_device_memory);
+	}
 	graphics_utils::destroy_buffers_and_buffer_memory (common_graphics::graphics_device, &fade_in_uniform_buffer, 1, &fade_in_device_memory);
 
 	meshes.clear ();

@@ -63,7 +63,11 @@ public:
 
 	void remove_binding (size_t id)
 	{
-		bindings.erase (std::find_if (bindings.begin (), bindings.end (), [&](auto b) {return b.obj_id == id; }));
+		auto it = std::find_if (bindings.begin (), bindings.end (), [&](auto b) {return b.obj_id == id; });
+		if (it != bindings.end ()) 
+		{ 
+			bindings.erase (it); 
+		}
 	}
 
 private:
@@ -104,7 +108,12 @@ public:
 
 	void remove_binding (size_t id)
 	{
-		bindings.erase (std::find_if (bindings.begin (), bindings.end (), [&](auto b) {return b.obj_id == id; }));
+		auto it = std::find_if (bindings.begin (), bindings.end (), [&](auto b) {return b.obj_id == id; });
+		
+		if (it != bindings.end ())
+		{
+			bindings.erase (it);
+		}
 	}
 
 private:
