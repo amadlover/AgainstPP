@@ -98,11 +98,6 @@ egraphics_result main_menu::create_transforms_buffer ()
 	transform_data = static_cast<uint8_t*>(_aligned_malloc (static_cast<size_t>(total_size), static_cast<size_t>(aligned_matrix_size)));
 	skybox->transform_buffer_data_ptr = transform_data;
 
-	for (uint32_t i = 0; i < ui_actors.size (); i++)
-	{
-		//ui_actors[i].transform_buffer_data_ptr = transform_data + 1 + i;
-	}
-
 	return egraphics_result::success;
 }
 
@@ -141,27 +136,29 @@ egraphics_result main_menu::create_descriptor_set ()
 		return egraphics_result::e_against_error_graphics_create_descriptor_pool;
 	}
 
-	VkDescriptorSetLayoutBinding set_layout_bindings[2] = {};
-	set_layout_bindings[0].binding = 0;
-	set_layout_bindings[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-	set_layout_bindings[0].descriptorCount = 1;
-	set_layout_bindings[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-	set_layout_bindings[1].binding = 0;
-	set_layout_bindings[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-	set_layout_bindings[1].descriptorCount = 1;
-	set_layout_bindings[1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+	VkDescriptorSetLayoutBinding transform_set_layout_binding = {};
+	transform_set_layout_binding.binding = 0;
+	transform_set_layout_binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+	transform_set_layout_binding.descriptorCount = 1;
+	transform_set_layout_binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+	
+	VkDescriptorSetLayoutBinding images_set_layout_binding = {};
+	images_set_layout_binding.binding = 0;
+	images_set_layout_binding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+	images_set_layout_binding.descriptorCount = 4;
+	images_set_layout_binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
 	VkDescriptorSetLayoutCreateInfo set_layout_create_info = {};
 	set_layout_create_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 	set_layout_create_info.bindingCount = 1;
-	set_layout_create_info.pBindings = &set_layout_bindings[0];
+	set_layout_create_info.pBindings = &transform_set_layout_binding;
 	
 	if (vkCreateDescriptorSetLayout (common_graphics::graphics_device, &set_layout_create_info, nullptr, &transform_descriptor_set_layout) != VK_SUCCESS)
 	{
 		return egraphics_result::e_against_error_graphics_create_descriptor_set_layout;
 	}
 
-	set_layout_create_info.pBindings = &set_layout_bindings[1];
+	set_layout_create_info.pBindings = &images_set_layout_binding;
 	if (vkCreateDescriptorSetLayout (common_graphics::graphics_device, &set_layout_create_info, nullptr, &texture_descriptor_set_layout) != VK_SUCCESS)
 	{
 		return egraphics_result::e_against_error_graphics_create_descriptor_set_layout;
@@ -184,15 +181,22 @@ egraphics_result main_menu::create_descriptor_set ()
 		return egraphics_result::e_against_error_graphics_allocate_descriptor_set;
 	}
 
-	VkDescriptorBufferInfo uniform_buffer_info = {};
-	uniform_buffer_info.buffer = transformation_buffer;
-	uniform_buffer_info.offset = 0;
-	uniform_buffer_info.range = VK_WHOLE_SIZE;
+	VkDescriptorImageInfo image_infos[4] = {};
+	image_infos[0].sampler = common_graphics::common_sampler;
+	image_infos[0].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	image_infos[0].imageView = skybox->mesh->graphics_primitves[0].material.base_color_texture.texture_image.image_view;
 
-	VkDescriptorImageInfo image_info = {};
-	image_info.sampler = common_graphics::common_sampler;
-	image_info.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-	image_info.imageView = skybox->mesh->graphics_primitves[0].material.base_color_texture.texture_image.image_view;
+	for (uint32_t uia = 0; uia < ui_actors.size (); ++uia)
+	{
+		image_infos[uia + 1].sampler = common_graphics::common_sampler;
+		image_infos[uia + 1].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		image_infos[uia + 1].imageView = ui_actors[uia].mesh->graphics_primitves[0].material.base_color_texture.texture_image.image_view;
+	}
+
+	VkDescriptorBufferInfo transforms_buffer_info = {};
+	transforms_buffer_info.buffer = transformation_buffer;
+	transforms_buffer_info.offset = 0;
+	transforms_buffer_info.range = VK_WHOLE_SIZE;
 
 	VkWriteDescriptorSet descriptor_writes[2] = {};
 	descriptor_writes[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -200,13 +204,13 @@ egraphics_result main_menu::create_descriptor_set ()
 	descriptor_writes[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 	descriptor_writes[0].dstSet = transform_descriptor_set;
 	descriptor_writes[0].dstBinding = 0;
-	descriptor_writes[0].pBufferInfo = &uniform_buffer_info;
+	descriptor_writes[0].pBufferInfo = &transforms_buffer_info;
 	descriptor_writes[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-	descriptor_writes[1].descriptorCount = 1;
+	descriptor_writes[1].descriptorCount = 4;
 	descriptor_writes[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 	descriptor_writes[1].dstSet = texture_descriptor_set;
 	descriptor_writes[1].dstBinding = 0;
-	descriptor_writes[1].pImageInfo = &image_info;
+	descriptor_writes[1].pImageInfo = image_infos;
 
 	vkUpdateDescriptorSets (common_graphics::graphics_device, 2, descriptor_writes, 0, nullptr);
 
@@ -235,11 +239,18 @@ egraphics_result main_menu::create_graphics_pipeline ()
 		)
 	);
 
+	VkPushConstantRange push_constant_range = {};
+	push_constant_range.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+	push_constant_range.size = sizeof (int);
+	push_constant_range.offset = 0;
+
 	VkDescriptorSetLayout layouts[2] = { transform_descriptor_set_layout, texture_descriptor_set_layout };
 	VkPipelineLayoutCreateInfo layout_create_info = {};
 	layout_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 	layout_create_info.setLayoutCount = 2;
 	layout_create_info.pSetLayouts = layouts;
+	layout_create_info.pushConstantRangeCount = 1;
+	layout_create_info.pPushConstantRanges = &push_constant_range;
 
 	if (vkCreatePipelineLayout (common_graphics::graphics_device, &layout_create_info, nullptr, &skybox_graphics_pipeline_layout) != VK_SUCCESS)
 	{
@@ -475,9 +486,11 @@ egraphics_result main_menu::update_command_buffers ()
 
 		vkCmdBindPipeline (command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, skybox_graphics_pipeline);
 		
+		int push_const_value = 0;
 		uint32_t dynamic_offset = 0;
 		vkCmdBindDescriptorSets (command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, skybox_graphics_pipeline_layout, 0, 1, &transform_descriptor_set, 1, &dynamic_offset);
 		vkCmdBindDescriptorSets (command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, skybox_graphics_pipeline_layout, 1, 1, &texture_descriptor_set, 0, nullptr);
+		vkCmdPushConstants (command_buffers[i], skybox_graphics_pipeline_layout, VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof (int), &push_const_value);
 		vkCmdBindVertexBuffers (command_buffers[i], 0, 1, &vertex_index_buffer, &skybox->mesh->graphics_primitves[0].positions_offset);
 		vkCmdBindVertexBuffers (command_buffers[i], 1, 1, &vertex_index_buffer, &skybox->mesh->graphics_primitves[0].uv0s_offset);
 		vkCmdBindIndexBuffer (command_buffers[i], vertex_index_buffer, skybox->mesh->graphics_primitves[0].indices_offset, skybox->mesh->graphics_primitves[0].indices_type);
@@ -485,9 +498,11 @@ egraphics_result main_menu::update_command_buffers ()
 
 		for (uint32_t a = 0; a < ui_actors.size (); a++)
 		{
+			push_const_value = a + 1;
 			ui_actor uia = ui_actors[a];
 			uint32_t dynamic_offset = static_cast<uint32_t>(uia.transform_buffer_aligned_offset);
 			vkCmdBindDescriptorSets (command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, skybox_graphics_pipeline_layout, 0, 1, &transform_descriptor_set, 1, &dynamic_offset);
+			vkCmdPushConstants (command_buffers[i], skybox_graphics_pipeline_layout, VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof (int), &push_const_value);
 			vkCmdBindVertexBuffers (command_buffers[i], 0, 1, &vertex_index_buffer, &uia.mesh->graphics_primitves[0].positions_offset);
 			vkCmdBindVertexBuffers (command_buffers[i], 1, 1, &vertex_index_buffer, &uia.mesh->graphics_primitves[0].uv0s_offset);
 			vkCmdBindIndexBuffer (command_buffers[i], vertex_index_buffer, uia.mesh->graphics_primitves[0].indices_offset, uia.mesh->graphics_primitves[0].indices_type);

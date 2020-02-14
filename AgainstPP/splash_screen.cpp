@@ -464,7 +464,7 @@ egraphics_result splash_screen::init ()
 
 	CHECK_AGAINST_RESULT (
 		asset::import_meshes (
-			utils::get_full_path ("\\UIElements\\SplashScreen\\SplashScreen.gltf"), 
+			utils::get_full_path ("\\Scenes\\SplashScreen\\SplashScreen.gltf"), 
 			meshes
 		)
 	);

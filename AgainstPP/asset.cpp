@@ -319,7 +319,7 @@ namespace asset
 
 		if (!loader.LoadASCIIFromFile (&model, &error, &warning, file_path))
 		{
-			throw std::runtime_error (error);
+			return egraphics_result::e_against_error_gltf_load;
 		}
 		
 		import_graphics_primitives (model, meshes);

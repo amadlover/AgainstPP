@@ -181,6 +181,10 @@ void log_error (egraphics_result err)
 		OutputDebugString (L"system error: open file\n");
 		break;
 
+	case egraphics_result::e_against_error_gltf_load:
+		OutputDebugString (L"gltf error: load gltf\n");
+		break;
+
 	default:
 		break;
 	}
