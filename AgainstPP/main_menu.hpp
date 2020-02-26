@@ -26,6 +26,7 @@ protected:
 	egraphics_result update () override;
 	egraphics_result draw () const override;
 
+private:
 	egraphics_result create_transforms_buffer ();
 	egraphics_result create_command_pool ();
 	egraphics_result create_descriptor_set ();
@@ -33,6 +34,7 @@ protected:
 	egraphics_result create_render_pass ();
 	egraphics_result create_framebuffers ();
 	egraphics_result create_sync_objects ();
+	egraphics_result create_ui_pass_data ();
 	egraphics_result allocate_command_buffers ();
 	egraphics_result update_command_buffers ();
 	egraphics_result init_cameras ();
@@ -45,10 +47,20 @@ protected:
 	VkRenderPass render_pass;
 	std::vector<VkFramebuffer> framebuffers;
 	VkPipelineShaderStageCreateInfo skybox_shader_stage_create_infos[2];
-	VkShaderModule skybox_vertex_shader_module;
-	VkShaderModule skybox_fragment_shader_module;
+	VkShaderModule skybox_shader_modules[2];
 	VkPipelineLayout skybox_graphics_pipeline_layout;
 	VkPipeline skybox_graphics_pipeline;
+
+	VkRenderPass ui_pass_render_pass;
+	std::vector<VkFramebuffer> ui_pass_framebuffers;
+	VkImage ui_pass_image;
+	std::vector<VkImageView> ui_pass_image_views;
+
+	VkPipelineShaderStageCreateInfo ui_shader_stage_create_infos[2];
+	VkShaderModule ui_shader_modules[2];
+	VkPipelineLayout ui_graphics_pipeline_layout;
+	VkPipeline ui_graphics_pipeline;
+
 	VkSemaphore wait_semaphore;
 	std::vector<VkSemaphore> signal_semaphores;
 	std::vector<VkCommandBuffer> command_buffers;

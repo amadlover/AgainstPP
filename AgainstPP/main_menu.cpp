@@ -15,9 +15,7 @@ main_menu::main_menu () : scene ()
 	descriptor_pool = VK_NULL_HANDLE;
 	texture_descriptor_set_layout = VK_NULL_HANDLE;
 	texture_descriptor_set = VK_NULL_HANDLE;
-	skybox_vertex_shader_module = VK_NULL_HANDLE;
-	skybox_fragment_shader_module = VK_NULL_HANDLE;
-
+	
 	staging_vertex_index_buffer = VK_NULL_HANDLE;
 	staging_vertex_index_memory = VK_NULL_HANDLE;
 	vertex_index_buffer = VK_NULL_HANDLE;
@@ -32,6 +30,9 @@ main_menu::main_menu () : scene ()
 
 	skybox_graphics_pipeline_layout = VK_NULL_HANDLE;
 	skybox_graphics_pipeline = VK_NULL_HANDLE;
+
+	ui_graphics_pipeline_layout = VK_NULL_HANDLE;
+	ui_graphics_pipeline = VK_NULL_HANDLE;
 
 	transform_descriptor_set_layout = VK_NULL_HANDLE;
 	transform_descriptor_set = VK_NULL_HANDLE;
@@ -224,7 +225,7 @@ egraphics_result main_menu::create_graphics_pipeline ()
 			utils::get_full_path ("\\Shaders\\MainMenu\\skybox.vert.spv").c_str (),
 			common_graphics::graphics_device,
 			VK_SHADER_STAGE_VERTEX_BIT,
-			&skybox_vertex_shader_module,
+			&skybox_shader_modules[0],
 			&skybox_shader_stage_create_infos[0]
 		)
 	);
@@ -234,7 +235,7 @@ egraphics_result main_menu::create_graphics_pipeline ()
 			utils::get_full_path ("\\Shaders\\MainMenu\\skybox.frag.spv").c_str (),
 			common_graphics::graphics_device,
 			VK_SHADER_STAGE_FRAGMENT_BIT,
-			&skybox_fragment_shader_module,
+			&skybox_shader_modules[1],
 			&skybox_shader_stage_create_infos[1]
 		)
 	);
@@ -440,6 +441,23 @@ egraphics_result main_menu::create_sync_objects ()
 	return egraphics_result::success;
 }
 
+egraphics_result main_menu::create_ui_pass_data ()
+{
+	VkRenderPassCreateInfo render_pass_create_info = {};
+	render_pass_create_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+
+	VkFramebufferCreateInfo frame_buffer_create_info = {};
+	frame_buffer_create_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+
+	VkImageCreateInfo image_create_info = {};
+	image_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+
+	VkImageViewCreateInfo image_view_create_info = {};
+	image_view_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+
+	return egraphics_result::success;
+}
+
 egraphics_result main_menu::allocate_command_buffers ()
 {
 	VkCommandBufferAllocateInfo allocate_info = {};
@@ -474,7 +492,7 @@ egraphics_result main_menu::update_command_buffers ()
 	render_pass_begin_info.clearValueCount = 1;
 	render_pass_begin_info.pClearValues = &clear_value;
 
-	for (uint32_t i = 0; i < common_graphics::swapchain_image_count; i++)
+	for (uint32_t i = 0; i < command_buffers.size (); i++)
 	{
 		render_pass_begin_info.framebuffer = framebuffers[i];
 		if (vkBeginCommandBuffer (command_buffers[i], &command_buffer_begin_info) != VK_SUCCESS)
@@ -583,6 +601,7 @@ egraphics_result main_menu::init ()
 	CHECK_AGAINST_RESULT (create_descriptor_set ());
 	CHECK_AGAINST_RESULT (create_graphics_pipeline ());
 	CHECK_AGAINST_RESULT (create_sync_objects ());
+	CHECK_AGAINST_RESULT (create_ui_pass_data ());
 	CHECK_AGAINST_RESULT (allocate_command_buffers ());
 	CHECK_AGAINST_RESULT (update_command_buffers ());
 	CHECK_AGAINST_RESULT (init_cameras ());
@@ -685,6 +704,12 @@ void main_menu::exit ()
 
 	vkQueueWaitIdle (common_graphics::graphics_queue);
 
+	vkDestroyPipelineLayout (common_graphics::graphics_device, ui_graphics_pipeline_layout, nullptr);
+	ui_graphics_pipeline_layout = VK_NULL_HANDLE;
+
+	vkDestroyPipeline (common_graphics::graphics_device, ui_graphics_pipeline_layout, nullptr);
+	ui_graphics_pipeline = VK_NULL_HANDLE;
+
 	vkDestroyPipelineLayout (common_graphics::graphics_device, skybox_graphics_pipeline_layout, nullptr);
 	skybox_graphics_pipeline_layout = VK_NULL_HANDLE;
 
@@ -711,11 +736,11 @@ void main_menu::exit ()
 	vkDestroySemaphore (common_graphics::graphics_device, wait_semaphore, nullptr);
 	wait_semaphore = VK_NULL_HANDLE;
 
-	vkDestroyShaderModule (common_graphics::graphics_device, skybox_vertex_shader_module, nullptr);
-	skybox_vertex_shader_module = VK_NULL_HANDLE;
+	vkDestroyShaderModule (common_graphics::graphics_device, skybox_shader_modules[0], nullptr);
+	skybox_shader_modules[0] = VK_NULL_HANDLE;
 
-	vkDestroyShaderModule (common_graphics::graphics_device, skybox_fragment_shader_module, nullptr);
-	skybox_fragment_shader_module = VK_NULL_HANDLE;
+	vkDestroyShaderModule (common_graphics::graphics_device, skybox_shader_modules[1], nullptr);
+	skybox_shader_modules[1] = VK_NULL_HANDLE;
 
 	if (command_pool != VK_NULL_HANDLE)
 	{

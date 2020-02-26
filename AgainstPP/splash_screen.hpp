@@ -22,6 +22,7 @@ protected:
 	egraphics_result update () override;
 	egraphics_result draw () const override;
 
+private:
 	egraphics_result create_fade_in_uniform_buffer ();
 	egraphics_result create_render_pass ();
 	egraphics_result create_framebuffers ();

@@ -31,6 +31,7 @@ egraphics_result game::init (HINSTANCE hInstance, HWND hWnd)
 
 	splash_screen_ptr = std::make_shared<splash_screen> ();
 	main_menu_ptr = std::make_shared<main_menu> ();
+	test_scene_ptr = std::make_shared <test_scene> ();
 
 	splash_screen_ptr->go_to_scene_event.add_binding (std::bind (&game::go_to_scene, this, std::placeholders::_1), unique_id);
 	keyboard_event.add_binding (std::bind (&splash_screen::process_keyboard_input, splash_screen_ptr, std::placeholders::_1, std::placeholders::_2), splash_screen_ptr->unique_id);
@@ -64,6 +65,11 @@ egraphics_result game::main_loop ()
 				main_menu_ptr->go_to_scene_event.remove_binding (unique_id);
 				keyboard_event.remove_binding (main_menu_ptr->unique_id);
 				break;
+			case e_scene_type::test_scene:
+				test_scene_ptr->exit ();
+				test_scene_ptr->go_to_scene_event.remove_binding (unique_id);
+				keyboard_event.remove_binding (test_scene_ptr->unique_id);
+				break;
 			default:
 				break;
 			}
@@ -96,6 +102,16 @@ egraphics_result game::main_loop ()
 			}
 			break;
 
+		case e_scene_type::test_scene:
+			if (test_scene_ptr->state != e_scene_state::inited)
+			{
+				CHECK_AGAINST_RESULT (test_scene_ptr->init ());
+				test_scene_ptr->go_to_scene_event.add_binding (std::bind (&game::go_to_scene, this, std::placeholders::_1), unique_id);
+				keyboard_event.add_binding (std::bind (&test_scene::process_keyboard_input, test_scene_ptr, std::placeholders::_1, std::placeholders::_2), test_scene_ptr->unique_id);
+				current_scene_ptr = test_scene_ptr;
+			}
+			break;
+
 		default:
 			break;
 		}
@@ -114,11 +130,6 @@ void game::go_to_scene (e_scene_type new_scene_type)
 	is_last_scene_exited = false;
 }
 
-egraphics_result game::init_new_scene (e_scene_type new_scene_type)
-{
-	return egraphics_result::success;
-}
-
 void game::exit ()
 {
 	OutputDebugString (L"game::exit\n");
@@ -135,6 +146,13 @@ void game::exit ()
 		main_menu_ptr->exit ();
 		keyboard_event.remove_binding (main_menu_ptr->unique_id);
 		main_menu_ptr->go_to_scene_event.remove_binding (unique_id);
+	}
+
+	if (test_scene_ptr != nullptr)
+	{
+		test_scene_ptr->exit ();
+		keyboard_event.remove_binding (test_scene_ptr->unique_id);
+		test_scene_ptr->go_to_scene_event.remove_binding (unique_id);
 	}
 
 	common_graphics::exit ();

@@ -17,8 +17,8 @@ link_directories ($ENV{VULKAN_SDK}/Lib)
 set (IMGUI_HPP ${CMAKE_SOURCE_DIR}/External/imgui/imgui.h ${CMAKE_SOURCE_DIR}/External/imgui/imconfig.h ${CMAKE_SOURCE_DIR}/External/imgui/imgui_internal.h ${CMAKE_SOURCE_DIR}/External/imgui/imstb_rectpack.h ${CMAKE_SOURCE_DIR}/External/imgui/imstb_textedit.h ${CMAKE_SOURCE_DIR}/External/imgui/imstb_truetype.h ${CMAKE_SOURCE_DIR}/External/imgui/examples/imgui_impl_win32.h ${CMAKE_SOURCE_DIR}/External/imgui/examples/imgui_impl_vulkan.h)
 set (IMGUI_CPP ${CMAKE_SOURCE_DIR}/External/imgui/imgui.cpp ${CMAKE_SOURCE_DIR}/External/imgui/imgui_demo.cpp ${CMAKE_SOURCE_DIR}/External/imgui/imgui_draw.cpp ${CMAKE_SOURCE_DIR}/External/imgui/imgui_widgets.cpp ${CMAKE_SOURCE_DIR}/External/imgui/examples/imgui_impl_win32.cpp ${CMAKE_SOURCE_DIR}/External/imgui/examples/imgui_impl_vulkan.cpp)
 
-set (HPP "ui_actor.hpp" "camera.hpp" "entity.hpp" "skybox_actor.hpp" "asset.hpp" "common_graphics.hpp" "enums.hpp" "error.hpp" "event.hpp" "game.hpp" "graphics_utils.hpp" "scene.hpp" "main_menu.hpp" "splash_screen.hpp" "utils.hpp")
-set (CPP "ui_actor.cpp" "camera.cpp" "entity.cpp" "skybox_actor.cpp" "asset.cpp" "common_graphics.cpp" "error.cpp" "game.cpp" "graphics_utils.cpp" "main.cpp" "scene.cpp" "main_menu.cpp" "splash_screen.cpp" "utils.cpp")
+set (HPP "test_scene.hpp" "ui_actor.hpp" "camera.hpp" "entity.hpp" "skybox_actor.hpp" "asset.hpp" "common_graphics.hpp" "enums.hpp" "error.hpp" "event.hpp" "game.hpp" "graphics_utils.hpp" "scene.hpp" "main_menu.hpp" "splash_screen.hpp" "utils.hpp")
+set (CPP "test_scene.cpp" "ui_actor.cpp" "camera.cpp" "entity.cpp" "skybox_actor.cpp" "asset.cpp" "common_graphics.cpp" "error.cpp" "game.cpp" "graphics_utils.cpp" "main.cpp" "scene.cpp" "main_menu.cpp" "splash_screen.cpp" "utils.cpp")
 
 set (GLSL "Assets/Shaders/SplashScreen/vert.vert" "Assets/Shaders/SplashScreen/frag.frag")
 

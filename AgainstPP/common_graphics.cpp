@@ -458,10 +458,7 @@ egraphics_result common_graphics::init (HINSTANCE hInstance, HWND hWnd)
 
 void common_graphics::exit ()
 {
-
-
 	vkDestroySampler (graphics_device, common_sampler, nullptr);
-
 	vkDestroySwapchainKHR (graphics_device, swapchain, nullptr);
 
 	for (auto& swapchain_imageview : swapchain_imageviews)

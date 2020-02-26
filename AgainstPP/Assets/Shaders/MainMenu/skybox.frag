@@ -1,5 +1,7 @@
 #version 450
 
+#extension GL_ARB_separate_shader_objects : enable
+
 layout (set = 1, binding = 0) uniform sampler2D color_texture[4];
 layout (push_constant) uniform image_index
 {

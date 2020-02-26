@@ -4,7 +4,7 @@
 #include "game.hpp"
 #include "error.hpp"
 
-game* g = nullptr;
+std::unique_ptr<game> g;
 
 LRESULT CALLBACK window_proc (
 	HWND WindowHandle,
@@ -82,7 +82,7 @@ int WINAPI wWinMain (
 	MSG Msg;
 	ZeroMemory (&Msg, sizeof (Msg));
 
-	g = new game ();
+	g = std::make_unique<game> ();
 
 	if (g == nullptr)
 	{
@@ -97,7 +97,6 @@ int WINAPI wWinMain (
 		log_error (result);
 		g->exit ();
 		DestroyWindow (hWnd);
-		delete g;
 
 		return 1;
 	}
@@ -117,14 +116,13 @@ int WINAPI wWinMain (
 			log_error (result);
 			g->exit ();
 			DestroyWindow (hWnd);
-			delete g;
+
 			return 1;
 		}
 	}
 
 	g->exit ();
 	DestroyWindow (hWnd);
-	delete g;
 
 	return 0;
 }
