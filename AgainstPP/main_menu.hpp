@@ -11,10 +11,13 @@
 #include <vector>
 #include <memory>
 
+class game;
+
 class main_menu : public scene
 {
 public:
 	main_menu ();
+	main_menu (game* ptr);
 	~main_menu ();
 
 	egraphics_result init () override;

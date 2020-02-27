@@ -22,137 +22,75 @@ game::~game ()
 void game::process_keyboard_input (WPARAM wParam, LPARAM lParam)
 {
 	OutputDebugString (L"process_keyboard_input\n");
-	keyboard_event.broadcast (wParam, lParam);
+
+	if (current_scene_ptr != nullptr)
+	{
+		current_scene_ptr->process_keyboard_input (wParam, lParam);
+	}
 }
 
 egraphics_result game::init (HINSTANCE hInstance, HWND hWnd)
 {
 	OutputDebugString (L"game::init\n");
 
-	splash_screen_ptr = std::make_shared<splash_screen> ();
-	main_menu_ptr = std::make_shared<main_menu> ();
-	test_scene_ptr = std::make_shared <test_scene> ();
-
-	splash_screen_ptr->go_to_scene_event.add_binding (std::bind (&game::go_to_scene, this, std::placeholders::_1), unique_id);
-	keyboard_event.add_binding (std::bind (&splash_screen::process_keyboard_input, splash_screen_ptr, std::placeholders::_1, std::placeholders::_2), splash_screen_ptr->unique_id);
-
 	CHECK_AGAINST_RESULT (common_graphics::init (hInstance, hWnd));
-	CHECK_AGAINST_RESULT (splash_screen_ptr->init ());
-
-	current_scene_ptr = splash_screen_ptr;
-	current_scene_type = e_scene_type::splash_screen;
-
-	is_last_scene_exited = false;
-	is_scene_changed = false;
+	CHECK_AGAINST_RESULT (set_current_scene (e_scene_type::splash_screen));
 
 	return egraphics_result::success;
 }
 
 egraphics_result game::main_loop ()
 {
-	if (is_scene_changed) {
-		if (!is_last_scene_exited)
-		{
-			switch (last_scene_type)
-			{
-			case e_scene_type::splash_screen:
-				splash_screen_ptr->exit ();
-				splash_screen_ptr->go_to_scene_event.remove_binding (unique_id);
-				keyboard_event.remove_binding (splash_screen_ptr->unique_id);
-				break;
-			case e_scene_type::main_menu:
-				main_menu_ptr->exit ();
-				main_menu_ptr->go_to_scene_event.remove_binding (unique_id);
-				keyboard_event.remove_binding (main_menu_ptr->unique_id);
-				break;
-			case e_scene_type::test_scene:
-				test_scene_ptr->exit ();
-				test_scene_ptr->go_to_scene_event.remove_binding (unique_id);
-				keyboard_event.remove_binding (test_scene_ptr->unique_id);
-				break;
-			default:
-				break;
-			}
-
-			is_last_scene_exited = true;
-		}
-	}
-
-	if (current_scene_ptr->state == e_scene_state::exited)
+	if (current_scene_ptr != nullptr)
 	{
-		switch (current_scene_type)
-		{
-		case e_scene_type::splash_screen:
-			if (splash_screen_ptr->state != e_scene_state::inited)
-			{
-				CHECK_AGAINST_RESULT (splash_screen_ptr->init ());
-				splash_screen_ptr->go_to_scene_event.add_binding (std::bind (&game::go_to_scene, this, std::placeholders::_1), unique_id);
-				keyboard_event.add_binding (std::bind (&splash_screen::process_keyboard_input, splash_screen_ptr, std::placeholders::_1, std::placeholders::_2), splash_screen_ptr->unique_id);
-				current_scene_ptr = splash_screen_ptr;
-			}
-			break;
-
-		case e_scene_type::main_menu:
-			if (main_menu_ptr->state != e_scene_state::inited)
-			{
-				CHECK_AGAINST_RESULT (main_menu_ptr->init ());
-				main_menu_ptr->go_to_scene_event.add_binding (std::bind (&game::go_to_scene, this, std::placeholders::_1), unique_id);
-				keyboard_event.add_binding (std::bind (&main_menu::process_keyboard_input, main_menu_ptr, std::placeholders::_1, std::placeholders::_2), main_menu_ptr->unique_id);
-				current_scene_ptr = main_menu_ptr;
-			}
-			break;
-
-		case e_scene_type::test_scene:
-			if (test_scene_ptr->state != e_scene_state::inited)
-			{
-				CHECK_AGAINST_RESULT (test_scene_ptr->init ());
-				test_scene_ptr->go_to_scene_event.add_binding (std::bind (&game::go_to_scene, this, std::placeholders::_1), unique_id);
-				keyboard_event.add_binding (std::bind (&test_scene::process_keyboard_input, test_scene_ptr, std::placeholders::_1, std::placeholders::_2), test_scene_ptr->unique_id);
-				current_scene_ptr = test_scene_ptr;
-			}
-			break;
-
-		default:
-			break;
-		}
+		CHECK_AGAINST_RESULT (current_scene_ptr->main_loop ());
 	}
-
-	CHECK_AGAINST_RESULT (current_scene_ptr->main_loop ());
 
 	return egraphics_result::success;
 }
 
-void game::go_to_scene (e_scene_type new_scene_type)
+egraphics_result game::set_current_scene (e_scene_type scene_type)
 {
-	last_scene_type = current_scene_type;
-	current_scene_type = new_scene_type;
-	is_scene_changed = true;
-	is_last_scene_exited = false;
+	if (current_scene_ptr != nullptr)
+	{
+		current_scene_ptr->exit ();
+		current_scene_ptr.reset ();
+	}
+	
+	switch (scene_type)
+	{
+	case e_scene_type::splash_screen:
+		current_scene_ptr = std::make_shared<splash_screen> (this);
+		break;
+
+	case e_scene_type::main_menu:
+		current_scene_ptr = std::make_shared<main_menu> (this);
+		break;
+
+	case e_scene_type::test_scene:
+		current_scene_ptr = std::make_shared<test_scene> (); 
+		break;
+
+	default:
+		break;
+	}
+
+	if (current_scene_ptr != nullptr)
+	{
+		CHECK_AGAINST_RESULT (current_scene_ptr->init ());
+	}
+
+	return egraphics_result::success;
 }
 
 void game::exit ()
 {
 	OutputDebugString (L"game::exit\n");
 
-	if (splash_screen_ptr != nullptr)
+	if (current_scene_ptr != nullptr)
 	{
-		splash_screen_ptr->exit ();
-		keyboard_event.remove_binding (splash_screen_ptr->unique_id);
-		splash_screen_ptr->go_to_scene_event.remove_binding (unique_id);
-	}
-
-	if (main_menu_ptr != nullptr)
-	{
-		main_menu_ptr->exit ();
-		keyboard_event.remove_binding (main_menu_ptr->unique_id);
-		main_menu_ptr->go_to_scene_event.remove_binding (unique_id);
-	}
-
-	if (test_scene_ptr != nullptr)
-	{
-		test_scene_ptr->exit ();
-		keyboard_event.remove_binding (test_scene_ptr->unique_id);
-		test_scene_ptr->go_to_scene_event.remove_binding (unique_id);
+		current_scene_ptr->exit ();
+		current_scene_ptr.reset ();
 	}
 
 	common_graphics::exit ();

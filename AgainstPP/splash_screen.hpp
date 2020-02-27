@@ -7,10 +7,13 @@
 
 #include <chrono>
 
+class game;
+
 class splash_screen : public scene
 {
 public:
 	splash_screen ();
+	splash_screen (game* ptr);
 	~splash_screen ();
 
 	egraphics_result init () override;

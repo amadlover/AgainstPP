@@ -2,6 +2,7 @@
 #include "utils.hpp"
 #include "enums.hpp"
 #include "graphics_utils.hpp"
+#include "game.hpp"
 
 splash_screen::splash_screen () : scene ()
 {
@@ -27,6 +28,36 @@ splash_screen::splash_screen () : scene ()
 	staging_image_buffer = VK_NULL_HANDLE;
 	staging_image_memory = VK_NULL_HANDLE;
 	
+	vertex_index_buffer = VK_NULL_HANDLE;
+	vertex_index_memory = VK_NULL_HANDLE;
+
+	scene_images_memory = VK_NULL_HANDLE;
+
+	scene_change_threshold = std::chrono::duration<float> (3);
+}
+
+splash_screen::splash_screen (game* ptr) : scene (ptr)
+{
+	command_pool = VK_NULL_HANDLE;
+	render_pass = VK_NULL_HANDLE;
+
+	wait_semaphore = VK_NULL_HANDLE;
+
+	descriptor_pool = VK_NULL_HANDLE;
+	texture_descriptor_set_layout = VK_NULL_HANDLE;
+
+	skybox_graphics_pipeline_layout = VK_NULL_HANDLE;
+	skybox_graphics_pipeline = VK_NULL_HANDLE;
+
+	vertex_shader_module = VK_NULL_HANDLE;
+	fragment_shader_module = VK_NULL_HANDLE;
+
+	staging_vertex_index_buffer = VK_NULL_HANDLE;
+	staging_vertex_index_memory = VK_NULL_HANDLE;
+
+	staging_image_buffer = VK_NULL_HANDLE;
+	staging_image_memory = VK_NULL_HANDLE;
+
 	vertex_index_buffer = VK_NULL_HANDLE;
 	vertex_index_memory = VK_NULL_HANDLE;
 
@@ -507,7 +538,8 @@ void splash_screen::process_keyboard_input (WPARAM wParam, LPARAM lParam)
 	switch (wParam)
 	{
 	case VK_ESCAPE:
-		go_to_scene_event.broadcast (e_scene_type::main_menu);
+		//go_to_scene_event.broadcast (e_scene_type::main_menu);
+		game_ptr->set_current_scene (e_scene_type::main_menu);
 		break;
 
 	case 0x53:

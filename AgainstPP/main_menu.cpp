@@ -2,6 +2,8 @@
 #include "graphics_utils.hpp"
 #include "utils.hpp"
 
+#include "game.hpp"
+
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/string_cast.hpp>
@@ -16,6 +18,40 @@ main_menu::main_menu () : scene ()
 	texture_descriptor_set_layout = VK_NULL_HANDLE;
 	texture_descriptor_set = VK_NULL_HANDLE;
 	
+	staging_vertex_index_buffer = VK_NULL_HANDLE;
+	staging_vertex_index_memory = VK_NULL_HANDLE;
+	vertex_index_buffer = VK_NULL_HANDLE;
+	vertex_index_memory = VK_NULL_HANDLE;
+
+	staging_image_buffer = VK_NULL_HANDLE;
+	staging_image_memory = VK_NULL_HANDLE;
+	scene_images_memory = VK_NULL_HANDLE;
+
+	transformation_buffer = VK_NULL_HANDLE;
+	transformation_memory = VK_NULL_HANDLE;
+
+	skybox_graphics_pipeline_layout = VK_NULL_HANDLE;
+	skybox_graphics_pipeline = VK_NULL_HANDLE;
+
+	ui_graphics_pipeline_layout = VK_NULL_HANDLE;
+	ui_graphics_pipeline = VK_NULL_HANDLE;
+
+	transform_descriptor_set_layout = VK_NULL_HANDLE;
+	transform_descriptor_set = VK_NULL_HANDLE;
+
+	wait_semaphore = VK_NULL_HANDLE;
+
+	transform_data = nullptr;
+}
+
+main_menu::main_menu (game* ptr) : scene (ptr)
+{
+	render_pass = VK_NULL_HANDLE;
+	command_pool = VK_NULL_HANDLE;
+	descriptor_pool = VK_NULL_HANDLE;
+	texture_descriptor_set_layout = VK_NULL_HANDLE;
+	texture_descriptor_set = VK_NULL_HANDLE;
+
 	staging_vertex_index_buffer = VK_NULL_HANDLE;
 	staging_vertex_index_memory = VK_NULL_HANDLE;
 	vertex_index_buffer = VK_NULL_HANDLE;
@@ -618,7 +654,8 @@ void main_menu::process_keyboard_input (WPARAM wParam, LPARAM lParam)
 	switch (wParam)
 	{
 	case VK_ESCAPE:
-		go_to_scene_event.broadcast (e_scene_type::splash_screen);
+		//go_to_scene_event.broadcast (e_scene_type::splash_screen);
+		game_ptr->set_current_scene (e_scene_type::splash_screen);
 		break;
 
 	case 0x53:

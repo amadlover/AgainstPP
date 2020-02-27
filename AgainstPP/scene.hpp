@@ -9,10 +9,13 @@
 #include <Windows.h>
 #include <vector>
 
+class game;
+
 class scene : public entity
 {
 public:
     scene ();
+    scene (game* ptr);
     ~scene ();
 
     virtual egraphics_result init () = 0;
@@ -23,6 +26,8 @@ public:
     event_one_param<e_scene_type> go_to_scene_event;
     e_scene_state state;
 
+    game* game_ptr;
+    
 protected:
     virtual egraphics_result update () = 0;
     virtual egraphics_result draw () const = 0;
