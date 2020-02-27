@@ -1,7 +1,7 @@
 #pragma once
 
 #include "enums.hpp"
-#include <vector>
+#include <list>
 #include <functional>
 #include <Windows.h>
 
@@ -13,16 +13,25 @@ public:
 	event_no_param () {}
 	~event_no_param () {}
 
-	void add_binding (std::function<void ()> binding)
+	void add_binding (std::function<void ()> binding, size_t id)
 	{
-		bindings.push_back (binding);
+		bindings.push_back (object_function_ptr_no_param (binding, id));
 	}
 
 	void broadcast ()
 	{
 		for (auto binding : bindings)
 		{
-			binding ();
+			binding.function_ptr ();
+		}
+	}
+
+	void remove_binding (size_t id)
+	{
+		auto it = std::find_if (bindings.begin (), bindings.end (), [&](auto b) {return b.obj_id == id; });
+		if (it != bindings.end ())
+		{
+			bindings.erase (it);
 		}
 	}
 
@@ -38,7 +47,7 @@ private:
 		std::function<void ()> function_ptr;
 		size_t obj_id;
 	};
-	typename std::vector<std::function<void ()>> bindings;
+	typename std::list<object_function_ptr_no_param> bindings;
 };
 
 template <typename U>
@@ -83,7 +92,7 @@ private:
 		std::function<void (U)> function_ptr;
 		size_t obj_id;
 	};
-	typename std::vector<object_function_ptr_one_param<U>> bindings;
+	typename std::list<object_function_ptr_one_param<U>> bindings;
 };
 
 template <typename U, typename V>
@@ -129,5 +138,5 @@ private:
 		std::function<void (U, V)> function_ptr;
 		size_t obj_id;
 	};
-	typename std::vector<object_function_ptr_two_param<U, V>> bindings;
+	typename std::list<object_function_ptr_two_param<U, V>> bindings;
 };
