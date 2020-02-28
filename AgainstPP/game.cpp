@@ -68,7 +68,7 @@ egraphics_result game::set_current_scene (e_scene_type scene_type)
 		break;
 
 	case e_scene_type::test_scene:
-		current_scene_ptr = std::make_shared<test_scene> (); 
+		current_scene_ptr = std::make_shared<test_scene> (this); 
 		break;
 
 	default:

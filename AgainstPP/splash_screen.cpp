@@ -538,7 +538,6 @@ void splash_screen::process_keyboard_input (WPARAM wParam, LPARAM lParam)
 	switch (wParam)
 	{
 	case VK_ESCAPE:
-		//go_to_scene_event.broadcast (e_scene_type::main_menu);
 		game_ptr->set_current_scene (e_scene_type::main_menu);
 		break;
 
@@ -624,7 +623,7 @@ egraphics_result splash_screen::main_loop ()
 
 	if (scene_duration > scene_change_threshold.count ())
 	{
-		go_to_scene_event.broadcast (e_scene_type::main_menu);
+		game_ptr->set_current_scene (e_scene_type::main_menu);
 		return egraphics_result::success;
 	}
 	

@@ -654,8 +654,7 @@ void main_menu::process_keyboard_input (WPARAM wParam, LPARAM lParam)
 	switch (wParam)
 	{
 	case VK_ESCAPE:
-		//go_to_scene_event.broadcast (e_scene_type::splash_screen);
-		game_ptr->set_current_scene (e_scene_type::splash_screen);
+		game_ptr->set_current_scene (e_scene_type::test_scene);
 		break;
 
 	case 0x53:

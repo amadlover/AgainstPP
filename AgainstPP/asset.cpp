@@ -319,7 +319,7 @@ namespace asset
 
 		if (!loader.LoadASCIIFromFile (&model, &error, &warning, file_path))
 		{
-			return egraphics_result::e_against_error_gltf_load;
+			return egraphics_result::e_against_error_gltf_import;
 		}
 		
 		import_graphics_primitives (model, meshes);

@@ -51,7 +51,7 @@ enum egraphics_result
 	e_against_error_system_create_file,
 	e_against_error_system_open_file,
 
-	e_against_error_gltf_load
+	e_against_error_gltf_import
 };
 
 static egraphics_result result = egraphics_result::success;

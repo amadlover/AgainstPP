@@ -5,8 +5,8 @@
 class camera
 {
 public:
-    camera () {}
-    ~camera () {}
+    camera ();
+    ~camera ();
 
     glm::mat4 transformation_matrix;
     glm::mat4 projection_matrix;
