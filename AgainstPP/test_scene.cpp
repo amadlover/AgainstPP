@@ -42,6 +42,10 @@ void test_scene::process_keyboard_input (WPARAM wParam, LPARAM lParam)
 		{
 			log_error (result);
 		}
+		else
+		{
+			update_command_buffers ();
+		}
 		break;
 
 	default:
@@ -80,7 +84,7 @@ egraphics_result test_scene::spawn_ship ()
 	// go through meshes to find the appropriate mesh.
 	// update the trasnform buffer at the correct offset.
 	// update command buffers.
-	return egraphics_result::e_against_error_graphics_acquire_next_image;
+	return egraphics_result::success;
 }
 
 void test_scene::exit ()

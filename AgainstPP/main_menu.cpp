@@ -86,11 +86,12 @@ main_menu::~main_menu ()
 egraphics_result main_menu::create_transforms_buffer ()
 {
 	VkDeviceSize min_alignment = common_graphics::physical_device_limits.minUniformBufferOffsetAlignment;
-	VkDeviceSize aligned_matrix_size = sizeof (glm::mat4);
+	VkDeviceSize raw_size = sizeof (glm::mat4) * 4 + 150;
+	VkDeviceSize aligned_matrix_size = raw_size;
 	
 	if (min_alignment > 0)
 	{
-		aligned_matrix_size = (sizeof (glm::mat4) + min_alignment - 1) & ~(min_alignment - 1);
+		aligned_matrix_size = (raw_size + min_alignment - 1) & ~(min_alignment - 1);
 	}
 	
 	skybox->transform_buffer_aligned_size = aligned_matrix_size;
@@ -132,7 +133,7 @@ egraphics_result main_menu::create_transforms_buffer ()
 		return egraphics_result::e_against_error_graphics_map_memory;
 	}
 
-	transform_data = static_cast<uint8_t*>(_aligned_malloc (static_cast<size_t>(total_size), static_cast<size_t>(aligned_matrix_size)));
+	transform_data = static_cast<uint8_t*>(malloc (static_cast<size_t>(total_size)));// , static_cast<size_t>(aligned_matrix_size)));
 	skybox->transform_buffer_data_ptr = transform_data;
 
 	return egraphics_result::success;
@@ -591,10 +592,10 @@ egraphics_result main_menu::update_actor_transforms ()
 
 	for (uint32_t i = 0 ; i < ui_actors.size (); i++)
 	{
-		std::memcpy (transform_data + (256 * (i + 1)), glm::value_ptr (ui_camera.projection_matrix * ui_camera.transformation_matrix * ui_actors[i].transformation_matrix), static_cast<size_t> (ui_actors[i].transform_buffer_aligned_size));
+		std::memcpy (transform_data + (512 * (i + 1)), glm::value_ptr (ui_camera.projection_matrix * ui_camera.transformation_matrix * ui_actors[i].transformation_matrix), static_cast<size_t> (ui_actors[i].transform_buffer_aligned_size));
 	}
 
-	std::memcpy (transform_buffer_data_ptr, transform_data, 1024);
+	std::memcpy (transform_buffer_data_ptr, transform_data, 2048);
 	return egraphics_result::success;
 }
 
@@ -827,7 +828,7 @@ void main_menu::exit ()
 
 	if (transform_data != nullptr)
 	{
-		_aligned_free (transform_data);
+		free (transform_data);
 	}
 
 	state = e_scene_state::exited;

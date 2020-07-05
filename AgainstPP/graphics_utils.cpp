@@ -343,7 +343,6 @@ egraphics_result graphics_utils::create_vulkan_handles_for_meshes (
 	subresource_range.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 	subresource_range.layerCount = 1;
 	subresource_range.levelCount = 1;
-	subresource_range.baseMipLevel = 0;
 
 	image_view_create_info.subresourceRange = subresource_range;
 
